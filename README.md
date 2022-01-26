@@ -87,7 +87,7 @@ Examples
 #### Dataset
 The main script to train model is `train_folder.py`. A user needs at least the following info to train a model: 1) `id_prop.csv` with name of the file and corresponding value, 2) `config_example.json` a config file with training and hyperparameters.
 
-Users can keep their structure files in `POSCAR`, `.cif`, `.xyz` or `.pdb` files in a directory. In the examples below we will use POSCAR format files. In the same directory, there should be an `id_prop.csv` file. 
+Users can keep their structure files in `POSCAR`, `.cif`, `.xyz` or `.pdb` files in a directory. In the examples below we will use POSCAR format files. In the same directory, there should be an `id_prop.csv` file.
 
 In this directory, `id_prop.csv`, the filenames, and correponding target values are kept in `comma separated values (csv) format`.
 
@@ -95,10 +95,10 @@ Here is an example of training OptB88vdw bandgaps of 50 materials from JARVIS-DF
 
 The dataset in split in 80:10:10 as training-validation-test set (controlled by `train_ratio, val_ratio, test_ratio`) . To change the split proportion and other parameters, change the [config_example.json](https://github.com/usnistgov/alignn/blob/main/alignn/examples/sample_data/config_example.json) file. If, users want to train on certain sets and val/test on another dataset, set `n_train`, `n_val`, `n_test` manually in the `config_example.json` and also set `keep_data_order` as True there so that random shuffle is disabled.
 
-A brief help guide (`-h`) can be obtained as follows. 
+A brief help guide (`-h`) can be obtained as follows.
 
 ```
-train_folder.py -h 
+train_folder.py -h
 ```
 #### Regression example
 Now, the model is trained as follows. Please increase the `batch_size` parameter to something like 32 or 64 in `config_example.json` for general trainings.
@@ -228,7 +228,7 @@ The results from models other than ALIGNN are reported as given in corresponding
 |     Ef      |     eV(atom)<sup>-1</sup>    |     0.93    |     0.104    |     0.039    |     0.028     |     0.035     |     0.022     |     42.27      |
 |     Eg      |     eV        |     1.35    |     0.434    |     0.388    |     0.33      |     -         |     0.218     |     6.19       |
 
- 
+
 
 ### 4) On QM9 dataset
 
@@ -279,7 +279,7 @@ coming soon!
 
 coming soon!
 
-### 10) On OpenCatalyst dataset 
+### 10) On OpenCatalyst dataset
 
 coming soon!
 
@@ -295,7 +295,6 @@ Useful notes (based on some of the queries we received)
 5) Note that `train_folder.py` and `pretrained.py` in alignn folder are actually python executable scripts. So, even if you don't provide absolute path of these scripts, they should work.
 6) Learn about the issue with QM9 results here: https://github.com/usnistgov/alignn/issues/54
 7) Make sure you have `pandas` version as 1.2.3.
-
 
 <a name="refs"></a>
 References
@@ -325,4 +324,3 @@ Code of conduct
 --------------------
 
 Please see [Code of conduct](https://github.com/usnistgov/jarvis/blob/master/CODE_OF_CONDUCT.md)
-
