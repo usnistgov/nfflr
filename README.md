@@ -229,7 +229,6 @@ The results from models other than ALIGNN are reported as given in corresponding
 |     Eg      |     eV        |     1.35    |     0.434    |     0.388    |     0.33      |     -         |     0.218     |     6.19       |
 
 
-
 ### 4) On QM9 dataset
 
 Note the [issue](https://github.com/usnistgov/alignn/issues/54) related to QM9 dataset. The results from models other than ALIGNN are reported as given in corresponding papers, not necessarily reproduced by us. These models were trained with same parameters as solid-state databases but for 1000 epochs.
@@ -248,13 +247,14 @@ Note the [issue](https://github.com/usnistgov/alignn/issues/54) related to QM9 d
 |    H   | eV    |  0.014 |  0.012  |  0.00653  | 0.0147 |
 |    G   | eV    |  0.014 |  0.012  |  0.00756  | 0.0144 |
 
-=======
+
 ### 4) On Materials project 2018 dataset
 
 |     Prop    |     Unit      |     MAD     |     CFID     |     CGCNN    |     MEGNet    |     SchNet    |     ALIGNN    |     MAD:MAE    |
 |-------------|---------------|-------------|--------------|--------------|---------------|---------------|---------------|----------------|
 |     Ef      |     eV/at.    |     0.93    |     0.104    |     0.039    |     0.028     |     0.035     |     0.022     |     42.27      |
 |     Eg      |     eV        |     1.35    |     0.434    |     0.388    |     0.33      |     -         |     0.218     |     6.19       |
+
 
 
 ### 5) On hMOF dataset
