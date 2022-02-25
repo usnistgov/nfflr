@@ -248,6 +248,14 @@ Note the [issue](https://github.com/usnistgov/alignn/issues/54) related to QM9 d
 |    H   | eV    |  0.014 |  0.012  |  0.00653  | 0.0147 |
 |    G   | eV    |  0.014 |  0.012  |  0.00756  | 0.0144 |
 
+=======
+### 4) On Materials project 2018 dataset
+
+|     Prop    |     Unit      |     MAD     |     CFID     |     CGCNN    |     MEGNet    |     SchNet    |     ALIGNN    |     MAD:MAE    |
+|-------------|---------------|-------------|--------------|--------------|---------------|---------------|---------------|----------------|
+|     Ef      |     eV/at.    |     0.93    |     0.104    |     0.039    |     0.028     |     0.035     |     0.022     |     42.27      |
+|     Eg      |     eV        |     1.35    |     0.434    |     0.388    |     0.33      |     -         |     0.218     |     6.19       |
+
 
 ### 5) On hMOF dataset
 
@@ -296,6 +304,7 @@ Useful notes (based on some of the queries we received)
 6) Learn about the issue with QM9 results here: https://github.com/usnistgov/alignn/issues/54
 7) Make sure you have `pandas` version as 1.2.3.
 
+
 <a name="refs"></a>
 References
 -----------------
@@ -324,7 +333,3 @@ Code of conduct
 --------------------
 
 Please see [Code of conduct](https://github.com/usnistgov/jarvis/blob/master/CODE_OF_CONDUCT.md)
-<<<<<<< HEAD
-=======
-
->>>>>>> Update README.
