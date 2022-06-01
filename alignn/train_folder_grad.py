@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 
 """Module to train for a folder with formatted dataset."""
-import os
-
-# import numpy as np
-import sys
-from alignn.data import get_train_val_loaders
-from alignn.train import train_dgl
-from alignn.config import TrainingConfig
-from jarvis.db.jsonutils import loadjson
 import argparse
-from alignn.models.alignn_atomwise import ALIGNNAtomWise, ALIGNNAtomWiseConfig
+import os
+import sys
 
-# from alignn.models.alignn import ALIGNN, ALIGNNConfig
 import torch
+from jarvis.db.jsonutils import loadjson
+
+from alignn.config import TrainingConfig
+from alignn.data import get_train_val_loaders
+from alignn.models.alignn_atomwise import ALIGNNAtomWise, ALIGNNAtomWiseConfig
+from alignn.train import train_dgl
 
 device = "cpu"
 if torch.cuda.is_available():

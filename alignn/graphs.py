@@ -1,21 +1,19 @@
 """Module to generate networkx graphs."""
-from jarvis.core.atoms import get_supercell_dims
-from jarvis.core.specie import Specie
-from jarvis.core.utils import random_colors
+# from jarvis.core.atoms import Atoms
+from collections import OrderedDict, defaultdict
+from typing import List, Optional, Sequence, Tuple
+
 import numpy as np
 import pandas as pd
-from collections import OrderedDict
 from jarvis.analysis.structure.neighbors import NeighborsAnalysis
-from jarvis.core.specie import chem_data, get_node_attributes
-
-# from jarvis.core.atoms import Atoms
-from collections import defaultdict
-from typing import List, Tuple, Sequence, Optional
+from jarvis.core.atoms import get_supercell_dims
+from jarvis.core.specie import Specie, chem_data, get_node_attributes
+from jarvis.core.utils import random_colors
 
 try:
+    import dgl
     import torch
     from tqdm import tqdm
-    import dgl
 except Exception as exp:
     print("dgl/torch/tqdm is not installed.", exp)
     pass
@@ -155,7 +153,7 @@ def build_undirected_edgedata(
 
     u = torch.tensor(u)
     v = torch.tensor(v)
-    r = torch.tensor(r).type(torch.get_default_dtype())
+    r = torch.tensor(np.array(r)).type(torch.get_default_dtype())
 
     return u, v, r
 
@@ -234,10 +232,13 @@ class Graph(object):
         )
         g = dgl.graph((u, v))
         g.ndata["atom_features"] = node_features
+        g.edata["r"] = r
+
+        # see https://github.com/dmlc/dgl/issues/1449
+        # to try to store cell matrix and volume as global variables
         g.ndata["lattice_mat"] = torch.tensor(
             [atoms.lattice_mat for ii in range(atoms.num_atoms)]
         )
-        g.edata["r"] = r
         g.ndata["V"] = torch.tensor(
             [atoms.volume for ii in range(atoms.num_atoms)]
         )
