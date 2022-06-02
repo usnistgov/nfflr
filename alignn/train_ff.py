@@ -44,64 +44,61 @@ if __name__ == "__main__":
         df,
         line_graph=lg,  # atom_features="cgcnn"
     )
-    collate = {True: dataset.collate_line_graph, False: dataset.collate}[lg]
-    dl = DataLoader(dataset, collate_fn=collate, batch_size=4)
+    dl = DataLoader(dataset, collate_fn=dataset.collate, batch_size=4)
     prepare_batch = dl.dataset.prepare_batch
 
     g, lg, t = next(iter(dl))
     out = model((g, lg))
 
-    # params = group_decay(model)
-    # optimizer = setup_optimizer(params, cfg)
+    params = group_decay(model)
+    optimizer = setup_optimizer(params, cfg)
 
-    # steps_per_epoch = len(dl)
-    # pct_start = cfg.warmup_steps / (cfg.epochs * steps_per_epoch)
-    # scheduler = torch.optim.lr_scheduler.OneCycleLR(
-    #     optimizer,
-    #     max_lr=cfg.learning_rate,
-    #     epochs=cfg.epochs,
-    #     steps_per_epoch=steps_per_epoch,
-    #     pct_start=pct_start,
-    # )
+    steps_per_epoch = len(dl)
+    pct_start = cfg.warmup_steps / (cfg.epochs * steps_per_epoch)
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer,
+        max_lr=cfg.learning_rate,
+        epochs=cfg.epochs,
+        steps_per_epoch=steps_per_epoch,
+        pct_start=pct_start,
+    )
 
-    # criteria = {"total_energy": nn.MSELoss(), "forces": nn.MSELoss()}
+    criteria = {"total_energy": nn.MSELoss(), "forces": nn.MSELoss()}
 
-    # def ff_criterion(outputs, targets):
-    #     print("evaluate loss")
-    #     energy_loss = criteria["total_energy"](
-    #         outputs["total_energy"], targets["total_energy"]
-    #     )
+    def ff_criterion(outputs, targets):
+        """Specify combined energy and force loss."""
+        energy_loss = criteria["total_energy"](
+            outputs["total_energy"], targets["total_energy"]
+        )
 
-    #     force_loss = criteria["forces"](outputs["forces"], targets["forces"])
-    #     print("finish loss")
+        force_loss = criteria["forces"](outputs["forces"], targets["forces"])
 
-    #     return energy_loss + force_loss
+        return energy_loss + force_loss
 
-    # metrics = {"loss": Loss(ff_criterion), "mae": MeanAbsoluteError()}
+    metrics = {"loss": Loss(ff_criterion), "mae": MeanAbsoluteError()}
 
-    # trainer = create_supervised_trainer(
-    #     model,
-    #     optimizer,
-    #     ff_criterion,
-    #     prepare_batch=prepare_batch,
-    #     # device=device,
-    # )
+    trainer = create_supervised_trainer(
+        model,
+        optimizer,
+        ff_criterion,
+        prepare_batch=prepare_batch,
+        # device=device,
+    )
 
-    # train_evaluator = create_supervised_evaluator(
-    #     model,
-    #     metrics=metrics,
-    #     prepare_batch=prepare_batch,
-    #     # device=device,
-    # )
+    train_evaluator = create_supervised_evaluator(
+        model,
+        metrics=metrics,
+        prepare_batch=prepare_batch,
+        # device=device,
+    )
 
-    # # ignite event handlers:
-    # trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
+    # ignite event handlers:
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
 
-    # # apply learning rate scheduler
-    # trainer.add_event_handler(
-    #     Events.ITERATION_COMPLETED, lambda engine: scheduler.step()
-    # )
+    # apply learning rate scheduler
+    trainer.add_event_handler(
+        Events.ITERATION_COMPLETED, lambda engine: scheduler.step()
+    )
 
-    # # train the model!
-    # print("starting trainer")
-    # trainer.run(dl, max_epochs=cfg.epochs)
+    # train the model!
+    trainer.run(dl, max_epochs=cfg.epochs)

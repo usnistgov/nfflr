@@ -87,6 +87,10 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.df = df
         self.graphs = graphs
         self.line_graph = line_graph
+        if self.line_graph:
+            self.collate = self.collate_line_graph
+        else:
+            self.collate = self.collate_default
 
         self.ids = self.df[id_tag]
         self.transform = transform
@@ -167,7 +171,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         return g, target
 
     @staticmethod
-    def collate(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
+    def collate_default(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
         """Dataloader helper to batch graphs cross `samples`.
 
         Forces get collated into a graph batch

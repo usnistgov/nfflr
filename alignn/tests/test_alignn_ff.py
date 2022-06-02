@@ -18,8 +18,7 @@ dataset = AtomisticConfigurationDataset(
     line_graph=True,
 )
 
-collate = dataset.collate_line_graph
-dl = DataLoader(dataset, collate_fn=collate, batch_size=4)
+dl = DataLoader(dataset, collate_fn=dataset.collate, batch_size=4)
 
 
 def test_force_grad():
