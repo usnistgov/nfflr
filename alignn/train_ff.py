@@ -14,11 +14,17 @@ if __name__ == "__main__":
     df = pd.read_json(example_data / "id_prop.json")
 
     model_cfg = ALIGNNAtomWiseConfig(
-        name="alignn_atomwise", alignn_layers=2, gcn_layers=2
+        name="alignn_atomwise",
+        alignn_layers=2,
+        gcn_layers=2,
+        atom_input_features=1,
+        calculate_gradient=True,
     )
     cfg = TrainingConfig(model=model_cfg)
 
     model = ALIGNNAtomWise(model_cfg)
 
-    dataset = AtomisticConfigurationDataset(df, line_graph=False)
-    dl = DataLoader(dataset, collate_fn=dataset.collate, batch_size=4)
+    lg = True
+    dataset = AtomisticConfigurationDataset(df, line_graph=lg)
+    collate = {True: dataset.collate_line_graph, False: dataset.collate}[lg]
+    dl = DataLoader(dataset, collate_fn=collate, batch_size=4)
