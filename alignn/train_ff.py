@@ -47,9 +47,6 @@ if __name__ == "__main__":
     dl = DataLoader(dataset, collate_fn=dataset.collate, batch_size=4)
     prepare_batch = dl.dataset.prepare_batch
 
-    g, lg, t = next(iter(dl))
-    out = model((g, lg))
-
     params = group_decay(model)
     optimizer = setup_optimizer(params, cfg)
 
