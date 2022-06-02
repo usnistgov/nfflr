@@ -1,5 +1,5 @@
 """Standalone dataset for training force field models."""
-from typing import List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import dgl
 import numpy as np
@@ -10,8 +10,6 @@ from jarvis.core.graphs import (
     chem_data,
     compute_bond_cosines,
     get_node_attributes,
-    prepare_dgl_batch,
-    prepare_line_graph_batch,
 )
 
 from alignn.graphs import Graph
@@ -28,6 +26,40 @@ def atoms_to_graph(atoms):
         compute_line_graph=False,
         use_canonize=True,
     )
+
+
+def prepare_line_graph_batch(
+    batch: Tuple[dgl.DGLGraph, dgl.DGLGraph, Dict[str, torch.Tensor]],
+    device=None,
+    non_blocking=False,
+) -> Tuple[Tuple[dgl.DGLGraph, dgl.DGLGraph], Dict[str, torch.Tensor]]:
+    """Send batched dgl crystal graph to device."""
+    g, lg, t = batch
+    t = {k: v.to(device, non_blocking=non_blocking) for k, v in t.items()}
+
+    batch = (
+        (
+            g.to(device, non_blocking=non_blocking),
+            lg.to(device, non_blocking=non_blocking),
+        ),
+        t,
+    )
+
+    return batch
+
+
+def prepare_dgl_batch(
+    batch: Tuple[dgl.DGLGraph, Dict[str, torch.Tensor]],
+    device=None,
+    non_blocking=False,
+) -> Tuple[dgl.DGLGraph, Dict[str, torch.Tensor]]:
+    """Send batched dgl crystal graph to device."""
+    g, t = batch
+    t = {k: v.to(device, non_blocking=non_blocking) for k, v in t.items()}
+
+    batch = (g.to(device, non_blocking=non_blocking), t)
+
+    return batch
 
 
 class AtomisticConfigurationDataset(torch.utils.data.Dataset):
@@ -121,6 +153,11 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             "stresses": self.df["stresses"][idx],
         }
 
+        target = {
+            k: torch.tensor(t, dtype=torch.get_default_dtype())
+            for k, t in target.items()
+        }
+
         if self.transform:
             g = self.transform(g)
 
@@ -144,9 +181,10 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         graphs, targets = map(list, zip(*samples))
 
         energy = torch.tensor([t["energy"] for t in targets])
-        forces = torch.cat([torch.tensor(t["forces"]) for t in targets], dim=0)
-        stresses = torch.tensor([t["stresses"] for t in targets])
-        targets = dict(energy=energy, forces=forces, stresses=stresses)
+        forces = torch.cat([t["forces"] for t in targets], dim=0)
+        stresses = torch.stack([t["stresses"] for t in targets])
+
+        targets = dict(total_energy=energy, forces=forces, stresses=stresses)
 
         batched_graph = dgl.batch(graphs)
         return batched_graph, targets
@@ -159,8 +197,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         graphs, line_graphs, targets = map(list, zip(*samples))
 
         energy = torch.tensor([t["energy"] for t in targets])
-        forces = torch.cat([torch.tensor(t["forces"]) for t in targets], dim=0)
-        stresses = torch.tensor([t["stresses"] for t in targets])
-        targets = dict(energy=energy, forces=forces, stresses=stresses)
+        forces = torch.cat([t["forces"] for t in targets], dim=0)
+        stresses = torch.stack([t["stresses"] for t in targets])
+        targets = dict(total_energy=energy, forces=forces, stresses=stresses)
 
         return dgl.batch(graphs), dgl.batch(line_graphs), targets

@@ -252,6 +252,7 @@ class ALIGNNAtomWise(nn.Module):
         y: bond features (g.edata and lg.ndata)
         z: angle features (lg.edata)
         """
+        print("forward")
         if len(self.alignn_layers) > 0:
             g, lg = g
             lg = lg.local_var()
@@ -264,10 +265,13 @@ class ALIGNNAtomWise(nn.Module):
         # initial node features: atom feature network...
         x = g.ndata.pop("atom_features")
         x = self.atom_embedding(x)
-        r = g.edata["r"]
-        if self.config.calculate_gradient:
-            r.requires_grad_(True)
-        # r = g.edata["r"].clone().detach().requires_grad_(True)
+        r = g.edata["r"].clone().detach().requires_grad_(True)
+        # r = g.edata["r"]
+        # r.requires_grad_(True)
+
+        # if self.config.calculate_gradient:
+        #     r.requires_grad_(True)
+
         bondlength = torch.norm(r, dim=1)
         y = self.edge_embedding(bondlength)
 
@@ -341,4 +345,5 @@ class ALIGNNAtomWise(nn.Module):
             atomwise_energy=atomwise_energy,
         )
 
+        print("finish forward")
         return result
