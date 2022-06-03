@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
+from ignite.contrib.engines.common import setup_common_training_handlers
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.engine import (
     Events,
@@ -105,12 +106,6 @@ def train_ff(config, model, dataloader):
 
         return energy_loss + force_loss
 
-    metrics = {
-        "loss": Loss(ff_criterion),
-        "mae_energy": MeanAbsoluteError(select_target("total_energy")),
-        "mae_forces": MeanAbsoluteError(select_target("forces")),
-    }
-
     trainer = create_supervised_trainer(
         model,
         optimizer,
@@ -119,6 +114,34 @@ def train_ff(config, model, dataloader):
         device=device,
     )
 
+    pbar = ProgressBar()
+    pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+
+    trainer.add_event_handler(
+        Events.ITERATION_COMPLETED, lambda engine: scheduler.step()
+    )
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
+
+    checkpoint_handler = Checkpoint(
+        dict(
+            model=model,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            trainer=trainer,
+        ),
+        DiskSaver(config.output_dir, create_dir=True, require_empty=False),
+        n_saved=1,
+        global_step_transform=lambda *_: trainer.state.epoch,
+    )
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_handler)
+
+    # evaluation
+    metrics = {
+        "loss": Loss(ff_criterion),
+        "mae_energy": MeanAbsoluteError(select_target("total_energy")),
+        "mae_forces": MeanAbsoluteError(select_target("forces")),
+    }
+
     # create_supervised_evaluator
     train_evaluator = setup_evaluator_with_grad(
         model,
@@ -126,30 +149,6 @@ def train_ff(config, model, dataloader):
         prepare_batch=prepare_batch,
         device=device,
     )
-
-    # ignite event handlers:
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
-
-    # apply learning rate scheduler
-    trainer.add_event_handler(
-        Events.ITERATION_COMPLETED, lambda engine: scheduler.step()
-    )
-
-    pbar = ProgressBar()
-    pbar.attach(trainer, output_transform=lambda x: {"loss": x})
-
-    # model checkpointing
-    to_save = dict(
-        model=model, optimizer=optimizer, scheduler=scheduler, trainer=trainer
-    )
-
-    handler = Checkpoint(
-        to_save,
-        DiskSaver(config.output_dir, create_dir=True, require_empty=False),
-        n_saved=1,
-        global_step_transform=lambda *_: trainer.state.epoch,
-    )
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, handler)
 
     # save outputs
     # list of outputs for each batch
@@ -160,9 +159,12 @@ def train_ff(config, model, dataloader):
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(engine):
         """Log training results."""
+        epoch = engine.state.epoch
+
         train_evaluator.run(dataloader)
         m = train_evaluator.state.metrics
-        epoch, loss = engine.state.epoch, metrics["loss"]
+        loss = m["loss"]
+
         print(f"Training Results - Epoch: {epoch}  Avg loss: {loss:.2f}")
         print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
 
