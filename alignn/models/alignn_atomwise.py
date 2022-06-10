@@ -27,6 +27,7 @@ class ALIGNNAtomWiseConfig(BaseSettings):
     alignn_layers: int = 4
     gcn_layers: int = 4
     atom_input_features: int = 92
+    sparse_atom_embedding: bool = False
     edge_input_features: int = 80
     triplet_input_features: int = 40
     embedding_features: int = 64
@@ -197,9 +198,15 @@ class ALIGNNAtomWise(nn.Module):
         super().__init__()
         self.config = config
 
-        self.atom_embedding = MLPLayer(
-            config.atom_input_features, config.hidden_features
-        )
+        if config.sparse_atom_embedding:
+            self.atom_embedding = nn.Sequential(
+                nn.Embedding(108, config.embedding_features),
+                MLPLayer(config.embedding_features, config.hidden_features),
+            )
+        else:
+            self.atom_embedding = MLPLayer(
+                config.atom_input_features, config.hidden_features
+            )
 
         self.edge_embedding = nn.Sequential(
             RBFExpansion(
@@ -262,7 +269,11 @@ class ALIGNNAtomWise(nn.Module):
         g = g.local_var()
 
         # initial node features: atom feature network...
-        x = g.ndata.pop("atom_features")
+        if self.config.sparse_atom_embedding:
+            x = g.ndata.pop("atomic_number").type(torch.IntTensor).squeeze()
+        else:
+            x = g.ndata.pop("atom_features")
+
         x = self.atom_embedding(x)
         r = g.edata["r"]
 

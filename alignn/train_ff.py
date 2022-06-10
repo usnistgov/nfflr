@@ -177,6 +177,9 @@ def train_ff(config, model, dataloader):
 if __name__ == "__main__":
     from pathlib import Path
 
+    # load data from this json format into pandas...
+    # then build graphs on each access instead of precomputing them...
+    # also, make sure to split sections grouped on id column
     example_data = Path("alignn/examples/sample_data")
     df = pd.read_json(example_data / "id_prop.json")
 
@@ -185,10 +188,15 @@ if __name__ == "__main__":
         alignn_layers=2,
         gcn_layers=2,
         atom_input_features=1,
+        sparse_atom_embedding=True,
         calculate_gradient=True,
     )
     cfg = TrainingConfig(
-        model=model_cfg, num_workers=0, epochs=10, output_dir="./temp"
+        model=model_cfg,
+        atom_features="atomic_number",
+        num_workers=0,
+        epochs=10,
+        output_dir="./temp",
     )
     print(cfg)
 
