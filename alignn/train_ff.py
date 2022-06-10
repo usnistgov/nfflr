@@ -1,4 +1,5 @@
 """Prototype training code for force field models."""
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -14,7 +15,7 @@ from ignite.handlers import Checkpoint, DiskSaver, TerminateOnNan
 from ignite.handlers.stores import EpochOutputStore
 from ignite.metrics import Accuracy, Loss, MeanAbsoluteError
 from torch import nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, SubsetRandomSampler
 
 from alignn.config import TrainingConfig
 from alignn.dataset import AtomisticConfigurationDataset
@@ -59,7 +60,7 @@ def select_target(name: str):
     return output_transform
 
 
-def parity_plots(output, epoch, directory):
+def parity_plots(output, epoch, directory, phase="train"):
     """Plot predictions for energy and forces."""
     fig, axes = plt.subplots(ncols=2, figsize=(16, 8))
     for batch in output:
@@ -77,18 +78,32 @@ def parity_plots(output, epoch, directory):
         )
 
     plt.tight_layout()
-    plt.savefig(Path(directory) / f"parity_plots_{epoch:03d}.png")
+    plt.savefig(Path(directory) / f"parity_plots_{phase}_{epoch:03d}.png")
     plt.clf()
     plt.close()
 
 
-def train_ff(config, model, dataloader):
+def train_ff(config, model, dataset):
     """Train force field model."""
-    prepare_batch = dataloader.dataset.prepare_batch
+    train_loader = DataLoader(
+        dataset,
+        collate_fn=dataset.collate,
+        batch_size=config.batch_size,
+        sampler=SubsetRandomSampler(dataset.split["train"]),
+        drop_last=True,
+    )
+    val_loader = DataLoader(
+        dataset,
+        collate_fn=dataset.collate,
+        batch_size=config.batch_size,
+        sampler=SubsetRandomSampler(dataset.split["train"]),
+    )
+
+    prepare_batch = train_loader.dataset.prepare_batch
 
     params = group_decay(model)
     optimizer = setup_optimizer(params, cfg)
-    scheduler = setup_scheduler(cfg, optimizer, len(dl))
+    scheduler = setup_scheduler(cfg, optimizer, len(train_loader))
 
     criteria = {"total_energy": nn.MSELoss(), "forces": nn.MSELoss()}
 
@@ -150,32 +165,64 @@ def train_ff(config, model, dataloader):
         device=device,
     )
 
+    val_evaluator = setup_evaluator_with_grad(
+        model,
+        metrics=metrics,
+        prepare_batch=prepare_batch,
+        device=device,
+    )
+
     # save outputs
     # list of outputs for each batch
     # in this case List[Tuple[Dict[str,torch.Tensor], Dict[str,torch.Tensor]]]
     eos = EpochOutputStore()
     eos.attach(train_evaluator, "output")
+    eos.attach(val_evaluator, "output")
+
+    history = {
+        "train": {m: [] for m in metrics.keys()},
+        "validation": {m: [] for m in metrics.keys()},
+    }
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(engine):
         """Log training results."""
         epoch = engine.state.epoch
 
-        train_evaluator.run(dataloader)
-        m = train_evaluator.state.metrics
-        loss = m["loss"]
+        train_evaluator.run(train_loader)
+        val_evaluator.run(val_loader)
 
-        print(f"Training Results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-        print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
+        evaluators = {"train": train_evaluator, "validation": val_evaluator}
 
-        parity_plots(train_evaluator.state.output, epoch, config.output_dir)
+        for phase, evaluator in evaluators.items():
+
+            m = evaluator.state.metrics
+            loss = m["loss"]
+
+            print(f"{phase} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
+            print(
+                f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
+            )
+
+            parity_plots(
+                train_evaluator.state.output,
+                epoch,
+                config.output_dir,
+                phase=phase,
+            )
+
+            for key, value in m.items():
+                history[phase][key].append(value)
+
+        torch.save(history, Path(config.output_dir) / "metric_history.pkl")
 
     # train the model!
-    trainer.run(dataloader, max_epochs=cfg.epochs)
+    trainer.run(train_loader, max_epochs=cfg.epochs)
+
+    print(history)
 
 
 if __name__ == "__main__":
-    from pathlib import Path
 
     # load data from this json format into pandas...
     # then build graphs on each access instead of precomputing them...
@@ -196,6 +243,7 @@ if __name__ == "__main__":
         atom_features="atomic_number",
         num_workers=0,
         epochs=10,
+        batch_size=16,
         output_dir="./temp",
     )
     print(cfg)
@@ -207,10 +255,7 @@ if __name__ == "__main__":
     lg = True
     dataset = AtomisticConfigurationDataset(
         df,
-        line_graph=lg,  # atom_features="cgcnn"
-    )
-    dl = DataLoader(
-        dataset, collate_fn=dataset.collate, batch_size=16, drop_last=True
+        line_graph=lg,
     )
 
-    train_ff(cfg, model, dl)
+    train_ff(cfg, model, dataset)

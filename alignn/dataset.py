@@ -1,5 +1,5 @@
 """Standalone dataset for training force field models."""
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Literal, Optional, Sequence, Tuple
 
 import dgl
 import numpy as np
@@ -11,6 +11,7 @@ from jarvis.core.graphs import (
     compute_bond_cosines,
     get_node_attributes,
 )
+from numpy.random import default_rng
 
 from alignn.graphs import Graph
 
@@ -72,11 +73,11 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self,
         df: pd.DataFrame,
         graphs: Optional[Sequence[dgl.DGLGraph]] = None,
-        atom_features="atomic_number",
-        transform=None,
-        line_graph=False,
-        classification=False,
-        id_tag="jid",
+        atom_features: str = "atomic_number",
+        transform: bool = None,
+        line_graph: bool = False,
+        train_val_seed: int = 42,
+        id_tag: str = "jid",
     ):
         """Pytorch Dataset for atomistic graphs.
 
@@ -87,6 +88,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.df = df
         self.graphs = graphs
         self.line_graph = line_graph
+        self.train_val_seed = train_val_seed
+
         if self.line_graph:
             self.collate = self.collate_line_graph
         else:
@@ -123,6 +126,30 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
                 lg = g.line_graph(shared=True)
                 lg.apply_edges(compute_bond_cosines)
                 self.line_graphs.append(lg)
+
+        self.split = self.split_dataset()
+
+    def split_dataset(self):
+        """Get train/val/test split indices for SubsetRandomSampler."""
+        N = len(self)
+        n_test = int(0.1 * N)
+        n_val = int(0.1 * N)
+        # n_train = N - n_val - n_test
+
+        # deterministic test split, always
+        test_rng = default_rng(0)
+        shuf = test_rng.permutation(N)
+        test_ids = shuf[:n_test]
+        train_val_ids = shuf[n_test:]
+
+        # configurable train/val seed
+        train_val_rng = default_rng(self.train_val_seed)
+        train_val_rng.shuffle(train_val_ids)
+
+        val_ids = train_val_ids[:n_val]
+        train_ids = train_val_ids[n_val:]
+
+        return {"train": train_ids, "val": val_ids, "test": test_ids}
 
     @staticmethod
     def _get_attribute_lookup(atom_features: str = "cgcnn"):
