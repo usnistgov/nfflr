@@ -114,7 +114,7 @@ def train_ff(config, model, dataset):
         )
 
         # scale the forces before the loss
-        force_scale = 0.001
+        force_scale = 10.0
         force_loss = criteria["forces"](
             force_scale * outputs["forces"], force_scale * targets["forces"]
         )
@@ -227,8 +227,13 @@ if __name__ == "__main__":
     # load data from this json format into pandas...
     # then build graphs on each access instead of precomputing them...
     # also, make sure to split sections grouped on id column
-    example_data = Path("alignn/examples/sample_data")
-    df = pd.read_json(example_data / "id_prop.json")
+    # example_data = Path("alignn/examples/sample_data")
+    # df = pd.read_json(example_data / "id_prop.json")
+
+    jdft_trajectories = Path(
+        "/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir"
+    )
+    df = pd.read_json(jdft_trajectories / "id_prop.json")
 
     model_cfg = ALIGNNAtomWiseConfig(
         name="alignn_atomwise",
