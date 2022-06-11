@@ -72,7 +72,6 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
     def __init__(
         self,
         df: pd.DataFrame,
-        graphs: Optional[Sequence[dgl.DGLGraph]] = None,
         atom_features: str = "atomic_number",
         transform: bool = None,
         line_graph: bool = False,
@@ -82,42 +81,31 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         """Pytorch Dataset for atomistic graphs.
 
         `df`: pandas dataframe from e.g. jarvis.db.figshare.data
-        `graphs`: DGLGraph representations corresponding to rows in `df`
-        `target`: key for label column in `df`
         """
         self.df = df
-        self.graphs = graphs
         self.line_graph = line_graph
         self.train_val_seed = train_val_seed
 
         if self.line_graph:
             self.collate = self.collate_line_graph
+            self.prepare_batch = prepare_line_graph_batch
         else:
             self.collate = self.collate_default
+            self.prepare_batch = prepare_dgl_batch
 
         self.ids = self.df[id_tag]
         self.transform = transform
 
-        features = self._get_attribute_lookup(atom_features)
+        self.split = self.split_dataset()
 
-        if graphs is None:
-            graphs = df["atoms"].apply(atoms_to_graph).values
+        # features = self._get_attribute_lookup(atom_features)
 
-        # load selected node representation
-        # assume graphs contain atomic number in g.ndata["atom_features"]
-        for g in graphs:
-            z = g.ndata.pop("atom_features")
-            g.ndata["atomic_number"] = z
-            z = z.type(torch.IntTensor).squeeze()
-            f = torch.tensor(features[z]).type(torch.FloatTensor)
-            if g.num_nodes() == 1:
-                f = f.unsqueeze(0)
-            g.ndata["atom_features"] = f
-
+    def produce_graphs(self):
+        """Precompute graphs."""
+        graphs = self.df["atoms"].apply(atoms_to_graph).values
         self.graphs = graphs
 
-        self.prepare_batch = prepare_dgl_batch
-        if line_graph:
+        if self.line_graph:
             self.prepare_batch = prepare_line_graph_batch
 
             print("building line graphs")
@@ -127,7 +115,16 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
                 lg.apply_edges(compute_bond_cosines)
                 self.line_graphs.append(lg)
 
-        self.split = self.split_dataset()
+        # # load selected node representation
+        # # assume graphs contain atomic number in g.ndata["atom_features"]
+        # for g in graphs:
+        #     z = g.ndata.pop("atom_features")
+        #     g.ndata["atomic_number"] = z
+        #     z = z.type(torch.IntTensor).squeeze()
+        #     f = torch.tensor(features[z]).type(torch.FloatTensor)
+        #     if g.num_nodes() == 1:
+        #         f = f.unsqueeze(0)
+        #     g.ndata["atom_features"] = f
 
     def split_dataset(self):
         """Get train/val/test split indices for SubsetRandomSampler."""
@@ -176,7 +173,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         """Get StructureDataset sample."""
-        g = self.graphs[idx]
+        # g = self.graphs[idx]
+        g = atoms_to_graph(self.df["atoms"].iloc[idx])
+        g.ndata["atomic_number"] = g.ndata["atom_features"]
 
         target = {
             "energy": self.df["total_energy"][idx],
@@ -193,7 +192,10 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             g = self.transform(g)
 
         if self.line_graph:
-            return g, self.line_graphs[idx], target
+            # lg = self.line_graphs[idx]
+            lg = g.line_graph(shared=True)
+            lg.apply_edges(compute_bond_cosines)
+            return g, lg, target
 
         return g, target
 
