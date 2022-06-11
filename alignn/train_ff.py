@@ -1,4 +1,5 @@
 """Prototype training code for force field models."""
+from functools import partial
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -99,7 +100,9 @@ def train_ff(config, model, dataset):
         sampler=SubsetRandomSampler(dataset.split["train"]),
     )
 
-    prepare_batch = train_loader.dataset.prepare_batch
+    prepare_batch = partial(
+        train_loader.dataset.prepare_batch, device=device, non_blocking=True
+    )
 
     params = group_decay(model)
     optimizer = setup_optimizer(params, cfg)
@@ -243,6 +246,7 @@ if __name__ == "__main__":
         sparse_atom_embedding=True,
         calculate_gradient=True,
     )
+    # need to pass model config as dict?
     cfg = TrainingConfig(
         model=model_cfg,
         atom_features="atomic_number",
