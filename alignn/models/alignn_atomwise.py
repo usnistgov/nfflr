@@ -270,7 +270,7 @@ class ALIGNNAtomWise(nn.Module):
 
         # initial node features: atom feature network...
         if self.config.sparse_atom_embedding:
-            x = g.ndata.pop("atomic_number").type(torch.IntTensor).squeeze()
+            x = g.ndata.pop("atomic_number").long().squeeze()
         else:
             x = g.ndata.pop("atom_features")
 
