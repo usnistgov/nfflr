@@ -85,6 +85,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.df = df
         self.line_graph = line_graph
         self.train_val_seed = train_val_seed
+        self.id_tag = id_tag
 
         if self.line_graph:
             self.collate = self.collate_line_graph
@@ -96,7 +97,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.ids = self.df[id_tag]
         self.transform = transform
 
-        self.split = self.split_dataset()
+        self.split = self.split_dataset_by_id()
 
         # features = self._get_attribute_lookup(atom_features)
 
@@ -125,6 +126,41 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         #     if g.num_nodes() == 1:
         #         f = f.unsqueeze(0)
         #     g.ndata["atom_features"] = f
+
+    def split_dataset_by_id(self):
+        """Get train/val/test split indices for SubsetRandomSampler.
+
+        Stratify by calculation / trajectory id
+        """
+        ids = self.df[self.id_tag].unique()
+
+        N = len(ids)
+        n_test = int(0.1 * N)
+        n_val = int(0.1 * N)
+        # n_train = N - n_val - n_test
+
+        # deterministic test split, always
+        test_rng = default_rng(0)
+        test_rng.shuffle(ids)
+        test_ids = ids[:n_test]
+        train_val_ids = ids[n_test:]
+
+        # configurable train/val seed
+        train_val_rng = default_rng(self.train_val_seed)
+        train_val_rng.shuffle(train_val_ids)
+
+        val_ids = train_val_ids[:n_val]
+        train_ids = train_val_ids[n_val:]
+
+        # calculation ids...
+        split_ids = {"train": train_ids, "val": val_ids, "test": test_ids}
+
+        # split atomistic configurations
+        all_ids = self.df[self.id_tag]
+        return {
+            key: np.where(all_ids.isin(split_ids))[0]
+            for key, split_ids in split_ids.items()
+        }
 
     def split_dataset(self):
         """Get train/val/test split indices for SubsetRandomSampler."""
