@@ -68,13 +68,13 @@ def parity_plots(output, epoch, directory, phase="train"):
         pred, tgt = batch
 
         axes[0].scatter(
-            tgt["total_energy"].detach().numpy(),
-            pred["total_energy"].detach().numpy(),
+            tgt["total_energy"].cpu().detach().numpy(),
+            pred["total_energy"].cpu().detach().numpy(),
             color="k",
         )
         axes[1].scatter(
-            tgt["forces"].detach().numpy(),
-            pred["forces"].detach().numpy(),
+            tgt["forces"].cpu().detach().numpy(),
+            pred["forces"].cpu().detach().numpy(),
             color="k",
         )
 
