@@ -65,6 +65,10 @@ def setup_evaluator_with_grad(
         x, y = prepare_batch(batch, device=device, non_blocking=non_blocking)
         y_pred = model(x)
 
+        # make sure to zero gradients in eval step?
+        for param in model.parameters():
+            param.grad = None
+
         return output_transform(x, y, y_pred)
 
     evaluator = Engine(evaluation_step)

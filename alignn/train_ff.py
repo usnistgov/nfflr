@@ -92,12 +92,14 @@ def train_ff(config, model, dataset):
         batch_size=config.batch_size,
         sampler=SubsetRandomSampler(dataset.split["train"]),
         drop_last=True,
+        pin_memory=True,
     )
     val_loader = DataLoader(
         dataset,
         collate_fn=dataset.collate,
         batch_size=config.batch_size,
         sampler=SubsetRandomSampler(dataset.split["train"]),
+        pin_memory=True,
     )
 
     prepare_batch = partial(
@@ -160,12 +162,21 @@ def train_ff(config, model, dataset):
         "mae_forces": MeanAbsoluteError(select_target("forces")),
     }
 
+    # def transfer_outputs(outputs):
+    def transfer_outputs(x, y, y_pred):
+        return tuple(
+            {key: value.detach().cpu() for key, value in xs.items()}
+             for xs in (y, y_pred)
+        )
+
+
     # create_supervised_evaluator
     train_evaluator = setup_evaluator_with_grad(
         model,
         metrics=metrics,
         prepare_batch=prepare_batch,
         device=device,
+        output_transform=transfer_outputs,
     )
 
     val_evaluator = setup_evaluator_with_grad(
@@ -173,19 +184,24 @@ def train_ff(config, model, dataset):
         metrics=metrics,
         prepare_batch=prepare_batch,
         device=device,
+        output_transform=transfer_outputs,
     )
 
     # save outputs
     # list of outputs for each batch
     # in this case List[Tuple[Dict[str,torch.Tensor], Dict[str,torch.Tensor]]]
-    eos = EpochOutputStore()
-    eos.attach(train_evaluator, "output")
-    eos.attach(val_evaluator, "output")
+    eos = EpochOutputStore(output_transform=transfer_outputs)
+    # eos.attach(train_evaluator, "output")
+    # eos.attach(val_evaluator, "output")
 
     history = {
         "train": {m: [] for m in metrics.keys()},
         "validation": {m: [] for m in metrics.keys()},
     }
+
+    # train_evaluator.add_event_handler(
+    #     Events.ITERATION_COMPLETED, lambda engine: print("evaluation step")
+    # )
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(engine):
@@ -207,12 +223,12 @@ def train_ff(config, model, dataset):
                 f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
             )
 
-            parity_plots(
-                train_evaluator.state.output,
-                epoch,
-                config.output_dir,
-                phase=phase,
-            )
+            # parity_plots(
+            #     train_evaluator.state.output,
+            #     epoch,
+            #     config.output_dir,
+            #     phase=phase,
+            # )
 
             for key, value in m.items():
                 history[phase][key].append(value)
@@ -233,10 +249,11 @@ if __name__ == "__main__":
     # example_data = Path("alignn/examples/sample_data")
     # df = pd.read_json(example_data / "id_prop.json")
 
-    jdft_trajectories = Path(
-        "/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir"
-    )
-    df = pd.read_json(jdft_trajectories / "id_prop.json")
+    # jdft_trajectories = Path(
+    #     "/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir"
+    # )
+    # df = pd.read_json(jdft_trajectories / "id_prop.json")
+    df = pd.read_pickle("jdft_prototyping_trajectories_10k.pkl")
 
     model_cfg = ALIGNNAtomWiseConfig(
         name="alignn_atomwise",
@@ -250,9 +267,9 @@ if __name__ == "__main__":
     cfg = TrainingConfig(
         model=model_cfg,
         atom_features="atomic_number",
-        num_workers=0,
+        num_workers=4,
         epochs=10,
-        batch_size=16,
+        batch_size=256,
         output_dir="./temp",
     )
     print(cfg)
