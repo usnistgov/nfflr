@@ -190,9 +190,16 @@ def train_ff(config, model, dataset):
     # save outputs
     # list of outputs for each batch
     # in this case List[Tuple[Dict[str,torch.Tensor], Dict[str,torch.Tensor]]]
-    eos = EpochOutputStore(output_transform=transfer_outputs)
-    # eos.attach(train_evaluator, "output")
-    # eos.attach(val_evaluator, "output")
+    def transfer_outputs_eos(outputs):
+        y, y_pred = outputs
+        return tuple(
+            {key: value.detach().cpu() for key, value in xs.items()}
+             for xs in (y, y_pred)
+        )
+
+    eos = EpochOutputStore(output_transform=transfer_outputs_eos)
+    eos.attach(train_evaluator, "output")
+    eos.attach(val_evaluator, "output")
 
     history = {
         "train": {m: [] for m in metrics.keys()},
@@ -223,12 +230,12 @@ def train_ff(config, model, dataset):
                 f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
             )
 
-            # parity_plots(
-            #     train_evaluator.state.output,
-            #     epoch,
-            #     config.output_dir,
-            #     phase=phase,
-            # )
+            parity_plots(
+                train_evaluator.state.output,
+                epoch,
+                config.output_dir,
+                phase=phase,
+            )
 
             for key, value in m.items():
                 history[phase][key].append(value)
