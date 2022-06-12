@@ -166,9 +166,8 @@ def train_ff(config, model, dataset):
     def transfer_outputs(x, y, y_pred):
         return tuple(
             {key: value.detach().cpu() for key, value in xs.items()}
-             for xs in (y, y_pred)
+            for xs in (y, y_pred)
         )
-
 
     # create_supervised_evaluator
     train_evaluator = setup_evaluator_with_grad(
@@ -194,7 +193,7 @@ def train_ff(config, model, dataset):
         y, y_pred = outputs
         return tuple(
             {key: value.detach().cpu() for key, value in xs.items()}
-             for xs in (y, y_pred)
+            for xs in (y, y_pred)
         )
 
     eos = EpochOutputStore(output_transform=transfer_outputs_eos)
