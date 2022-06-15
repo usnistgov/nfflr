@@ -1,8 +1,10 @@
 """Standalone dataset for training force field models."""
-from typing import Dict, List, Literal, Optional, Sequence, Tuple
+import pickle
 from functools import partial
+from typing import Dict, List, Literal, Optional, Sequence, Tuple
 
 import dgl
+import lmdb
 import numpy as np
 import pandas as pd
 import torch
@@ -15,6 +17,7 @@ from jarvis.core.graphs import (
 from numpy.random import default_rng
 
 from alignn.graphs import Graph
+
 
 def atoms_to_graph(atoms):
     """Convert structure dict to DGLGraph."""
@@ -82,9 +85,10 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
         `df`: pandas dataframe from e.g. jarvis.db.figshare.data
         """
-
         # split key like "JVASP-6664_main-5"
-        df["group_id"], df["step_id"] = zip(*df[id_tag].apply(partial(str.split, sep="_")))
+        df["group_id"], df["step_id"] = zip(
+            *df[id_tag].apply(partial(str.split, sep="_"))
+        )
 
         self.df = df
         self.line_graph = line_graph
@@ -104,22 +108,46 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.split = self.split_dataset_by_id()
 
         # features = self._get_attribute_lookup(atom_features)
+        self.env = lmdb.open("data/test_jv.db", map_size=100000000)
         self.produce_graphs()
 
+    def load_graph(self, key: str):
+        """Deserialize graph from lmdb store using calculation key."""
+        with self.env.begin() as txn:
+            g = pickle.loads(txn.get(key.encode()))
+        return g
+
     def produce_graphs(self):
-        """Precompute graphs."""
-        graphs = self.df["atoms"].apply(atoms_to_graph).values
-        self.graphs = graphs
+        """Precompute graphs. store pickled graphs in lmdb store."""
+        print("precomputing atomistic graphs")
 
-        if self.line_graph:
-            self.prepare_batch = prepare_line_graph_batch
+        # skip anything already cached
+        with self.env.begin() as txn:
+            cached = set(
+                map(bytes.decode, txn.cursor().iternext(values=False))
+            )
 
-            print("building line graphs")
-            self.line_graphs = []
-            for g in self.graphs:
-                lg = g.line_graph(shared=True)
-                lg.apply_edges(compute_bond_cosines)
-                self.line_graphs.append(lg)
+        to_compute = set(self.ids).difference(cached)
+        uncached = self.df[self.ids.isin(to_compute)]
+
+        cols = (self.id_tag, "atoms")
+        for idx, jid, atoms in uncached.loc[:, cols].itertuples(name=None):
+            graph = atoms_to_graph(atoms)
+            with self.env.begin(write=True) as txn:
+                txn.put(jid.encode(), pickle.dumps(graph))
+
+        # graphs = self.df["atoms"].apply(atoms_to_graph).values
+        # self.graphs = graphs
+
+        # if self.line_graph:
+        #     self.prepare_batch = prepare_line_graph_batch
+
+        #     print("building line graphs")
+        #     self.line_graphs = []
+        #     for g in self.graphs:
+        #         lg = g.line_graph(shared=True)
+        #         lg.apply_edges(compute_bond_cosines)
+        #         self.line_graphs.append(lg)
 
         # # load selected node representation
         # # assume graphs contain atomic number in g.ndata["atom_features"]
@@ -139,6 +167,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         """
         ids = self.df["group_id"].unique()
 
+        # number of calculation groups
         N = len(ids)
         n_test = int(0.1 * N)
         n_val = int(0.1 * N)
@@ -161,7 +190,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         split_ids = {"train": train_ids, "val": val_ids, "test": test_ids}
 
         # split atomistic configurations
-        all_ids = self.df[self.id_tag]
+        all_ids = self.df["group_id"]
         return {
             key: np.where(all_ids.isin(split_ids))[0]
             for key, split_ids in split_ids.items()
@@ -214,8 +243,11 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         """Get StructureDataset sample."""
-        g = self.graphs[idx]
+        # g = self.graphs[idx]
         # g = atoms_to_graph(self.df["atoms"].iloc[idx])
+        key = self.df[self.id_tag].iloc[idx]
+        g = self.load_graph(key)
+
         g.ndata["atomic_number"] = g.ndata["atom_features"]
 
         target = {
@@ -233,9 +265,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             g = self.transform(g)
 
         if self.line_graph:
-            lg = self.line_graphs[idx]
-            # lg = g.line_graph(shared=True)
-            # lg.apply_edges(compute_bond_cosines)
+            # lg = self.line_graphs[idx]
+            lg = g.line_graph(shared=True)
+            lg.apply_edges(compute_bond_cosines)
             return g, lg, target
 
         return g, target
