@@ -255,11 +255,11 @@ if __name__ == "__main__":
     # example_data = Path("alignn/examples/sample_data")
     # df = pd.read_json(example_data / "id_prop.json")
 
-    jdft_trajectories = Path(
-        "/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir"
-    )
-    df = pd.read_json(jdft_trajectories / "id_prop.json")
-    # df = pd.read_pickle("jdft_prototyping_trajectories_10k.pkl")
+    # jdft_trajectories = Path(
+    #     "/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir"
+    # )
+    # df = pd.read_json(jdft_trajectories / "id_prop.json")
+    df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
 
     model_cfg = ALIGNNAtomWiseConfig(
         name="alignn_atomwise",
@@ -275,7 +275,8 @@ if __name__ == "__main__":
         atom_features="atomic_number",
         num_workers=4,
         epochs=10,
-        batch_size=256,
+        batch_size=16,
+        warmup_steps=10,
         output_dir="./temp",
     )
     print(cfg)

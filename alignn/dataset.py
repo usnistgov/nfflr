@@ -108,11 +108,16 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.split = self.split_dataset_by_id()
 
         # features = self._get_attribute_lookup(atom_features)
-        self.env = lmdb.open("data/test_jv.db", map_size=100000000)
+        self.lmdb_path = "data/test_jv.db"
+        self.lmdb_sz = 10000000000
+        self.env = None
         self.produce_graphs()
 
     def load_graph(self, key: str):
         """Deserialize graph from lmdb store using calculation key."""
+        if self.env is None:
+            self.env = lmdb.open(self.lmdb_path, map_size=self.lmdb_sz)
+
         with self.env.begin() as txn:
             g = pickle.loads(txn.get(key.encode()))
         return g
@@ -120,9 +125,10 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
     def produce_graphs(self):
         """Precompute graphs. store pickled graphs in lmdb store."""
         print("precomputing atomistic graphs")
+        env = lmdb.open(self.lmdb_path, map_size=self.lmdb_sz)
 
         # skip anything already cached
-        with self.env.begin() as txn:
+        with env.begin() as txn:
             cached = set(
                 map(bytes.decode, txn.cursor().iternext(values=False))
             )
@@ -133,7 +139,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         cols = (self.id_tag, "atoms")
         for idx, jid, atoms in uncached.loc[:, cols].itertuples(name=None):
             graph = atoms_to_graph(atoms)
-            with self.env.begin(write=True) as txn:
+            with env.begin(write=True) as txn:
                 txn.put(jid.encode(), pickle.dumps(graph))
 
         # graphs = self.df["atoms"].apply(atoms_to_graph).values
