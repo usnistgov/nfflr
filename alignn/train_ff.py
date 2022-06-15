@@ -225,9 +225,7 @@ def train_ff(config, model, dataset):
             loss = m["loss"]
 
             print(f"{phase} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-            print(
-                f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
-            )
+            print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
 
             parity_plots(
                 train_evaluator.state.output,
@@ -255,11 +253,11 @@ if __name__ == "__main__":
     # example_data = Path("alignn/examples/sample_data")
     # df = pd.read_json(example_data / "id_prop.json")
 
-    # jdft_trajectories = Path(
-    #     "/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir"
-    # )
-    # df = pd.read_json(jdft_trajectories / "id_prop.json")
-    df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
+    jdft_trajectories = Path("/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir")
+    df = pd.read_json(jdft_trajectories / "id_prop.json")
+
+    # df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
+    print(df.shape)
 
     model_cfg = ALIGNNAtomWiseConfig(
         name="alignn_atomwise",
@@ -273,10 +271,11 @@ if __name__ == "__main__":
     cfg = TrainingConfig(
         model=model_cfg,
         atom_features="atomic_number",
-        num_workers=4,
+        num_workers=8,
         epochs=10,
-        batch_size=16,
-        warmup_steps=10,
+        batch_size=256 + 128,
+        warmup_steps=1000,
+        learning_rate=0.5,
         output_dir="./temp",
     )
     print(cfg)
