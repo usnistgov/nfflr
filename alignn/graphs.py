@@ -237,7 +237,7 @@ class Graph(object):
         # see https://github.com/dmlc/dgl/issues/1449
         # to try to store cell matrix and volume as global variables
         g.ndata["lattice_mat"] = torch.tensor(
-            [atoms.lattice_mat for ii in range(atoms.num_atoms)]
+            np.array([atoms.lattice_mat for ii in range(atoms.num_atoms)])
         )
         g.ndata["V"] = torch.tensor(
             [atoms.volume for ii in range(atoms.num_atoms)]

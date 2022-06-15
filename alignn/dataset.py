@@ -1,5 +1,6 @@
 """Standalone dataset for training force field models."""
 from typing import Dict, List, Literal, Optional, Sequence, Tuple
+from functools import partial
 
 import dgl
 import numpy as np
@@ -14,7 +15,6 @@ from jarvis.core.graphs import (
 from numpy.random import default_rng
 
 from alignn.graphs import Graph
-
 
 def atoms_to_graph(atoms):
     """Convert structure dict to DGLGraph."""
@@ -82,6 +82,10 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
         `df`: pandas dataframe from e.g. jarvis.db.figshare.data
         """
+
+        # split key like "JVASP-6664_main-5"
+        df["group_id"], df["step_id"] = zip(*df[id_tag].apply(partial(str.split, sep="_")))
+
         self.df = df
         self.line_graph = line_graph
         self.train_val_seed = train_val_seed
@@ -100,6 +104,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.split = self.split_dataset_by_id()
 
         # features = self._get_attribute_lookup(atom_features)
+        self.produce_graphs()
 
     def produce_graphs(self):
         """Precompute graphs."""
@@ -130,9 +135,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
     def split_dataset_by_id(self):
         """Get train/val/test split indices for SubsetRandomSampler.
 
-        Stratify by calculation / trajectory id
+        Stratify by calculation / trajectory id `"group_id"`
         """
-        ids = self.df[self.id_tag].unique()
+        ids = self.df["group_id"].unique()
 
         N = len(ids)
         n_test = int(0.1 * N)
@@ -209,8 +214,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         """Get StructureDataset sample."""
-        # g = self.graphs[idx]
-        g = atoms_to_graph(self.df["atoms"].iloc[idx])
+        g = self.graphs[idx]
+        # g = atoms_to_graph(self.df["atoms"].iloc[idx])
         g.ndata["atomic_number"] = g.ndata["atom_features"]
 
         target = {
@@ -228,9 +233,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             g = self.transform(g)
 
         if self.line_graph:
-            # lg = self.line_graphs[idx]
-            lg = g.line_graph(shared=True)
-            lg.apply_edges(compute_bond_cosines)
+            lg = self.line_graphs[idx]
+            # lg = g.line_graph(shared=True)
+            # lg.apply_edges(compute_bond_cosines)
             return g, lg, target
 
         return g, target
