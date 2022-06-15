@@ -129,9 +129,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
         # skip anything already cached
         with env.begin() as txn:
-            cached = set(
-                map(bytes.decode, txn.cursor().iternext(values=False))
-            )
+            cached = set(map(bytes.decode, txn.cursor().iternext(values=False)))
 
         to_compute = set(self.ids).difference(cached)
         uncached = self.df[self.ids.isin(to_compute)]
@@ -273,7 +271,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         if self.line_graph:
             # lg = self.line_graphs[idx]
             lg = g.line_graph(shared=True)
-            lg.apply_edges(compute_bond_cosines)
+            # lg.apply_edges(compute_bond_cosines)
             return g, lg, target
 
         return g, target

@@ -19,6 +19,8 @@ from torch.nn import functional as F
 from alignn.models.utils import RBFExpansion
 from alignn.utils import BaseSettings
 
+from jarvis.core.graphs import compute_bond_cosines
+
 
 class ALIGNNAtomWiseConfig(BaseSettings):
     """Hyperparameter schema for jarvisdgl.models.alignn."""
@@ -99,9 +101,7 @@ class EdgeGatedGraphConv(nn.Module):
 
         g.edata["sigma"] = torch.sigmoid(m)
         g.ndata["Bh"] = self.dst_update(node_feats)
-        g.update_all(
-            fn.u_mul_e("Bh", "sigma", "m"), fn.sum("m", "sum_sigma_h")
-        )
+        g.update_all(fn.u_mul_e("Bh", "sigma", "m"), fn.sum("m", "sum_sigma_h"))
         g.update_all(fn.copy_e("sigma", "m"), fn.sum("m", "sum_sigma"))
         g.ndata["h"] = g.ndata["sum_sigma_h"] / (g.ndata["sum_sigma"] + 1e-6)
         x = self.src_update(node_feats) + g.ndata.pop("h")
@@ -190,9 +190,7 @@ class ALIGNNAtomWise(nn.Module):
 
     def __init__(
         self,
-        config: ALIGNNAtomWiseConfig = ALIGNNAtomWiseConfig(
-            name="alignn_atomwise"
-        ),
+        config: ALIGNNAtomWiseConfig = ALIGNNAtomWiseConfig(name="alignn_atomwise"),
     ):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
@@ -238,9 +236,7 @@ class ALIGNNAtomWise(nn.Module):
         )
         self.gcn_layers = nn.ModuleList(
             [
-                EdgeGatedGraphConv(
-                    config.hidden_features, config.hidden_features
-                )
+                EdgeGatedGraphConv(config.hidden_features, config.hidden_features)
                 for idx in range(config.gcn_layers)
             ]
         )
@@ -259,9 +255,11 @@ class ALIGNNAtomWise(nn.Module):
         y: bond features (g.edata and lg.ndata)
         z: angle features (lg.edata)
         """
+
         if len(self.alignn_layers) > 0:
             g, lg = g
             lg = lg.local_var()
+            lg.apply_edges(compute_bond_cosines)
 
             # angle features (fixed)
             z = self.angle_embedding(lg.edata.pop("h"))
@@ -321,9 +319,7 @@ class ALIGNNAtomWise(nn.Module):
 
             # reduce over bonds to get forces on each atom
             g.edata["pairwise_forces"] = pairwise_forces
-            g.update_all(
-                fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces")
-            )
+            g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
             forces = torch.squeeze(g.ndata["forces"])
 
             if self.config.calculate_stress:
@@ -335,9 +331,7 @@ class ALIGNNAtomWise(nn.Module):
                 # Following Virial stress formula, assuming inital velocity = 0
                 # Save volume as g.gdta['V']?
                 stress = -1 * (
-                    160.21766208
-                    * torch.matmul(r.T, dy_dr)
-                    / (2 * g.ndata["V"][0])
+                    160.21766208 * torch.matmul(r.T, dy_dr) / (2 * g.ndata["V"][0])
                 )
                 # virial = (
                 #    160.21766208
