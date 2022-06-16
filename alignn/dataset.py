@@ -1,8 +1,7 @@
 """Standalone dataset for training force field models."""
 import os
-import shutil
 import pickle
-from tqdm import tqdm
+import shutil
 from functools import partial
 from pathlib import Path
 from typing import Dict, List, Literal, Optional, Sequence, Tuple
@@ -19,8 +18,20 @@ from jarvis.core.graphs import (
     get_node_attributes,
 )
 from numpy.random import default_rng
+from tqdm import tqdm
 
 from alignn.graphs import Graph
+
+
+def get_scratch_dir():
+    """Get local scratch directory."""
+    scratch = Path("/tmp/alignnff")
+
+    slurm_job = os.environ.get("SLURM_JOB_ID")
+    if slurm_job is not None:
+        scratch = Path(f"/scratch/{slurm_job}")
+
+    return scratch
 
 
 def atoms_to_graph(atoms):
@@ -115,8 +126,12 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.lmdb_name = "jv_300k.db"
         self.lmdb_path = Path("data")
 
-        scratch = Path(f"/scratch/{os.environ.get('SLURM_JOB_ID')}")
-        shutil.copytree(self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name)
+        scratch = get_scratch_dir()
+        scratch.mkdir(exist_ok=True)
+        if (self.lmdb_path / self.lmdb_name).exists():
+            shutil.copytree(
+                self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name
+            )
         self.lmdb_scratch_path = str(scratch / self.lmdb_name)
 
         self.lmdb_sz = int(1e10)
@@ -126,7 +141,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
     def load_graph(self, key: str):
         """Deserialize graph from lmdb store using calculation key."""
         if self.env is None:
-            self.env = lmdb.open(str(self.lmdb_scratch_path), map_size=self.lmdb_sz)
+            self.env = lmdb.open(
+                str(self.lmdb_scratch_path), map_size=self.lmdb_sz
+            )
 
         with self.env.begin() as txn:
             g = pickle.loads(txn.get(key.encode()))
@@ -136,11 +153,12 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         """Precompute graphs. store pickled graphs in lmdb store."""
         print("precomputing atomistic graphs")
         env = lmdb.open(self.lmdb_scratch_path, map_size=self.lmdb_sz)
-        # env = lmdb.open(str(self.lmdb_path / self.lmdb_name), map_size=self.lmdb_sz)
 
         # skip anything already cached
         with env.begin() as txn:
-            cached = set(map(bytes.decode, txn.cursor().iternext(values=False)))
+            cached = set(
+                map(bytes.decode, txn.cursor().iternext(values=False))
+            )
 
         to_compute = set(self.ids).difference(cached)
         uncached = self.df[self.ids.isin(to_compute)]
@@ -154,7 +172,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
                 txn.put(jid.encode(), pickle.dumps(graph))
 
         # shutil.copytree(
-        #     self.lmdb_scratch_path, self.lmdb_path / self.lmdb_name, dirs_exist_ok=True
+        #     self.lmdb_scratch_path,
+        #     self.lmdb_path / self.lmdb_name,
+        #     dirs_exist_ok=True,
         # )
 
         # graphs = self.df["atoms"].apply(atoms_to_graph).values
