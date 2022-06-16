@@ -1,6 +1,10 @@
 """Standalone dataset for training force field models."""
+import os
+import shutil
 import pickle
+from tqdm import tqdm
 from functools import partial
+from pathlib import Path
 from typing import Dict, List, Literal, Optional, Sequence, Tuple
 
 import dgl
@@ -108,15 +112,21 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.split = self.split_dataset_by_id()
 
         # features = self._get_attribute_lookup(atom_features)
-        self.lmdb_path = "data/test_jv.db"
-        self.lmdb_sz = 10000000000
+        self.lmdb_name = "jv_300k.db"
+        self.lmdb_path = Path("data")
+
+        scratch = Path(f"/scratch/{os.environ.get('SLURM_JOB_ID')}")
+        shutil.copytree(self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name)
+        self.lmdb_scratch_path = str(scratch / self.lmdb_name)
+
+        self.lmdb_sz = int(1e10)
         self.env = None
         self.produce_graphs()
 
     def load_graph(self, key: str):
         """Deserialize graph from lmdb store using calculation key."""
         if self.env is None:
-            self.env = lmdb.open(self.lmdb_path, map_size=self.lmdb_sz)
+            self.env = lmdb.open(str(self.lmdb_scratch_path), map_size=self.lmdb_sz)
 
         with self.env.begin() as txn:
             g = pickle.loads(txn.get(key.encode()))
@@ -125,7 +135,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
     def produce_graphs(self):
         """Precompute graphs. store pickled graphs in lmdb store."""
         print("precomputing atomistic graphs")
-        env = lmdb.open(self.lmdb_path, map_size=self.lmdb_sz)
+        env = lmdb.open(self.lmdb_scratch_path, map_size=self.lmdb_sz)
+        # env = lmdb.open(str(self.lmdb_path / self.lmdb_name), map_size=self.lmdb_sz)
 
         # skip anything already cached
         with env.begin() as txn:
@@ -135,10 +146,16 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         uncached = self.df[self.ids.isin(to_compute)]
 
         cols = (self.id_tag, "atoms")
-        for idx, jid, atoms in uncached.loc[:, cols].itertuples(name=None):
+        for idx, jid, atoms in tqdm(
+            uncached.loc[:, cols].itertuples(name=None), total=len(uncached)
+        ):
             graph = atoms_to_graph(atoms)
             with env.begin(write=True) as txn:
                 txn.put(jid.encode(), pickle.dumps(graph))
+
+        # shutil.copytree(
+        #     self.lmdb_scratch_path, self.lmdb_path / self.lmdb_name, dirs_exist_ok=True
+        # )
 
         # graphs = self.df["atoms"].apply(atoms_to_graph).values
         # self.graphs = graphs
