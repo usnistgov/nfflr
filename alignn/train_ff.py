@@ -65,18 +65,20 @@ def parity_plots(output, epoch, directory, phase="train"):
     """Plot predictions for energy and forces."""
     fig, axes = plt.subplots(ncols=2, figsize=(16, 8))
     for batch in output:
-        pred, tgt = batch
+        tgt, pred = batch
 
         axes[0].scatter(
             tgt["total_energy"].cpu().detach().numpy(),
             pred["total_energy"].cpu().detach().numpy(),
             color="k",
         )
+        axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
         axes[1].scatter(
             tgt["forces"].cpu().detach().numpy(),
             pred["forces"].cpu().detach().numpy(),
             color="k",
         )
+        axes[1].set(xlabel="DFT force", ylabel="predicted force")
 
     plt.tight_layout()
     plt.savefig(Path(directory) / f"parity_plots_{phase}_{epoch:03d}.png")
@@ -98,7 +100,7 @@ def train_ff(config, model, dataset):
         dataset,
         collate_fn=dataset.collate,
         batch_size=config.batch_size,
-        sampler=SubsetRandomSampler(dataset.split["train"]),
+        sampler=SubsetRandomSampler(dataset.split["validation"]),
         pin_memory=True,
     )
 
@@ -110,7 +112,7 @@ def train_ff(config, model, dataset):
     optimizer = setup_optimizer(params, cfg)
     scheduler = setup_scheduler(cfg, optimizer, len(train_loader))
 
-    criteria = {"total_energy": nn.MSELoss(), "forces": nn.MSELoss()}
+    criteria = {"total_energy": nn.MSELoss(), "forces": nn.HuberLoss(delta=0.1)}
 
     def ff_criterion(outputs, targets):
         """Specify combined energy and force loss."""
@@ -119,12 +121,10 @@ def train_ff(config, model, dataset):
         )
 
         # scale the forces before the loss
-        force_scale = 10.0
-        force_loss = criteria["forces"](
-            force_scale * outputs["forces"], force_scale * targets["forces"]
-        )
+        force_scale = 0.1
+        force_loss = criteria["forces"](outputs["forces"], targets["forces"])
 
-        return energy_loss + force_loss
+        return energy_loss + force_scale * force_loss
 
     trainer = create_supervised_trainer(
         model,
@@ -134,8 +134,8 @@ def train_ff(config, model, dataset):
         device=device,
     )
 
-    pbar = ProgressBar()
-    pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+    # pbar = ProgressBar()
+    # pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
     trainer.add_event_handler(
         Events.ITERATION_COMPLETED, lambda engine: scheduler.step()
@@ -272,11 +272,11 @@ if __name__ == "__main__":
         model=model_cfg,
         atom_features="atomic_number",
         num_workers=8,
-        epochs=10,
+        epochs=30,
         batch_size=256 + 128,
         warmup_steps=1000,
-        learning_rate=0.5,
-        output_dir="./temp",
+        learning_rate=0.01,
+        output_dir="./ff-test",
     )
     print(cfg)
 
