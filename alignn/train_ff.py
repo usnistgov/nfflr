@@ -12,7 +12,12 @@ from ignite.engine import (
     create_supervised_evaluator,
     create_supervised_trainer,
 )
-from ignite.handlers import Checkpoint, DiskSaver, TerminateOnNan
+from ignite.handlers import (
+    Checkpoint,
+    DiskSaver,
+    FastaiLRFinder,
+    TerminateOnNan,
+)
 from ignite.handlers.stores import EpochOutputStore
 from ignite.metrics import Accuracy, Loss, MeanAbsoluteError
 from torch import nn
@@ -100,7 +105,7 @@ def train_ff(config, model, dataset):
         dataset,
         collate_fn=dataset.collate,
         batch_size=config.batch_size,
-        sampler=SubsetRandomSampler(dataset.split["validation"]),
+        sampler=SubsetRandomSampler(dataset.split["val"]),
         pin_memory=True,
     )
 
@@ -112,7 +117,10 @@ def train_ff(config, model, dataset):
     optimizer = setup_optimizer(params, cfg)
     scheduler = setup_scheduler(cfg, optimizer, len(train_loader))
 
-    criteria = {"total_energy": nn.MSELoss(), "forces": nn.HuberLoss(delta=0.1)}
+    criteria = {
+        "total_energy": nn.MSELoss(),
+        "forces": nn.HuberLoss(delta=0.1),
+    }
 
     def ff_criterion(outputs, targets):
         """Specify combined energy and force loss."""
@@ -134,8 +142,23 @@ def train_ff(config, model, dataset):
         device=device,
     )
 
-    # pbar = ProgressBar()
-    # pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+    pbar = ProgressBar()
+    pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+
+    lr_finder = FastaiLRFinder()
+    to_save = {"model": model, "optimizer": optimizer}
+    with lr_finder.attach(
+        trainer,
+        to_save,
+        start_lr=1e-6,
+        end_lr=1.0,
+        num_iter=200,
+    ) as finder:
+        finder.run(train_loader)
+
+    print("Suggested LR", lr_finder.lr_suggestion())
+    ax = lr_finder.plot(skip_end=0)
+    ax.figure.savefig("lr.png")
 
     trainer.add_event_handler(
         Events.ITERATION_COMPLETED, lambda engine: scheduler.step()
@@ -225,7 +248,9 @@ def train_ff(config, model, dataset):
             loss = m["loss"]
 
             print(f"{phase} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-            print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
+            print(
+                f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
+            )
 
             parity_plots(
                 train_evaluator.state.output,
@@ -253,7 +278,9 @@ if __name__ == "__main__":
     # example_data = Path("alignn/examples/sample_data")
     # df = pd.read_json(example_data / "id_prop.json")
 
-    jdft_trajectories = Path("/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir")
+    jdft_trajectories = Path(
+        "/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir"
+    )
     df = pd.read_json(jdft_trajectories / "id_prop.json")
 
     # df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
