@@ -26,6 +26,7 @@ from torch.utils.data import DataLoader, SubsetRandomSampler
 from alignn.config import TrainingConfig
 from alignn.dataset import AtomisticConfigurationDataset
 from alignn.models.alignn_atomwise import ALIGNNAtomWise, ALIGNNAtomWiseConfig
+from alignn.models.bond_order import BondOrderConfig, NeuralBondOrder
 from alignn.training_utils import (
     group_decay,
     setup_evaluator_with_grad,
@@ -152,12 +153,13 @@ def train_ff(config, model, dataset):
         to_save,
         start_lr=1e-6,
         end_lr=1.0,
-        num_iter=200,
+        num_iter=400,
     ) as finder:
         finder.run(train_loader)
 
     print("Suggested LR", lr_finder.lr_suggestion())
-    ax = lr_finder.plot(skip_end=0)
+    ax = lr_finder.plot()
+    ax.loglog()
     ax.figure.savefig("lr.png")
 
     trainer.add_event_handler(
@@ -294,6 +296,12 @@ if __name__ == "__main__":
         sparse_atom_embedding=True,
         calculate_gradient=True,
     )
+    # model_cfg = BondOrderConfig(
+    #     name="bondorder",
+    #     alignn_layers=2,
+    #     gcn_layers=2,
+    #     calculate_gradient=True,
+    # )
     # need to pass model config as dict?
     cfg = TrainingConfig(
         model=model_cfg,
@@ -308,7 +316,8 @@ if __name__ == "__main__":
     print(cfg)
 
     model = ALIGNNAtomWise(model_cfg)
-    model.fc.bias.data = torch.tensor([-3.0])
+    # model = NeuralBondOrder(model_cfg)
+    # model.fc.bias.data = torch.tensor([-3.0])
     model.to(device)
 
     lg = True
