@@ -1,4 +1,5 @@
 """Prototype training code for force field models."""
+import typer
 from functools import partial
 from pathlib import Path
 
@@ -32,6 +33,8 @@ from alignn.training_utils import (
     setup_evaluator_with_grad,
     setup_optimizer,
 )
+
+cli = typer.Typer()
 
 device = "cpu"
 if torch.cuda.is_available():
@@ -92,8 +95,31 @@ def parity_plots(output, epoch, directory, phase="train"):
     plt.close()
 
 
-def train_ff(config, model, dataset):
-    """Train force field model."""
+def get_dataflow(config):
+    """Set up dataloaders."""
+    # load data from this json format into pandas...
+    # then build graphs on each access instead of precomputing them...
+    # also, make sure to split sections grouped on id column
+    # example_data = Path("alignn/examples/sample_data")
+    # df = pd.read_json(example_data / "id_prop.json")
+
+    # _epa suffix has energies per atom...
+    # dataset = "jdft_max_min_307113_epa"
+    # dataset = "jdft_max_min_307113"
+    dataset = "jdft_max_min_307113_id_prop.json"
+
+    datadir = Path("data")
+    df = pd.read_json(datadir / dataset)
+
+    dataset = AtomisticConfigurationDataset(
+        df,
+        line_graph=True,
+        energy_units="eV/atom",
+    )
+
+    # df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
+    print(df.shape)
+
     train_loader = DataLoader(
         dataset,
         collate_fn=dataset.collate,
@@ -109,6 +135,36 @@ def train_ff(config, model, dataset):
         sampler=SubsetRandomSampler(dataset.split["val"]),
         pin_memory=True,
     )
+
+    return train_loader, val_loader
+
+
+@cli.command()
+def train():
+    """Train force field model."""
+
+    model_cfg = ALIGNNAtomWiseConfig(
+        name="alignn_atomwise",
+        alignn_layers=2,
+        gcn_layers=2,
+        atom_input_features=1,
+        sparse_atom_embedding=True,
+        calculate_gradient=True,
+    )
+    config = TrainingConfig(
+        model=model_cfg,
+        atom_features="atomic_number",
+        num_workers=8,
+        epochs=100,
+        batch_size=256 + 128,
+        learning_rate=0.002,
+        output_dir="./models/ff-300k",
+    )
+
+    model = ALIGNNAtomWise(config.model)
+    model.to(device)
+
+    train_loader, val_loader = get_dataflow(config)
 
     prepare_batch = partial(
         train_loader.dataset.prepare_batch, device=device, non_blocking=True
@@ -251,9 +307,7 @@ def train_ff(config, model, dataset):
             loss = m["loss"]
 
             print(f"{phase} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-            print(
-                f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
-            )
+            print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
 
             parity_plots(
                 evaluator.state.output,
@@ -273,25 +327,9 @@ def train_ff(config, model, dataset):
     print(history)
 
 
-if __name__ == "__main__":
-
-    # load data from this json format into pandas...
-    # then build graphs on each access instead of precomputing them...
-    # also, make sure to split sections grouped on id column
-    # example_data = Path("alignn/examples/sample_data")
-    # df = pd.read_json(example_data / "id_prop.json")
-
-    # _epa suffix has energies per atom...
-    # dataset = "jdft_max_min_307113_epa"
-    dataset = "jdft_max_min_307113"
-
-    jdft_trajectories = Path(
-        f"/wrk/knc6/AlIGNN-FF/{dataset}/DataDir"
-    )
-    df = pd.read_json(jdft_trajectories / "id_prop.json")
-
-    # df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
-    print(df.shape)
+@cli.command()
+def lr():
+    """run learning rate finder."""
 
     model_cfg = ALIGNNAtomWiseConfig(
         name="alignn_atomwise",
@@ -301,14 +339,7 @@ if __name__ == "__main__":
         sparse_atom_embedding=True,
         calculate_gradient=True,
     )
-    # model_cfg = BondOrderConfig(
-    #     name="bondorder",
-    #     alignn_layers=2,
-    #     gcn_layers=2,
-    #     calculate_gradient=True,
-    # )
-    # need to pass model config as dict?
-    cfg = TrainingConfig(
+    config = TrainingConfig(
         model=model_cfg,
         atom_features="atomic_number",
         num_workers=8,
@@ -317,18 +348,64 @@ if __name__ == "__main__":
         learning_rate=0.002,
         output_dir="./models/ff-300k",
     )
-    print(cfg)
 
-    model = ALIGNNAtomWise(model_cfg)
-    # model = NeuralBondOrder(model_cfg)
-    # model.fc.bias.data = torch.tensor([-3.0])
+    model = ALIGNNAtomWise(config.model)
     model.to(device)
 
-    lg = True
-    dataset = AtomisticConfigurationDataset(
-        df,
-        line_graph=lg,
-        energy_units="eV/atom",
+    train_loader, val_loader = get_dataflow(config)
+
+    prepare_batch = partial(
+        train_loader.dataset.prepare_batch, device=device, non_blocking=True
     )
 
-    train_ff(cfg, model, dataset)
+    params = group_decay(model)
+    optimizer = setup_optimizer(params, cfg)
+    scheduler = setup_scheduler(cfg, optimizer, len(train_loader))
+
+    criteria = {
+        "total_energy": nn.MSELoss(),
+        "forces": nn.HuberLoss(delta=0.1),
+    }
+
+    def ff_criterion(outputs, targets):
+        """Specify combined energy and force loss."""
+        energy_loss = criteria["total_energy"](
+            outputs["total_energy"], targets["total_energy"]
+        )
+
+        # # scale the forces before the loss
+        force_scale = 1.0
+        force_loss = criteria["forces"](outputs["forces"], targets["forces"])
+
+        return energy_loss + force_scale * force_loss
+
+    trainer = create_supervised_trainer(
+        model,
+        optimizer,
+        ff_criterion,
+        prepare_batch=prepare_batch,
+        device=device,
+    )
+
+    pbar = ProgressBar()
+    pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+
+    lr_finder = FastaiLRFinder()
+    to_save = {"model": model, "optimizer": optimizer}
+    with lr_finder.attach(
+        trainer,
+        to_save,
+        start_lr=1e-6,
+        end_lr=1.0,
+        num_iter=400,
+    ) as finder:
+        finder.run(train_loader)
+
+    print("Suggested LR", lr_finder.lr_suggestion())
+    ax = lr_finder.plot()
+    ax.loglog()
+    ax.figure.savefig("lr.png")
+
+
+if __name__ == "__main__":
+    cli()
