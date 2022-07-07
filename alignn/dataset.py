@@ -95,20 +95,28 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         line_graph: bool = False,
         train_val_seed: int = 42,
         id_tag: str = "jid",
+        energy_units: Literal["eV", "eV/atom"] = "eV/atom"
     ):
         """Pytorch Dataset for atomistic graphs.
 
         `df`: pandas dataframe from e.g. jarvis.db.figshare.data
         """
-        # split key like "JVASP-6664_main-5"
-        df["group_id"], df["step_id"] = zip(
-            *df[id_tag].apply(partial(str.split, sep="_"))
-        )
+        example_id = df[id_tag].iloc[0]
+
+        if isinstance(example_id, int):
+            df["group_id"] = df[id_tag]
+            df["step_id"] = df.index
+        else:
+            # split key like "JVASP-6664_main-5"
+            df["group_id"], df["step_id"] = zip(
+                *df[id_tag].apply(partial(str.split, sep="_"))
+            )
 
         self.df = df
         self.line_graph = line_graph
         self.train_val_seed = train_val_seed
         self.id_tag = id_tag
+        self.energy_units = energy_units
 
         if self.line_graph:
             self.collate = self.collate_line_graph
@@ -123,7 +131,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.split = self.split_dataset_by_id()
 
         # features = self._get_attribute_lookup(atom_features)
-        self.lmdb_name = "jv_300k.db"
+        # self.lmdb_name = "jv_300k.db"
+        self.lmdb_name = "jv_2M.db"
         self.lmdb_path = Path("data")
 
         scratch = get_scratch_dir()
@@ -163,6 +172,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         to_compute = set(self.ids).difference(cached)
         uncached = self.df[self.ids.isin(to_compute)]
 
+        if len(uncached) == 0:
+            return
+
         cols = (self.id_tag, "atoms")
         for idx, jid, atoms in tqdm(
             uncached.loc[:, cols].itertuples(name=None), total=len(uncached)
@@ -171,11 +183,12 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             with env.begin(write=True) as txn:
                 txn.put(jid.encode(), pickle.dumps(graph))
 
-        # shutil.copytree(
-        #     self.lmdb_scratch_path,
-        #     self.lmdb_path / self.lmdb_name,
-        #     dirs_exist_ok=True,
-        # )
+        # if there are any updates to the scratch lmdb store, sync back
+        shutil.copytree(
+            self.lmdb_scratch_path,
+            self.lmdb_path / self.lmdb_name,
+            dirs_exist_ok=True,
+        )
 
         # graphs = self.df["atoms"].apply(atoms_to_graph).values
         # self.graphs = graphs
@@ -301,6 +314,16 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             k: torch.tensor(t, dtype=torch.get_default_dtype())
             for k, t in target.items()
         }
+
+        # TODO: make sure datasets use standard units...
+        # data store should have total energies in eV
+        if self.energy_units == "eV/atom":
+            target["energy"] = target["energy"] / g.num_nodes()
+            # note: probably keep forces in eV/at and scale up predictions...
+            # target["forces"] = target["forces"] / g.num_nodes()
+        elif self.energy_units == "eV":
+            # data store should have total energies in eV, so do nothing
+            pass
 
         if self.transform:
             g = self.transform(g)

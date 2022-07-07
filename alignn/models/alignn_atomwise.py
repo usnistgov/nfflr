@@ -37,6 +37,7 @@ class ALIGNNAtomWiseConfig(BaseSettings):
     output_features: int = 1
     calculate_gradient: bool = True
     calculate_stress: bool = False
+    energy_units: Literal["eV", "eV/atom"] = "eV/atom"
 
     class Config:
         """Configure model settings behavior."""
@@ -241,7 +242,10 @@ class ALIGNNAtomWise(nn.Module):
             ]
         )
 
-        self.readout = SumPooling()
+        if self.config.energy_units == "eV/atom":
+            self.readout = AvgPooling()
+        elif self.config.energy_units == "eV":
+            self.readout = SumPooling()
 
         self.fc = nn.Linear(config.hidden_features, config.output_features)
 
@@ -289,10 +293,11 @@ class ALIGNNAtomWise(nn.Module):
         for gcn_layer in self.gcn_layers:
             x, y = gcn_layer(g, x, y)
 
-        # predict per-atom energy contribution
+        # predict per-atom energy contribution (in eV)
         atomwise_energy = self.fc(x)
 
         # total energy prediction
+        # if config.energy_units = eV/atom, mean reduction
         total_energy = torch.squeeze(self.readout(g, atomwise_energy))
 
         forces = torch.empty(1)
@@ -321,6 +326,12 @@ class ALIGNNAtomWise(nn.Module):
             g.edata["pairwise_forces"] = pairwise_forces
             g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
             forces = torch.squeeze(g.ndata["forces"])
+
+            # if training against reduced energies, correct the force predictions
+            if self.config.energy_units == "eV/atom":
+                # broadcast |v(g)| across forces to under per-atom energy scaling
+                n_nodes = torch.cat([i * torch.ones(i, device=g.device) for i in g.batch_num_nodes()])
+                forces = forces * n_nodes
 
             if self.config.calculate_stress:
                 # make this a custom DGL aggregation?

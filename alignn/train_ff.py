@@ -47,7 +47,7 @@ def setup_scheduler(config, optimizer, steps_per_epoch):
         max_lr=config.learning_rate,
         epochs=config.epochs,
         steps_per_epoch=steps_per_epoch,
-        pct_start=pct_start,
+        # pct_start=pct_start,
     )
 
     return scheduler
@@ -129,8 +129,8 @@ def train_ff(config, model, dataset):
             outputs["total_energy"], targets["total_energy"]
         )
 
-        # scale the forces before the loss
-        force_scale = 0.1
+        # # scale the forces before the loss
+        force_scale = 1.0
         force_loss = criteria["forces"](outputs["forces"], targets["forces"])
 
         return energy_loss + force_scale * force_loss
@@ -239,7 +239,8 @@ def train_ff(config, model, dataset):
         """Log training results."""
         epoch = engine.state.epoch
 
-        train_evaluator.run(train_loader)
+        n_train_eval = int(0.1 * len(train_loader))
+        train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
         val_evaluator.run(val_loader)
 
         evaluators = {"train": train_evaluator, "validation": val_evaluator}
@@ -255,7 +256,7 @@ def train_ff(config, model, dataset):
             )
 
             parity_plots(
-                train_evaluator.state.output,
+                evaluator.state.output,
                 epoch,
                 config.output_dir,
                 phase=phase,
@@ -280,8 +281,12 @@ if __name__ == "__main__":
     # example_data = Path("alignn/examples/sample_data")
     # df = pd.read_json(example_data / "id_prop.json")
 
+    # _epa suffix has energies per atom...
+    # dataset = "jdft_max_min_307113_epa"
+    dataset = "jdft_max_min_307113"
+
     jdft_trajectories = Path(
-        "/wrk/knc6/AlIGNN-FF/jdft_max_min_307113_epa/DataDir"
+        f"/wrk/knc6/AlIGNN-FF/{dataset}/DataDir"
     )
     df = pd.read_json(jdft_trajectories / "id_prop.json")
 
@@ -307,11 +312,10 @@ if __name__ == "__main__":
         model=model_cfg,
         atom_features="atomic_number",
         num_workers=8,
-        epochs=30,
+        epochs=100,
         batch_size=256 + 128,
-        warmup_steps=1000,
-        learning_rate=0.01,
-        output_dir="./ff-test",
+        learning_rate=0.002,
+        output_dir="./models/ff-300k",
     )
     print(cfg)
 
@@ -324,6 +328,7 @@ if __name__ == "__main__":
     dataset = AtomisticConfigurationDataset(
         df,
         line_graph=lg,
+        energy_units="eV/atom",
     )
 
     train_ff(cfg, model, dataset)
