@@ -110,7 +110,7 @@ def get_dataflow(config):
 
     datadir = Path("data")
     df = pd.read_json(datadir / dataset)
-    # df = df.iloc[:10000]
+    df = df.iloc[:10000]
 
     dataset = AtomisticConfigurationDataset(
         df,
@@ -281,7 +281,9 @@ def train():
         epoch = engine.state.epoch
 
         n_train_eval = int(0.1 * len(train_loader))
-        train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
+        train_evaluator.run(
+            train_loader, epoch_length=n_train_eval, max_epochs=1
+        )
         val_evaluator.run(val_loader)
 
         evaluators = {"train": train_evaluator, "validation": val_evaluator}
@@ -292,7 +294,9 @@ def train():
             loss = m["loss"]
 
             print(f"{phase} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-            print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
+            print(
+                f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
+            )
 
             parity_plots(
                 evaluator.state.output,
@@ -317,6 +321,8 @@ def lr():
     """run learning rate finder."""
     # torch.autograd.set_detect_anomaly(True)
 
+    torch.set_default_dtype(torch.float64)  # batch size=64
+
     model_cfg = ALIGNNAtomWiseConfig(
         name="alignn_atomwise",
         alignn_layers=2,
@@ -330,7 +336,7 @@ def lr():
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
-        batch_size=128,
+        batch_size=64,
         learning_rate=0.001,
         output_dir="./models/ff-300k",
     )

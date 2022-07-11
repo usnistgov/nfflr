@@ -74,7 +74,9 @@ def build_radius_graph_torch(
     maxr = np.ceil((r + bond_tol) * recp_len / (2 * np.pi))
     nmin = np.floor(np.min(a.frac_coords, axis=0)) - maxr
     nmax = np.ceil(np.max(a.frac_coords, axis=0)) + maxr
-    all_ranges = [torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)]
+    all_ranges = [
+        torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)
+    ]
     cell_images = torch.cartesian_prod(*all_ranges)
 
     # tile periodic images into X_dst
@@ -111,9 +113,14 @@ def build_radius_graph_torch(
 
     # index into tiled cell image index to atom ids
     g = dgl.graph((src, v % n))
-    g.ndata["coord"] = X_src.float()
-    g.edata["r"] = (X_dst[v] - X_src[src]).float()
-    # print(torch.norm(g.edata["r"], dim=1).sort()[0])
+
+    if torch.get_default_dtype() == torch.float32:
+        g.ndata["coord"] = X_src.float()
+        g.edata["r"] = (X_dst[v] - X_src[src]).float()
+    else:
+        g.ndata["coord"] = X_src
+        g.edata["r"] = X_dst[v] - X_src[src]
+
     g.ndata["atom_features"] = torch.tensor(a.atomic_numbers)[:, None]
 
     return g
@@ -198,7 +205,6 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             self.prepare_batch = prepare_dgl_batch
 
         self.ids = self.df[id_tag]
-        self.transform = transform
 
         self.split = self.split_dataset_by_id()
 
@@ -210,7 +216,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         scratch = get_scratch_dir()
         scratch.mkdir(exist_ok=True)
         if (self.lmdb_path / self.lmdb_name).exists():
-            shutil.copytree(self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name)
+            shutil.copytree(
+                self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name
+            )
         self.lmdb_scratch_path = str(scratch / self.lmdb_name)
 
         self.lmdb_sz = int(1e10)
@@ -220,23 +228,25 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
     def load_graph(self, idx: int):
         """Deserialize graph from lmdb store using calculation key."""
         key = self.df[self.id_tag].iloc[idx]
-        # print(idx, key)
 
         if self.env is None:
-            self.env = lmdb.open(str(self.lmdb_scratch_path), map_size=self.lmdb_sz)
+            self.env = lmdb.open(
+                str(self.lmdb_scratch_path), map_size=self.lmdb_sz
+            )
 
         with self.env.begin() as txn:
             record = txn.get(key.encode())
         if record is not None:
-            g = pickle.loads(record)
+            g, lg = pickle.loads(record)
         else:
             # g = atoms_to_graph(self.df["atoms"].iloc[idx])
             a = Atoms.from_dict(self.df["atoms"].iloc[idx])
-            # print(key)
+
             g = build_radius_graph_torch(a, neighbor_strategy="12nn")
+            lg = g.line_graph(shared=True)
             with self.env.begin(write=True) as txn:
-                txn.put(key.encode(), pickle.dumps(g))
-        return g
+                txn.put(key.encode(), pickle.dumps((g, lg)))
+        return g, lg
 
     def produce_graphs(self):
         """Precompute graphs. store pickled graphs in lmdb store."""
@@ -245,7 +255,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
         # skip anything already cached
         with env.begin() as txn:
-            cached = set(map(bytes.decode, txn.cursor().iternext(values=False)))
+            cached = set(
+                map(bytes.decode, txn.cursor().iternext(values=False))
+            )
 
         to_compute = set(self.ids).difference(cached)
         uncached = self.df[self.ids.isin(to_compute)]
@@ -377,11 +389,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         """Get StructureDataset sample."""
-        # g = self.graphs[idx]
-        # g = atoms_to_graph(self.df["atoms"].iloc[idx])
-        # key = self.df[self.id_tag].iloc[idx]
-        # g = self.load_graph(key)
-        g = self.load_graph(idx)
+
+        g, lg = self.load_graph(idx)
 
         g.ndata["atomic_number"] = g.ndata["atom_features"]
 
@@ -406,12 +415,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             # data store should have total energies in eV, so do nothing
             pass
 
-        if self.transform:
-            g = self.transform(g)
-
         if self.line_graph:
-            # lg = self.line_graphs[idx]
-            lg = g.line_graph(shared=True)
+            # lg = g.line_graph(shared=True)
             # lg.apply_edges(compute_bond_cosines)
             return g, lg, target
 
