@@ -47,6 +47,78 @@ def atoms_to_graph(atoms):
     )
 
 
+def build_radius_graph_torch(
+    a: Atoms,
+    r: float = 5,
+    bond_tol: float = 0.15,
+    neighbor_strategy: Literal["cutoff", "12nn"] = "cutoff",
+):
+    """
+    Get neighbors for each atom in the unit cell, out to a distance r.
+    Contains [index_i, index_j, distance, image] array.
+    Adapted from jarvis-tools, in turn adapted from pymatgen.
+
+    Optionally, use a 12th-neighbor-shell graph
+
+    might be differentiable wrt atom coords, definitely not wrt cell params
+    """
+    precision = torch.float64
+    atol = 1e-5
+
+    n = a.num_atoms
+    X_src = torch.tensor(a.cart_coords, dtype=precision)
+    lattice_matrix = torch.tensor(a.lattice_mat, dtype=precision)
+
+    # cutoff -> calculate which periodic images to consider
+    recp_len = np.array(a.lattice.reciprocal_lattice().abc)
+    maxr = np.ceil((r + bond_tol) * recp_len / (2 * np.pi))
+    nmin = np.floor(np.min(a.frac_coords, axis=0)) - maxr
+    nmax = np.ceil(np.max(a.frac_coords, axis=0)) + maxr
+    all_ranges = [torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)]
+    cell_images = torch.cartesian_prod(*all_ranges)
+
+    # tile periodic images into X_dst
+    # index id_dst into X_dst maps to atom id as id_dest % num_atoms
+    X_dst = (cell_images @ lattice_matrix)[:, None, :] + X_src
+    X_dst = X_dst.reshape(-1, 3)
+
+    # pairwise distances between atoms in (0,0,0) cell
+    # and atoms in all periodic images
+    dist = torch.cdist(X_src, X_dst)
+
+    if neighbor_strategy == "cutoff":
+        neighbor_mask = torch.bitwise_and(
+            dist <= r, ~torch.isclose(dist, torch.DoubleTensor([0]), atol=atol)
+        )
+
+    elif neighbor_strategy == "12nn":
+        # collect 12th-nearest neighbor distance
+        # topk: k = 13 because first neighbor is a self-interaction
+        # this is filtered out in the neighbor_mask selection
+        nbrdist, _ = dist.topk(13, largest=False)
+        k_dist = nbrdist[:, -1]
+
+        # expand k-NN graph to include all atoms in the
+        # neighbor shell of the twelfth neighbor
+        # broadcast the <= along the src axis
+        neighbor_mask = torch.bitwise_and(
+            dist <= 1.05 * k_dist[:, None],
+            ~torch.isclose(dist, torch.DoubleTensor([0]), atol=atol),
+        )
+
+    # get node indices for edgelist from neighbor mask
+    src, v = torch.where(neighbor_mask)
+
+    # index into tiled cell image index to atom ids
+    g = dgl.graph((src, v % n))
+    g.ndata["coord"] = X_src.float()
+    g.edata["r"] = (X_dst[v] - X_src[src]).float()
+    # print(torch.norm(g.edata["r"], dim=1).sort()[0])
+    g.ndata["atom_features"] = torch.tensor(a.atomic_numbers)[:, None]
+
+    return g
+
+
 def prepare_line_graph_batch(
     batch: Tuple[dgl.DGLGraph, dgl.DGLGraph, Dict[str, torch.Tensor]],
     device=None,
@@ -95,7 +167,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         line_graph: bool = False,
         train_val_seed: int = 42,
         id_tag: str = "jid",
-        energy_units: Literal["eV", "eV/atom"] = "eV/atom"
+        energy_units: Literal["eV", "eV/atom"] = "eV/atom",
     ):
         """Pytorch Dataset for atomistic graphs.
 
@@ -131,31 +203,39 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.split = self.split_dataset_by_id()
 
         # features = self._get_attribute_lookup(atom_features)
-        # self.lmdb_name = "jv_300k.db"
-        self.lmdb_name = "jv_2M.db"
+        self.lmdb_name = "jv_300k_scratch.db"
+        # self.lmdb_name = "jv_2M.db"
         self.lmdb_path = Path("data")
 
         scratch = get_scratch_dir()
         scratch.mkdir(exist_ok=True)
         if (self.lmdb_path / self.lmdb_name).exists():
-            shutil.copytree(
-                self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name
-            )
+            shutil.copytree(self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name)
         self.lmdb_scratch_path = str(scratch / self.lmdb_name)
 
         self.lmdb_sz = int(1e10)
         self.env = None
-        self.produce_graphs()
+        # self.produce_graphs()
 
-    def load_graph(self, key: str):
+    def load_graph(self, idx: int):
         """Deserialize graph from lmdb store using calculation key."""
+        key = self.df[self.id_tag].iloc[idx]
+        # print(idx, key)
+
         if self.env is None:
-            self.env = lmdb.open(
-                str(self.lmdb_scratch_path), map_size=self.lmdb_sz
-            )
+            self.env = lmdb.open(str(self.lmdb_scratch_path), map_size=self.lmdb_sz)
 
         with self.env.begin() as txn:
-            g = pickle.loads(txn.get(key.encode()))
+            record = txn.get(key.encode())
+        if record is not None:
+            g = pickle.loads(record)
+        else:
+            # g = atoms_to_graph(self.df["atoms"].iloc[idx])
+            a = Atoms.from_dict(self.df["atoms"].iloc[idx])
+            # print(key)
+            g = build_radius_graph_torch(a, neighbor_strategy="12nn")
+            with self.env.begin(write=True) as txn:
+                txn.put(key.encode(), pickle.dumps(g))
         return g
 
     def produce_graphs(self):
@@ -165,15 +245,15 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
         # skip anything already cached
         with env.begin() as txn:
-            cached = set(
-                map(bytes.decode, txn.cursor().iternext(values=False))
-            )
+            cached = set(map(bytes.decode, txn.cursor().iternext(values=False)))
 
         to_compute = set(self.ids).difference(cached)
         uncached = self.df[self.ids.isin(to_compute)]
 
         if len(uncached) == 0:
             return
+        else:
+            print(f"precomputing {len(uncached)}/{len(self.ids)} graphs")
 
         cols = (self.id_tag, "atoms")
         for idx, jid, atoms in tqdm(
@@ -299,8 +379,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         """Get StructureDataset sample."""
         # g = self.graphs[idx]
         # g = atoms_to_graph(self.df["atoms"].iloc[idx])
-        key = self.df[self.id_tag].iloc[idx]
-        g = self.load_graph(key)
+        # key = self.df[self.id_tag].iloc[idx]
+        # g = self.load_graph(key)
+        g = self.load_graph(idx)
 
         g.ndata["atomic_number"] = g.ndata["atom_features"]
 

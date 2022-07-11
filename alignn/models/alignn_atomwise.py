@@ -282,7 +282,13 @@ class ALIGNNAtomWise(nn.Module):
         if self.config.calculate_gradient:
             r.requires_grad_(True)
 
+        # JVASP-76516_elast-0 is causing issues!
+        # i.e. bond length of zero...
+        # this is is a precision bug related to distance filtering
+        # using float64 and self-interaction threshold 1e-8 works
+        # with float32, need to increase the threshold... to 1e-2
         bondlength = torch.norm(r, dim=1)
+        # print(bondlength.sort()[0][:10])
         y = self.edge_embedding(bondlength)
 
         # ALIGNN updates: update node, edge, triplet features
@@ -330,8 +336,12 @@ class ALIGNNAtomWise(nn.Module):
             # if training against reduced energies, correct the force predictions
             if self.config.energy_units == "eV/atom":
                 # broadcast |v(g)| across forces to under per-atom energy scaling
-                n_nodes = torch.cat([i * torch.ones(i, device=g.device) for i in g.batch_num_nodes()])
-                forces = forces * n_nodes
+
+                n_nodes = torch.cat(
+                    [i * torch.ones(i, device=g.device) for i in g.batch_num_nodes()]
+                )
+
+                forces = forces * n_nodes[:, None]
 
             if self.config.calculate_stress:
                 # make this a custom DGL aggregation?

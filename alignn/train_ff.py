@@ -110,6 +110,7 @@ def get_dataflow(config):
 
     datadir = Path("data")
     df = pd.read_json(datadir / dataset)
+    # df = df.iloc[:10000]
 
     dataset = AtomisticConfigurationDataset(
         df,
@@ -156,8 +157,8 @@ def train():
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
-        batch_size=256 + 128,
-        learning_rate=0.002,
+        batch_size=128,
+        learning_rate=0.001,
         output_dir="./models/ff-300k",
     )
 
@@ -171,8 +172,8 @@ def train():
     )
 
     params = group_decay(model)
-    optimizer = setup_optimizer(params, cfg)
-    scheduler = setup_scheduler(cfg, optimizer, len(train_loader))
+    optimizer = setup_optimizer(params, config)
+    scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
     criteria = {
         "total_energy": nn.MSELoss(),
@@ -199,24 +200,8 @@ def train():
         device=device,
     )
 
-    pbar = ProgressBar()
-    pbar.attach(trainer, output_transform=lambda x: {"loss": x})
-
-    lr_finder = FastaiLRFinder()
-    to_save = {"model": model, "optimizer": optimizer}
-    with lr_finder.attach(
-        trainer,
-        to_save,
-        start_lr=1e-6,
-        end_lr=1.0,
-        num_iter=400,
-    ) as finder:
-        finder.run(train_loader)
-
-    print("Suggested LR", lr_finder.lr_suggestion())
-    ax = lr_finder.plot()
-    ax.loglog()
-    ax.figure.savefig("lr.png")
+    # pbar = ProgressBar()
+    # pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
     trainer.add_event_handler(
         Events.ITERATION_COMPLETED, lambda engine: scheduler.step()
@@ -322,7 +307,7 @@ def train():
         torch.save(history, Path(config.output_dir) / "metric_history.pkl")
 
     # train the model!
-    trainer.run(train_loader, max_epochs=cfg.epochs)
+    trainer.run(train_loader, max_epochs=config.epochs)
 
     print(history)
 
@@ -330,6 +315,7 @@ def train():
 @cli.command()
 def lr():
     """run learning rate finder."""
+    # torch.autograd.set_detect_anomaly(True)
 
     model_cfg = ALIGNNAtomWiseConfig(
         name="alignn_atomwise",
@@ -344,8 +330,8 @@ def lr():
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
-        batch_size=256 + 128,
-        learning_rate=0.002,
+        batch_size=128,
+        learning_rate=0.001,
         output_dir="./models/ff-300k",
     )
 
@@ -359,8 +345,9 @@ def lr():
     )
 
     params = group_decay(model)
-    optimizer = setup_optimizer(params, cfg)
-    scheduler = setup_scheduler(cfg, optimizer, len(train_loader))
+
+    optimizer = setup_optimizer(params, config)
+    scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
     criteria = {
         "total_energy": nn.MSELoss(),
@@ -373,9 +360,12 @@ def lr():
             outputs["total_energy"], targets["total_energy"]
         )
 
+        # print("energy_loss", torch.isnan(energy_loss).any())
+
         # # scale the forces before the loss
         force_scale = 1.0
         force_loss = criteria["forces"](outputs["forces"], targets["forces"])
+        # print("force_loss", torch.isnan(force_loss).any())
 
         return energy_loss + force_scale * force_loss
 
