@@ -6,6 +6,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
+
+import ignite.distributed as idist
+from ignite.utils import manual_seed
+
 from ignite.contrib.engines.common import setup_common_training_handlers
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.engine import (
@@ -107,10 +111,13 @@ def get_dataflow(config):
     # dataset = "jdft_max_min_307113_epa"
     # dataset = "jdft_max_min_307113"
     dataset = "jdft_max_min_307113_id_prop.json"
-
     datadir = Path("data")
+
     df = pd.read_json(datadir / dataset)
-    df = df.iloc[:10000]
+    # df = df.iloc[:10000]
+
+    if idist.get_local_rank() > 0:
+        idist.barrier()
 
     dataset = AtomisticConfigurationDataset(
         df,
@@ -118,10 +125,16 @@ def get_dataflow(config):
         energy_units="eV/atom",
     )
 
-    # df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
-    print(df.shape)
+    # rank 0 triggers lmdb connect/write
+    _ = dataset[0]
 
-    train_loader = DataLoader(
+    if idist.get_local_rank() == 0:
+        idist.barrier()
+
+
+    # df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
+    
+    train_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
         batch_size=config.batch_size,
@@ -129,7 +142,7 @@ def get_dataflow(config):
         drop_last=True,
         pin_memory=True,
     )
-    val_loader = DataLoader(
+    val_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
         batch_size=config.batch_size,
@@ -157,13 +170,29 @@ def train():
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
-        batch_size=128,
-        learning_rate=0.001,
-        output_dir="./models/ff-300k",
+        batch_size=128*4,
+        learning_rate=4e-3,
+        output_dir="./models/ff-300k-dist",
     )
 
+    # spawn_kwargs = {"nproc_per_node": 2}
+    spawn_kwargs = {}
+
+    print("launching...")
+    with idist.Parallel(backend="nccl", **spawn_kwargs) as parallel:
+        parallel.run(run_train, config)
+
+def run_train(local_rank, config):
+    # torch.set_default_dtype(torch.float64)  # batch size=64
+
+    rank = idist.get_rank()
+    manual_seed(config.random_seed + rank)
+    device = idist.device()
+
+    print(f"running training {config.model.name} on {device}")
+
     model = ALIGNNAtomWise(config.model)
-    model.to(device)
+    idist.auto_model(model)
 
     train_loader, val_loader = get_dataflow(config)
 
@@ -173,6 +202,8 @@ def train():
 
     params = group_decay(model)
     optimizer = setup_optimizer(params, config)
+    optimizer = idist.auto_optim(optimizer)
+
     scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
     criteria = {
@@ -219,7 +250,8 @@ def train():
         n_saved=1,
         global_step_transform=lambda *_: trainer.state.epoch,
     )
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_handler)
+    if rank == 0:
+        trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_handler)
 
     # evaluation
     metrics = {
@@ -286,7 +318,10 @@ def train():
         )
         val_evaluator.run(val_loader)
 
-        evaluators = {"train": train_evaluator, "validation": val_evaluator}
+        if rank == 0:
+            evaluators = {"train": train_evaluator, "validation": val_evaluator}
+        else:
+            evaluators = {}
 
         for phase, evaluator in evaluators.items():
 
@@ -311,17 +346,11 @@ def train():
         torch.save(history, Path(config.output_dir) / "metric_history.pkl")
 
     # train the model!
+    print("go")
     trainer.run(train_loader, max_epochs=config.epochs)
-
-    print(history)
-
 
 @cli.command()
 def lr():
-    """run learning rate finder."""
-    # torch.autograd.set_detect_anomaly(True)
-
-    torch.set_default_dtype(torch.float64)  # batch size=64
 
     model_cfg = ALIGNNAtomWiseConfig(
         name="alignn_atomwise",
@@ -336,13 +365,32 @@ def lr():
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
-        batch_size=64,
+        batch_size=128*4,
         learning_rate=0.001,
         output_dir="./models/ff-300k",
     )
 
+    # spawn_kwargs = {"nproc_per_node": 2}
+    spawn_kwargs = {}
+
+    print("launching...")
+    with idist.Parallel(backend="nccl", **spawn_kwargs) as parallel:
+        parallel.run(run_lr, config)
+
+def run_lr(local_rank, config):
+    """run learning rate finder."""
+
+    rank = idist.get_rank()
+    manual_seed(config.random_seed + rank)
+    device = idist.device()
+
+    print(f"running lr finder on {device}")
+
+    # torch.set_default_dtype(torch.float64)  # batch size=64
+
     model = ALIGNNAtomWise(config.model)
-    model.to(device)
+    idist.auto_model(model)
+    # model.to(device)
 
     train_loader, val_loader = get_dataflow(config)
 
@@ -353,6 +401,8 @@ def lr():
     params = group_decay(model)
 
     optimizer = setup_optimizer(params, config)
+    optimizer = idist.auto_optim(optimizer)
+
     scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
     criteria = {
@@ -383,9 +433,11 @@ def lr():
         device=device,
     )
 
-    pbar = ProgressBar()
-    pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+    if rank == 0:
+        pbar = ProgressBar()
+        pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
+    print("go")
     lr_finder = FastaiLRFinder()
     to_save = {"model": model, "optimizer": optimizer}
     with lr_finder.attach(
@@ -397,10 +449,11 @@ def lr():
     ) as finder:
         finder.run(train_loader)
 
-    print("Suggested LR", lr_finder.lr_suggestion())
-    ax = lr_finder.plot()
-    ax.loglog()
-    ax.figure.savefig("lr.png")
+    if rank == 0:
+        print("Suggested LR", lr_finder.lr_suggestion())
+        ax = lr_finder.plot()
+        ax.loglog()
+        ax.figure.savefig("lr.png")
 
 
 if __name__ == "__main__":

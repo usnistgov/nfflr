@@ -221,7 +221,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             )
         self.lmdb_scratch_path = str(scratch / self.lmdb_name)
 
-        self.lmdb_sz = int(1e10)
+        self.lmdb_sz = int(1e11)
         self.env = None
         # self.produce_graphs()
 
@@ -238,14 +238,18 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             record = txn.get(key.encode())
         if record is not None:
             g, lg = pickle.loads(record)
+
         else:
             # g = atoms_to_graph(self.df["atoms"].iloc[idx])
             a = Atoms.from_dict(self.df["atoms"].iloc[idx])
 
             g = build_radius_graph_torch(a, neighbor_strategy="12nn")
-            lg = g.line_graph(shared=True)
+            lg = g.line_graph(shared=False)
             with self.env.begin(write=True) as txn:
                 txn.put(key.encode(), pickle.dumps((g, lg)))
+
+        # don't serialize redundant edge data...
+        lg.ndata["r"] = g.edata["r"]        
         return g, lg
 
     def produce_graphs(self):
