@@ -1,15 +1,12 @@
 """Prototype training code for force field models."""
-import typer
 from functools import partial
 from pathlib import Path
 
+import ignite.distributed as idist
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
-
-import ignite.distributed as idist
-from ignite.utils import manual_seed
-
+import typer
 from ignite.contrib.engines.common import setup_common_training_handlers
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.engine import (
@@ -25,6 +22,7 @@ from ignite.handlers import (
 )
 from ignite.handlers.stores import EpochOutputStore
 from ignite.metrics import Accuracy, Loss, MeanAbsoluteError
+from ignite.utils import manual_seed
 from torch import nn
 from torch.utils.data import DataLoader, SubsetRandomSampler
 
@@ -114,6 +112,7 @@ def get_dataflow(config):
     datadir = Path("data")
 
     df = pd.read_json(datadir / dataset)
+    # df = pd.read_pickle(datadir / dataset.replace("json", "pkl"))
     df = df.iloc[:10000]
 
     if idist.get_local_rank() > 0:
@@ -315,11 +314,16 @@ def run_train(local_rank, config):
         epoch = engine.state.epoch
 
         n_train_eval = int(0.1 * len(train_loader))
-        train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
+        train_evaluator.run(
+            train_loader, epoch_length=n_train_eval, max_epochs=1
+        )
         val_evaluator.run(val_loader)
 
         if rank == 0:
-            evaluators = {"train": train_evaluator, "validation": val_evaluator}
+            evaluators = {
+                "train": train_evaluator,
+                "validation": val_evaluator,
+            }
         else:
             evaluators = {}
 
@@ -329,7 +333,9 @@ def run_train(local_rank, config):
             loss = m["loss"]
 
             print(f"{phase} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-            print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
+            print(
+                f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
+            )
 
             parity_plots(
                 evaluator.state.output,
@@ -351,20 +357,28 @@ def run_train(local_rank, config):
 @cli.command()
 def lr():
 
-    model_cfg = ALIGNNAtomWiseConfig(
-        name="alignn_atomwise",
+    # model_cfg = ALIGNNAtomWiseConfig(
+    #     name="alignn_atomwise",
+    #     alignn_layers=2,
+    #     gcn_layers=2,
+    #     atom_input_features=1,
+    #     sparse_atom_embedding=True,
+    #     calculate_gradient=True,
+    # )
+
+    model_cfg = BondOrderConfig(
+        name="bondorder",
         alignn_layers=2,
         gcn_layers=2,
-        atom_input_features=1,
-        sparse_atom_embedding=True,
         calculate_gradient=True,
     )
+
     config = TrainingConfig(
-        model=model_cfg,
+        model=model_cfg.dict(),
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
-        batch_size=128 * 4,
+        batch_size=16,  # 128 * 4,
         learning_rate=0.001,
         output_dir="./models/ff-300k",
     )
@@ -373,7 +387,8 @@ def lr():
     spawn_kwargs = {}
 
     print("launching...")
-    with idist.Parallel(backend="nccl", **spawn_kwargs) as parallel:
+    backend = "gloo"  # "nccl"
+    with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
         parallel.run(run_lr, config)
 
 
@@ -388,7 +403,8 @@ def run_lr(local_rank, config):
 
     # torch.set_default_dtype(torch.float64)  # batch size=64
 
-    model = ALIGNNAtomWise(config.model)
+    # model = ALIGNNAtomWise(config.model)
+    model = NeuralBondOrder(config.model)
     idist.auto_model(model)
     # model.to(device)
 
