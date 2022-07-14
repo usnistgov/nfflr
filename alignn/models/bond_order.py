@@ -32,6 +32,8 @@ class BondOrderConfig(BaseSettings):
     embedding_features: int = 64
     hidden_features: int = 64
     output_features: Literal[1] = 1
+    calculate_gradient: bool = True
+    energy_units: Literal["eV", "eV/atom"] = "eV/atom"
 
     class Config:
         """Configure model settings behavior."""
@@ -40,9 +42,7 @@ class BondOrderConfig(BaseSettings):
 
 
 class BondOrderInteraction(nn.Module):
-    def __init__(
-        self, node_input_features, cutoff_distance=4, cutoff_onset=3.8
-    ):
+    def __init__(self, node_input_features, cutoff_distance=4, cutoff_onset=3.8):
         super().__init__()
         self.pair_parameters = 4
         self.src_params = nn.Linear(node_input_features, self.pair_parameters)
@@ -114,17 +114,13 @@ class NeuralBondOrder(nn.Module):
     and atomistic line graph.
     """
 
-    def __init__(
-        self, config: BondOrderConfig = BondOrderConfig(name="bondorder")
-    ):
+    def __init__(self, config: BondOrderConfig = BondOrderConfig(name="bondorder")):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
 
         # just use atom embedding layer
         DICTIONARY_SIZE = 128
-        self.atom_embedding = nn.Embedding(
-            DICTIONARY_SIZE, config.atom_features
-        )
+        self.atom_embedding = nn.Embedding(DICTIONARY_SIZE, config.atom_features)
 
         self.edge_embedding = nn.Sequential(
             RBFExpansion(
@@ -156,21 +152,21 @@ class NeuralBondOrder(nn.Module):
         )
         self.gcn_layers = nn.ModuleList(
             [
-                EdgeGatedGraphConv(
-                    config.hidden_features, config.hidden_features
-                )
+                EdgeGatedGraphConv(config.hidden_features, config.hidden_features)
                 for idx in range(config.gcn_layers)
             ]
         )
 
         self.interaction = BondOrderInteraction(config.atom_features)
-        self.readout = SumPooling()
+
+        if self.config.energy_units == "eV/atom":
+            self.readout = AvgPooling()
+        elif self.config.energy_units == "eV":
+            self.readout = SumPooling()
 
         self.fc = nn.Linear(config.hidden_features, config.output_features)
 
-    def forward(
-        self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]
-    ):
+    def forward(self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]):
         """NeuralBondOrder : start with `atom_features`.
 
         V_ij = f_repulse(r_ij) + b_ij * f_attract(r_ij)
@@ -188,35 +184,42 @@ class NeuralBondOrder(nn.Module):
         y: bond features (g.edata and lg.ndata)
         z: angle features (lg.edata)
         """
-        if len(self.alignn_layers) > 0:
-            g, lg = g
-            lg = lg.local_var()
-
-            # angle features (fixed)
-            z = self.angle_embedding(lg.edata.pop("h"))
 
         g = g.local_var()
+
+        # initial bond features
+        # to compute forces, take gradient wrt g.edata["r"]
+        # needs to be included in the graph though...
+        r = g.edata["r"]
+
+        if self.config.calculate_gradient:
+            r.requires_grad_(True)
+
+        bondlength = torch.norm(r, dim=1)
+        g.edata["bondlength"] = bondlength
+
+        # apply GCN to local neighborhoods
+        g_local = dgl.edge_subgraph(g, bondlength <= 4.0)
+
+        lg = g_local.line_graph(shared=True)
+        lg.apply_edges(compute_bond_cosines)
+        z = self.angle_embedding(lg.edata.pop("h"))
 
         # initial node features: atom feature network...
         x = g.ndata.pop("atom_features").squeeze()
         x = self.atom_embedding(x)
         x_initial = x.clone()
 
-        # initial bond features
-        # to compute forces, take gradient wrt g.edata["r"]
-        # needs to be included in the graph though...
-        r = g.edata["r"]
-        bondlength = torch.norm(r, dim=1)
-        y = self.edge_embedding(bondlength)
+        y = self.edge_embedding(g_local.edata["bondlength"])
 
         # ALIGNN updates: update node, edge, triplet features
         # print(x.size(), y.size(), z.size())
         for alignn_layer in self.alignn_layers:
-            x, y, z = alignn_layer(g, lg, x, y, z)
+            x, y, z = alignn_layer(g_local, lg, x, y, z)
 
         # gated GCN updates: update node, edge features
         for gcn_layer in self.gcn_layers:
-            x, y = gcn_layer(g, x, y)
+            x, y = gcn_layer(g_local, x, y)
 
         # per-bond bond order
         # remove channel dimension...
@@ -230,5 +233,36 @@ class NeuralBondOrder(nn.Module):
         # use sum pooling to predict total energy
         # for each atomistic configuration in the batch
         energy = self.readout(g, potential)
+
+        forces = torch.empty(1)
+
+        if self.config.calculate_gradient:
+            # energy gradient contribution of each bond
+            # dU/dr
+            dy_dr = grad(
+                energy,
+                r,
+                grad_outputs=torch.ones_like(energy),
+                create_graph=True,
+                retain_graph=True,
+            )[0]
+
+            # forces: negative energy gradient -dU/dr
+            pairwise_forces = -dy_dr
+
+            # reduce over bonds to get forces on each atom
+            g.edata["pairwise_forces"] = pairwise_forces
+            g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
+            forces = torch.squeeze(g.ndata["forces"])
+
+            # if training against reduced energies, correct the force predictions
+            if self.config.energy_units == "eV/atom":
+                # broadcast |v(g)| across forces to under per-atom energy scaling
+
+                n_nodes = torch.cat(
+                    [i * torch.ones(i, device=g.device) for i in g.batch_num_nodes()]
+                )
+
+                forces = forces * n_nodes[:, None]
 
         return torch.squeeze(energy)

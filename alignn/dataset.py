@@ -74,9 +74,7 @@ def build_radius_graph_torch(
     maxr = np.ceil((r + bond_tol) * recp_len / (2 * np.pi))
     nmin = np.floor(np.min(a.frac_coords, axis=0)) - maxr
     nmax = np.ceil(np.max(a.frac_coords, axis=0)) + maxr
-    all_ranges = [
-        torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)
-    ]
+    all_ranges = [torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)]
     cell_images = torch.cartesian_prod(*all_ranges)
 
     # tile periodic images into X_dst
@@ -174,6 +172,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         line_graph: bool = False,
         train_val_seed: int = 42,
         id_tag: str = "jid",
+        cutoff_radius: float = 6.0,
+        neighbor_strategy: Literal["cutoff", "12nn"] = "cutoff",
         energy_units: Literal["eV", "eV/atom"] = "eV/atom",
     ):
         """Pytorch Dataset for atomistic graphs.
@@ -195,6 +195,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.line_graph = line_graph
         self.train_val_seed = train_val_seed
         self.id_tag = id_tag
+        self.cutoff_radius = cutoff_radius
+        self.neighbor_strategy = neighbor_strategy
         self.energy_units = energy_units
 
         if self.line_graph:
@@ -216,9 +218,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         scratch = get_scratch_dir()
         scratch.mkdir(exist_ok=True)
         if (self.lmdb_path / self.lmdb_name).exists():
-            shutil.copytree(
-                self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name
-            )
+            shutil.copytree(self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name)
         self.lmdb_scratch_path = str(scratch / self.lmdb_name)
 
         self.lmdb_sz = int(1e11)
@@ -230,85 +230,33 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         key = self.df[self.id_tag].iloc[idx]
 
         if self.env is None:
-            self.env = lmdb.open(
-                str(self.lmdb_scratch_path), map_size=self.lmdb_sz
-            )
+            self.env = lmdb.open(str(self.lmdb_scratch_path), map_size=self.lmdb_sz)
 
         with self.env.begin() as txn:
             record = txn.get(key.encode())
+
         if record is not None:
             g, lg = pickle.loads(record)
 
         else:
-            # g = atoms_to_graph(self.df["atoms"].iloc[idx])
             a = Atoms.from_dict(self.df["atoms"].iloc[idx])
+            g = build_radius_graph_torch(
+                a, neighbor_strategy=self.neighbor_strategy, r=self.cutoff_radius
+            )
 
-            g = build_radius_graph_torch(a, neighbor_strategy="12nn")
-            lg = g.line_graph(shared=False)
+            if self.line_graph:
+                lg = g.line_graph(shared=False)
+            else:
+                lg = None
+
             with self.env.begin(write=True) as txn:
                 txn.put(key.encode(), pickle.dumps((g, lg)))
 
         # don't serialize redundant edge data...
-        lg.ndata["r"] = g.edata["r"]        
+        if self.line_graph:
+            lg.ndata["r"] = g.edata["r"]
+
         return g, lg
-
-    def produce_graphs(self):
-        """Precompute graphs. store pickled graphs in lmdb store."""
-        print("precomputing atomistic graphs")
-        env = lmdb.open(self.lmdb_scratch_path, map_size=self.lmdb_sz)
-
-        # skip anything already cached
-        with env.begin() as txn:
-            cached = set(
-                map(bytes.decode, txn.cursor().iternext(values=False))
-            )
-
-        to_compute = set(self.ids).difference(cached)
-        uncached = self.df[self.ids.isin(to_compute)]
-
-        if len(uncached) == 0:
-            return
-        else:
-            print(f"precomputing {len(uncached)}/{len(self.ids)} graphs")
-
-        cols = (self.id_tag, "atoms")
-        for idx, jid, atoms in tqdm(
-            uncached.loc[:, cols].itertuples(name=None), total=len(uncached)
-        ):
-            graph = atoms_to_graph(atoms)
-            with env.begin(write=True) as txn:
-                txn.put(jid.encode(), pickle.dumps(graph))
-
-        # if there are any updates to the scratch lmdb store, sync back
-        shutil.copytree(
-            self.lmdb_scratch_path,
-            self.lmdb_path / self.lmdb_name,
-            dirs_exist_ok=True,
-        )
-
-        # graphs = self.df["atoms"].apply(atoms_to_graph).values
-        # self.graphs = graphs
-
-        # if self.line_graph:
-        #     self.prepare_batch = prepare_line_graph_batch
-
-        #     print("building line graphs")
-        #     self.line_graphs = []
-        #     for g in self.graphs:
-        #         lg = g.line_graph(shared=True)
-        #         lg.apply_edges(compute_bond_cosines)
-        #         self.line_graphs.append(lg)
-
-        # # load selected node representation
-        # # assume graphs contain atomic number in g.ndata["atom_features"]
-        # for g in graphs:
-        #     z = g.ndata.pop("atom_features")
-        #     g.ndata["atomic_number"] = z
-        #     z = z.type(torch.IntTensor).squeeze()
-        #     f = torch.tensor(features[z]).type(torch.FloatTensor)
-        #     if g.num_nodes() == 1:
-        #         f = f.unsqueeze(0)
-        #     g.ndata["atom_features"] = f
 
     def split_dataset_by_id(self):
         """Get train/val/test split indices for SubsetRandomSampler.

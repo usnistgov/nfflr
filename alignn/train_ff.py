@@ -114,14 +114,16 @@ def get_dataflow(config):
     datadir = Path("data")
 
     df = pd.read_json(datadir / dataset)
-    # df = df.iloc[:10000]
+    df = df.iloc[:10000]
 
     if idist.get_local_rank() > 0:
         idist.barrier()
 
     dataset = AtomisticConfigurationDataset(
         df,
-        line_graph=True,
+        line_graph=False,
+        cutoff_radius=6.0,
+        neighbor_strategy="cutoff",
         energy_units="eV/atom",
     )
 
@@ -131,9 +133,8 @@ def get_dataflow(config):
     if idist.get_local_rank() == 0:
         idist.barrier()
 
-
     # df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
-    
+
     train_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
@@ -170,7 +171,7 @@ def train():
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
-        batch_size=128*4,
+        batch_size=128 * 4,
         learning_rate=4e-3,
         output_dir="./models/ff-300k-dist",
     )
@@ -181,6 +182,7 @@ def train():
     print("launching...")
     with idist.Parallel(backend="nccl", **spawn_kwargs) as parallel:
         parallel.run(run_train, config)
+
 
 def run_train(local_rank, config):
     # torch.set_default_dtype(torch.float64)  # batch size=64
@@ -313,9 +315,7 @@ def run_train(local_rank, config):
         epoch = engine.state.epoch
 
         n_train_eval = int(0.1 * len(train_loader))
-        train_evaluator.run(
-            train_loader, epoch_length=n_train_eval, max_epochs=1
-        )
+        train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
         val_evaluator.run(val_loader)
 
         if rank == 0:
@@ -329,9 +329,7 @@ def run_train(local_rank, config):
             loss = m["loss"]
 
             print(f"{phase} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-            print(
-                f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
-            )
+            print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
 
             parity_plots(
                 evaluator.state.output,
@@ -349,6 +347,7 @@ def run_train(local_rank, config):
     print("go")
     trainer.run(train_loader, max_epochs=config.epochs)
 
+
 @cli.command()
 def lr():
 
@@ -365,7 +364,7 @@ def lr():
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
-        batch_size=128*4,
+        batch_size=128 * 4,
         learning_rate=0.001,
         output_dir="./models/ff-300k",
     )
@@ -376,6 +375,7 @@ def lr():
     print("launching...")
     with idist.Parallel(backend="nccl", **spawn_kwargs) as parallel:
         parallel.run(run_lr, config)
+
 
 def run_lr(local_rank, config):
     """run learning rate finder."""
