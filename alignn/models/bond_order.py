@@ -131,10 +131,10 @@ class BondOrderInteraction(nn.Module):
             N = r.size()
             c = torch.where(
                 r < R - D,
-                torch.ones(N),
+                torch.ones_like(r),
                 0.5 - 0.5 * torch.sin(np.pi * (r - R) / (2 * D)),
             )
-            return torch.where(r > R + D, torch.zeros(N), c)
+            return torch.where(r > R + D, torch.zeros_like(r), c)
 
         self.cutoff = cutoff
 
