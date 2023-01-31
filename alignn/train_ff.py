@@ -46,6 +46,15 @@ device = "cpu"
 if torch.cuda.is_available():
     device = torch.device("cuda")
 
+# configure distributed backend:
+# prefer nccl if available for GPU parallelism
+# https://pytorch.org/docs/stable/distributed.html#which-backend-to-use
+distributed_backend = None
+if torch.distributed.is_nccl_available():
+    distributed_backend = "nccl"
+elif torch.distributed.is_gloo_available():
+    distributed_backend = "gloo"
+
 
 def get_dataflow(config):
     """Set up force field dataloaders."""
@@ -133,8 +142,7 @@ def train():
     spawn_kwargs = {}
 
     print("launching...")
-    backend = None  # None, nccl, gloo
-    with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
+    with idist.Parallel(backend=distributed_backend, **spawn_kwargs) as parallel:
         parallel.run(run_train, config)
 
 
@@ -343,11 +351,7 @@ def lr():
     spawn_kwargs = {}
 
     print("launching...")
-    # backend = "gloo" # "gloo"  # "nccl" on nisaba
-    # with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
-    #     parallel.run(run_lr, config)
-    backend = None  # "gloo"  # "nccl" on nisaba
-    with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
+    with idist.Parallel(backend=distributed_backend, **spawn_kwargs) as parallel:
         parallel.run(run_lr, config)
 
 
