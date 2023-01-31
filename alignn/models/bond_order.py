@@ -16,8 +16,12 @@ from torch import nn
 from torch.autograd import grad
 from torch.nn import functional as F
 
-from alignn.models.alignn import ALIGNNConv, EdgeGatedGraphConv, MLPLayer
-from alignn.models.utils import RBFExpansion
+from alignn.models.utils import (
+    RBFExpansion,
+    ALIGNNConv,
+    EdgeGatedGraphConv,
+    MLPLayer,
+)
 from alignn.utils import BaseSettings
 
 
