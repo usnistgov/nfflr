@@ -36,6 +36,8 @@ from alignn.training_utils import (
     group_decay,
     setup_evaluator_with_grad,
     setup_optimizer,
+    setup_scheduler,
+    select_target,
 )
 
 cli = typer.Typer()
@@ -45,62 +47,8 @@ if torch.cuda.is_available():
     device = torch.device("cuda")
 
 
-def setup_scheduler(config, optimizer, steps_per_epoch):
-    """Configure OneCycle scheduler."""
-    pct_start = config.warmup_steps / (config.epochs * steps_per_epoch)
-    pct_start = min(pct_start, 0.3)
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        optimizer,
-        max_lr=config.learning_rate,
-        epochs=config.epochs,
-        steps_per_epoch=steps_per_epoch,
-        pct_start=pct_start,
-    )
-
-    return scheduler
-
-
-def select_target(name: str):
-    """Build ignite metric transforms for multi-output models.
-
-    `output` should be Tuple[Dict[str,torch.Tensor], Dict[str,torch.Tensor]]
-    """
-
-    def output_transform(output):
-        """Select output tensor for metric computation."""
-        pred, target = output
-        return pred[name], target[name]
-
-    return output_transform
-
-
-def parity_plots(output, epoch, directory, phase="train"):
-    """Plot predictions for energy and forces."""
-    fig, axes = plt.subplots(ncols=2, figsize=(16, 8))
-    for batch in output:
-        tgt, pred = batch
-
-        axes[0].scatter(
-            tgt["total_energy"].cpu().detach().numpy(),
-            pred["total_energy"].cpu().detach().numpy(),
-            color="k",
-        )
-        axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
-        axes[1].scatter(
-            tgt["forces"].cpu().detach().numpy(),
-            pred["forces"].cpu().detach().numpy(),
-            color="k",
-        )
-        axes[1].set(xlabel="DFT force", ylabel="predicted force")
-
-    plt.tight_layout()
-    plt.savefig(Path(directory) / f"parity_plots_{phase}_{epoch:03d}.png")
-    plt.clf()
-    plt.close()
-
-
 def get_dataflow(config):
-    """Set up dataloaders."""
+    """Set up force field dataloaders."""
     # load data from this json format into pandas...
     # then build graphs on each access instead of precomputing them...
     # also, make sure to split sections grouped on id column
@@ -115,10 +63,11 @@ def get_dataflow(config):
 
     # df = pd.read_json(datadir / dataset)
     # df = pd.read_pickle(datadir / dataset.replace("json", "pkl"))
-    # df = df.iloc[:10000]
     df = pd.DataFrame(jdata("alignn_ff_db", store_dir="/Users/bld/.jarvis"))
     df = df.iloc[:1000]
 
+    # in a distributed setting, ensure only the rank 0 process
+    # creates any lmdb store on disk
     if idist.get_local_rank() > 0:
         idist.barrier()
 
@@ -133,9 +82,12 @@ def get_dataflow(config):
     # rank 0 triggers lmdb connect/write
     _ = dataset[0]
 
+    # and now non-root processes can continue
     if idist.get_local_rank() == 0:
+
         idist.barrier()
 
+    # configure training and validation datasets...
     train_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
@@ -181,7 +133,8 @@ def train():
     spawn_kwargs = {}
 
     print("launching...")
-    with idist.Parallel(backend="nccl", **spawn_kwargs) as parallel:
+    backend = None  # None, nccl, gloo
+    with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
         parallel.run(run_train, config)
 
 
@@ -198,7 +151,6 @@ def run_train(local_rank, config):
     idist.auto_model(model)
 
     train_loader, val_loader = get_dataflow(config)
-
     prepare_batch = partial(
         train_loader.dataset.prepare_batch, device=device, non_blocking=True
     )
@@ -309,6 +261,9 @@ def run_train(local_rank, config):
     # train_evaluator.add_event_handler(
     #     Events.ITERATION_COMPLETED, lambda engine: print("evaluation step")
     # )
+    trainer.add_event_handler(
+        Events.ITERATION_STARTED, lambda engine: print("training step")
+    )
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(engine):
@@ -367,16 +322,15 @@ def lr():
         sparse_atom_embedding=True,
         calculate_gradient=True,
     )
-
     # model_cfg = BondOrderConfig(
     #     name="bondorder",
     #     alignn_layers=2,
     #     gcn_layers=2,
     #     calculate_gradient=True,
     # )
-    print(model_cfg)
+
     config = TrainingConfig(
-        model=model_cfg, # .dict(),
+        model=model_cfg.dict(),
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
@@ -389,36 +343,33 @@ def lr():
     spawn_kwargs = {}
 
     print("launching...")
-    backend = "gloo"  # "nccl"
+    # backend = "gloo" # "gloo"  # "nccl" on nisaba
+    # with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
+    #     parallel.run(run_lr, config)
+    backend = None  # "gloo"  # "nccl" on nisaba
     with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
         parallel.run(run_lr, config)
 
 
 def run_lr(local_rank, config):
     """run learning rate finder."""
+    # torch.set_default_dtype(torch.float64)  # batch size=64
 
     rank = idist.get_rank()
     manual_seed(config.random_seed + rank)
     device = idist.device()
-
     print(f"running lr finder on {device}")
-
-    # torch.set_default_dtype(torch.float64)  # batch size=64
 
     model = ALIGNNForceField(config.model)
     # model = NeuralBondOrder(config.model)
     idist.auto_model(model)
-    # model.to(device)
 
     train_loader, val_loader = get_dataflow(config)
-
     prepare_batch = partial(
         train_loader.dataset.prepare_batch, device=device, non_blocking=True
     )
 
-    params = group_decay(model)
-
-    optimizer = setup_optimizer(params, config)
+    optimizer = setup_optimizer(group_decay(model), config)
     optimizer = idist.auto_optim(optimizer)
 
     scheduler = setup_scheduler(config, optimizer, len(train_loader))
@@ -434,12 +385,9 @@ def run_lr(local_rank, config):
             outputs["total_energy"], targets["total_energy"]
         )
 
-        # print("energy_loss", torch.isnan(energy_loss).any())
-
         # # scale the forces before the loss
         force_scale = 1.0
         force_loss = criteria["forces"](outputs["forces"], targets["forces"])
-        # print("force_loss", torch.isnan(force_loss).any())
 
         return energy_loss + force_scale * force_loss
 
@@ -472,6 +420,31 @@ def run_lr(local_rank, config):
         ax = lr_finder.plot()
         ax.loglog()
         ax.figure.savefig("lr.png")
+
+
+def parity_plots(output, epoch, directory, phase="train"):
+    """Plot predictions for energy and forces."""
+    fig, axes = plt.subplots(ncols=2, figsize=(16, 8))
+    for batch in output:
+        tgt, pred = batch
+
+        axes[0].scatter(
+            tgt["total_energy"].cpu().detach().numpy(),
+            pred["total_energy"].cpu().detach().numpy(),
+            color="k",
+        )
+        axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
+        axes[1].scatter(
+            tgt["forces"].cpu().detach().numpy(),
+            pred["forces"].cpu().detach().numpy(),
+            color="k",
+        )
+        axes[1].set(xlabel="DFT force", ylabel="predicted force")
+
+    plt.tight_layout()
+    plt.savefig(Path(directory) / f"parity_plots_{phase}_{epoch:03d}.png")
+    plt.clf()
+    plt.close()
 
 
 if __name__ == "__main__":

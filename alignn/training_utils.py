@@ -7,6 +7,20 @@ from ignite.engine import Engine
 from alignn.config import TrainingConfig
 
 
+def select_target(name: str):
+    """Build ignite metric transforms for multi-output models.
+
+    `output` should be Tuple[Dict[str,torch.Tensor], Dict[str,torch.Tensor]]
+    """
+
+    def output_transform(output):
+        """Select output tensor for metric computation."""
+        pred, target = output
+        return pred[name], target[name]
+
+    return output_transform
+
+
 def group_decay(model):
     """Omit weight decay from bias and batchnorm params."""
     decay, no_decay = [], []
@@ -39,6 +53,21 @@ def setup_optimizer(params, config: TrainingConfig):
             weight_decay=config.weight_decay,
         )
     return optimizer
+
+
+def setup_scheduler(config: TrainingConfig, optimizer, steps_per_epoch: int):
+    """Configure OneCycle scheduler."""
+    pct_start = config.warmup_steps / (config.epochs * steps_per_epoch)
+    pct_start = min(pct_start, 0.3)
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer,
+        max_lr=config.learning_rate,
+        epochs=config.epochs,
+        steps_per_epoch=steps_per_epoch,
+        pct_start=pct_start,
+    )
+
+    return scheduler
 
 
 def setup_evaluator_with_grad(
