@@ -26,9 +26,11 @@ from ignite.utils import manual_seed
 from torch import nn
 from torch.utils.data import DataLoader, SubsetRandomSampler
 
+from jarvis.db.figshare import data as jdata
+
 from alignn.config import TrainingConfig
 from alignn.dataset import AtomisticConfigurationDataset
-from alignn.models.alignn_atomwise import ALIGNNAtomWise, ALIGNNAtomWiseConfig
+from alignn.models.alignn_ff import ALIGNNForceField, ALIGNNForceFieldConfig
 from alignn.models.bond_order import BondOrderConfig, NeuralBondOrder
 from alignn.training_utils import (
     group_decay,
@@ -52,7 +54,7 @@ def setup_scheduler(config, optimizer, steps_per_epoch):
         max_lr=config.learning_rate,
         epochs=config.epochs,
         steps_per_epoch=steps_per_epoch,
-        # pct_start=pct_start,
+        pct_start=pct_start,
     )
 
     return scheduler
@@ -108,19 +110,21 @@ def get_dataflow(config):
     # _epa suffix has energies per atom...
     # dataset = "jdft_max_min_307113_epa"
     # dataset = "jdft_max_min_307113"
-    dataset = "jdft_max_min_307113_id_prop.json"
-    datadir = Path("data")
+    # dataset = "jdft_max_min_307113_id_prop.json"
+    # datadir = Path("data")
 
-    df = pd.read_json(datadir / dataset)
+    # df = pd.read_json(datadir / dataset)
     # df = pd.read_pickle(datadir / dataset.replace("json", "pkl"))
-    df = df.iloc[:10000]
+    # df = df.iloc[:10000]
+    df = pd.DataFrame(jdata("alignn_ff_db", store_dir="/Users/bld/.jarvis"))
+    df = df.iloc[:1000]
 
     if idist.get_local_rank() > 0:
         idist.barrier()
 
     dataset = AtomisticConfigurationDataset(
         df,
-        line_graph=False,
+        line_graph=True,
         cutoff_radius=6.0,
         neighbor_strategy="cutoff",
         energy_units="eV/atom",
@@ -131,8 +135,6 @@ def get_dataflow(config):
 
     if idist.get_local_rank() == 0:
         idist.barrier()
-
-    # df = pd.read_json("jdft_prototyping_trajectories_10k.jsonl", lines=True)
 
     train_loader = idist.auto_dataloader(
         dataset,
@@ -157,8 +159,8 @@ def get_dataflow(config):
 def train():
     """Train force field model."""
 
-    model_cfg = ALIGNNAtomWiseConfig(
-        name="alignn_atomwise",
+    model_cfg = ALIGNNForceFieldConfig(
+        name="alignn_forcefield",
         alignn_layers=2,
         gcn_layers=2,
         atom_input_features=1,
@@ -192,7 +194,7 @@ def run_train(local_rank, config):
 
     print(f"running training {config.model.name} on {device}")
 
-    model = ALIGNNAtomWise(config.model)
+    model = ALIGNNForceField(config.model)
     idist.auto_model(model)
 
     train_loader, val_loader = get_dataflow(config)
@@ -232,8 +234,8 @@ def run_train(local_rank, config):
         device=device,
     )
 
-    # pbar = ProgressBar()
-    # pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+    pbar = ProgressBar()
+    pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
     trainer.add_event_handler(
         Events.ITERATION_COMPLETED, lambda engine: scheduler.step()
@@ -357,24 +359,24 @@ def run_train(local_rank, config):
 @cli.command()
 def lr():
 
-    # model_cfg = ALIGNNAtomWiseConfig(
-    #     name="alignn_atomwise",
-    #     alignn_layers=2,
-    #     gcn_layers=2,
-    #     atom_input_features=1,
-    #     sparse_atom_embedding=True,
-    #     calculate_gradient=True,
-    # )
-
-    model_cfg = BondOrderConfig(
-        name="bondorder",
+    model_cfg = ALIGNNForceFieldConfig(
+        name="alignn_forcefield",
         alignn_layers=2,
         gcn_layers=2,
+        atom_input_features=1,
+        sparse_atom_embedding=True,
         calculate_gradient=True,
     )
 
+    # model_cfg = BondOrderConfig(
+    #     name="bondorder",
+    #     alignn_layers=2,
+    #     gcn_layers=2,
+    #     calculate_gradient=True,
+    # )
+    print(model_cfg)
     config = TrainingConfig(
-        model=model_cfg.dict(),
+        model=model_cfg, # .dict(),
         atom_features="atomic_number",
         num_workers=8,
         epochs=100,
@@ -403,8 +405,8 @@ def run_lr(local_rank, config):
 
     # torch.set_default_dtype(torch.float64)  # batch size=64
 
-    # model = ALIGNNAtomWise(config.model)
-    model = NeuralBondOrder(config.model)
+    model = ALIGNNForceField(config.model)
+    # model = NeuralBondOrder(config.model)
     idist.auto_model(model)
     # model.to(device)
 

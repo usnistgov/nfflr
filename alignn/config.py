@@ -11,6 +11,8 @@ from alignn.models.icgcnn import ICGCNNConfig
 from alignn.models.gcn import SimpleGCNConfig
 from alignn.models.densegcn import DenseGCNConfig
 from alignn.models.alignn import ALIGNNConfig
+from alignn.models.alignn_ff import ALIGNNForceFieldConfig
+from alignn.models.bond_order import BondOrderConfig
 from alignn.models.alignn_atomwise import ALIGNNAtomWiseConfig
 from alignn.models.dense_alignn import DenseALIGNNConfig
 from alignn.models.alignn_cgcnn import ACGCNNConfig
@@ -199,13 +201,6 @@ class TrainingConfig(BaseSettings):
     distributed: bool = False
     n_early_stopping: Optional[int] = None  # typically 50
     output_dir: str = os.path.abspath(".")  # typically 50
-    # alignn_layers: int = 4
-    # gcn_layers: int =4
-    # edge_input_features: int= 80
-    # hidden_features: int= 256
-    # triplet_input_features: int=40
-    # embedding_features: int=64
-
     # model configuration
     model: Union[
         CGCNNConfig,
@@ -213,16 +208,18 @@ class TrainingConfig(BaseSettings):
         SimpleGCNConfig,
         DenseGCNConfig,
         ALIGNNConfig,
+        ALIGNNForceFieldConfig,
         ALIGNNAtomWiseConfig,
         ALIGNN_LN_Config,
         DenseALIGNNConfig,
         ACGCNNConfig,
+        BondOrderConfig,
     ] = ALIGNNConfig(name="alignn")
-    # ] = CGCNNConfig(name="cgcnn")
 
     @root_validator()
     def set_input_size(cls, values):
         """Automatically configure node feature dimensionality."""
+        print(values.keys())
         values["model"].atom_input_features = FEATURESET_SIZE[
             values["atom_features"]
         ]
