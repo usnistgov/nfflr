@@ -4,7 +4,7 @@ import pickle
 import shutil
 from functools import partial
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Sequence, Tuple
+from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 import dgl
 import lmdb
@@ -74,7 +74,9 @@ def build_radius_graph_torch(
     maxr = np.ceil((r + bond_tol) * recp_len / (2 * np.pi))
     nmin = np.floor(np.min(a.frac_coords, axis=0)) - maxr
     nmax = np.ceil(np.max(a.frac_coords, axis=0)) + maxr
-    all_ranges = [torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)]
+    all_ranges = [
+        torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)
+    ]
     cell_images = torch.cartesian_prod(*all_ranges)
 
     # tile periodic images into X_dst
@@ -161,6 +163,12 @@ def prepare_dgl_batch(
 class AtomisticConfigurationDataset(torch.utils.data.Dataset):
     """Dataset of crystal DGLGraphs.
 
+    build (and cache) graphs on each access instead of precomputing them
+    also, make sure to split sections grouped on id column
+
+    example_data = Path("alignn/examples/sample_data")
+    df = pd.read_json(example_data / "id_prop.json")
+
     target: total_energy, forces, stresses
     """
 
@@ -173,6 +181,8 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         train_val_seed: int = 42,
         id_tag: str = "jid",
         cutoff_radius: float = 6.0,
+        n_train: Union[float, int] = 0.8,
+        n_val: Union[float, int] = 0.1,
         neighbor_strategy: Literal["cutoff", "12nn"] = "cutoff",
         energy_units: Literal["eV", "eV/atom"] = "eV/atom",
     ):
@@ -208,7 +218,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
         self.ids = self.df[id_tag]
 
-        self.split = self.split_dataset_by_id()
+        self.split = self.split_dataset_by_id(n_train, n_val)
 
         # features = self._get_attribute_lookup(atom_features)
         self.lmdb_name = "jv_300k_scratch.db"
@@ -218,19 +228,22 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         scratch = get_scratch_dir()
         scratch.mkdir(exist_ok=True)
         if (self.lmdb_path / self.lmdb_name).exists():
-            shutil.copytree(self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name)
+            shutil.copytree(
+                self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name
+            )
         self.lmdb_scratch_path = str(scratch / self.lmdb_name)
 
         self.lmdb_sz = int(1e11)
         self.env = None
-        # self.produce_graphs()
 
     def load_graph(self, idx: int):
         """Deserialize graph from lmdb store using calculation key."""
         key = self.df[self.id_tag].iloc[idx]
 
         if self.env is None:
-            self.env = lmdb.open(str(self.lmdb_scratch_path), map_size=self.lmdb_sz)
+            self.env = lmdb.open(
+                str(self.lmdb_scratch_path), map_size=self.lmdb_sz
+            )
 
         with self.env.begin() as txn:
             record = txn.get(key.encode())
@@ -241,7 +254,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         else:
             a = Atoms.from_dict(self.df["atoms"].iloc[idx])
             g = build_radius_graph_torch(
-                a, neighbor_strategy=self.neighbor_strategy, r=self.cutoff_radius
+                a,
+                neighbor_strategy=self.neighbor_strategy,
+                r=self.cutoff_radius,
             )
 
             if self.line_graph:
@@ -258,7 +273,9 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
         return g, lg
 
-    def split_dataset_by_id(self):
+    def split_dataset_by_id(
+        self, n_train: Union[float, int], n_val: Union[float, int]
+    ):
         """Get train/val/test split indices for SubsetRandomSampler.
 
         Stratify by calculation / trajectory id `"group_id"`
@@ -267,22 +284,36 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
         # number of calculation groups
         N = len(ids)
-        n_test = int(0.1 * N)
-        n_val = int(0.1 * N)
-        # n_train = N - n_val - n_test
 
-        # deterministic test split, always
+        # test set is always the same 10 % of calculation groups
+        n_test = int(0.1 * N)
         test_rng = default_rng(0)
         test_rng.shuffle(ids)
-        test_ids = ids[:n_test]
-        train_val_ids = ids[n_test:]
+        test_ids = ids[0:n_test]
+        train_val_ids = ids[n_test:-1]
+
+        if isinstance(n_train, float) and isinstance(n_val, float):
+            # n_train and n_val specified as fractions of dataset
+            if n_train + n_val > 0.9:
+                raise ValueError(
+                    "training and validation set exceed 90% of data"
+                )
+            n_val = int(n_val * N)
+            n_train = int(n_train * N)
+
+        if isinstance(n_train, int) and isinstance(n_val, int):
+            # n_train and n_val specified directly as calculation group counts
+            if n_train + n_val > 0.9 * N:
+                raise ValueError(
+                    "training and validation set exceed 90% of data"
+                )
 
         # configurable train/val seed
         train_val_rng = default_rng(self.train_val_seed)
         train_val_rng.shuffle(train_val_ids)
 
-        val_ids = train_val_ids[:n_val]
-        train_ids = train_val_ids[n_val:]
+        val_ids = train_val_ids[0:n_val]
+        train_ids = train_val_ids[n_val : n_val + n_train]
 
         # calculation ids...
         split_ids = {"train": train_ids, "val": val_ids, "test": test_ids}

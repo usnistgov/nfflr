@@ -61,10 +61,10 @@ class DatasetConfig:
     ] = "atomic_number"
     random_seed: Optional[int] = 123
     n_val: Optional[Union[int, float]] = 0.1
-    n_test: Optional[Union[int, float]] = 0.1
     n_train: Optional[Union[int, float]] = 0.8
     num_workers: int = 4
     cutoff: float = 6.0
+    jarvis_cache: Path = Path("~/.jarvis").expanduser()
 
 
 @dataclass
@@ -88,22 +88,20 @@ class FFConfig:
 
 def get_dataflow(config):
     """Set up force field dataloaders."""
-    # load data from this json format into pandas...
-    # then build graphs on each access instead of precomputing them...
-    # also, make sure to split sections grouped on id column
-    # example_data = Path("alignn/examples/sample_data")
-    # df = pd.read_json(example_data / "id_prop.json")
-
     # _epa suffix has energies per atom...
     # dataset = "jdft_max_min_307113_epa"
     # dataset = "jdft_max_min_307113"
     # dataset = "jdft_max_min_307113_id_prop.json"
     # datadir = Path("data")
 
-    # df = pd.read_json(datadir / dataset)
-    # df = pd.read_pickle(datadir / dataset.replace("json", "pkl"))
-    df = pd.DataFrame(jdata("alignn_ff_db", store_dir="/Users/bld/.jarvis"))
-    df = df.iloc[0 : config.dataset.n_train]
+    if isinstance(config.dataset.name, Path):
+        # e.g., "jdft_max_min_307113_id_prop.json"
+        df = pd.read_json(config.dataset.name)
+        # df = pd.read_pickle(datadir / dataset.replace("json", "pkl"))
+    elif config.dataset.name == "alignn_ff_db":
+        df = pd.DataFrame(
+            jdata(config.dataset.name, store_dir=config.dataset.jarvis_cache)
+        )
 
     # in a distributed setting, ensure only the rank 0 process
     # creates any lmdb store on disk
@@ -116,6 +114,8 @@ def get_dataflow(config):
         cutoff_radius=config.dataset.cutoff,
         neighbor_strategy="cutoff",
         energy_units="eV/atom",
+        n_train=config.dataset.n_train,
+        n_val=config.dataset.n_val,
     )
 
     # rank 0 triggers lmdb connect/write
