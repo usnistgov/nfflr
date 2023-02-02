@@ -203,11 +203,13 @@ def run_train(local_rank, config):
 
     print(f"running training {config.model.name} on {device}")
 
-    # todo: make a model setup function?
     # todo: soft cutoffs in models
     # also todo: set this up with ray.tune?
-    model = ALIGNNForceField(config.model)
-    # model = NeuralBondOrder(config.model)
+    if config.model.name == "alignn_forcefield":
+        model = ALIGNNForceField(config.model)
+    elif config.model.name == "bond_order":
+        model = NeuralBondOrder(config.model)
+
     idist.auto_model(model)
 
     train_loader, val_loader = get_dataflow(config)
@@ -428,8 +430,12 @@ def run_lr(local_rank, config):
     device = idist.device()
     print(f"running lr finder on {device}")
 
-    model = ALIGNNForceField(config.model)
-    # model = NeuralBondOrder(config.model)
+
+    if config.model.name == "alignn_forcefield":
+        model = ALIGNNForceField(config.model)
+    elif config.model.name == "bond_order":
+        model = NeuralBondOrder(config.model)
+
     idist.auto_model(model)
 
     train_loader, val_loader = get_dataflow(config)
