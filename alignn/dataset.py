@@ -115,13 +115,118 @@ def build_radius_graph_torch(
     g = dgl.graph((src, v % n))
 
     if torch.get_default_dtype() == torch.float32:
-        g.ndata["coord"] = X_src.float()
-        g.edata["r"] = (X_dst[v] - X_src[src]).float()
+        try:
+            g.ndata["coord"] = X_src.float()
+            g.edata["r"] = (X_dst[v] - X_src[src]).float()
+        except:
+            print(a)
+            print(g)
+            print(X_src)
+            raise
     else:
         g.ndata["coord"] = X_src
         g.edata["r"] = X_dst[v] - X_src[src]
 
     g.ndata["atom_features"] = torch.tensor(a.atomic_numbers)[:, None]
+
+    return g
+
+
+def atom_dgl_multigraph_torch(
+    atoms: Atoms,
+    cutoff: float = 8,
+    bond_tol: float = 0.15,
+    atol=1e-5,
+    topk_tol=1.001,
+    precision=torch.float64,
+):
+    """
+    Get neighbors for each atom in the unit cell, out to a distance r.
+
+    Contains [index_i, index_j, distance, image] array.
+
+    This function builds a supercell and identifies all edges  by
+    brute force calculation of the pairwise distances between atoms
+    in the original cell and atoms in the supercell. If the kNN graph
+    construction is used, do some extra work to make sure that all
+    edges have a reverse pair for dgl undirected graph representation,
+    but also that edges are not double counted.
+
+    # check that torch knn graph is equivalent to pytorch version (with canonical edges)
+    a = Atoms(...)
+    pg = graphs.Graph.atom_dgl_multigraph(a, use_canonize=True, compute_line_graph=False)
+    tg = graphs.Graph.atom_dgl_multigraph_torch(a, compute_line_graph=False)
+
+    # round bond displacement vectors to add tolerance to numerical error
+    pg_edata = list(
+        zip(
+            map(int, pg.edges()[0]),
+            map(int, pg.edges()[1]),
+            map(tuple, torch.round(pg.edata["r"], decimals=3).tolist()),
+        )
+    )
+    tg_edata = list(
+        zip(
+            map(int, tg.edges()[0]),
+            map(int, tg.edges()[1]),
+            map(tuple, torch.round(tg.edata["r"], decimals=3).tolist()),
+        )
+    )
+    set(tg_edata).difference(pg_edata) # -> yields empty set
+
+    """
+
+    if atoms is not None:
+        cart_coords = torch.tensor(atoms.cart_coords, dtype=precision)
+        frac_coords = torch.tensor(atoms.frac_coords, dtype=precision)
+        lattice_mat = torch.tensor(atoms.lattice_mat, dtype=precision)
+        elements = atoms.elements
+
+    X_src = cart_coords
+    num_atoms = X_src.shape[0]
+
+    # determine how many supercells are needed for the cutoff radius
+    recp = 2 * torch.pi * torch.linalg.inv(lattice_mat).T
+    recp_len = torch.tensor(
+        [i for i in (torch.sqrt(torch.sum(recp**2, dim=1)))]
+    )
+
+    maxr = torch.ceil((cutoff + bond_tol) * recp_len / (2 * torch.pi))
+    nmin = torch.floor(torch.min(frac_coords, dim=0)[0]) - maxr
+    nmax = torch.ceil(torch.max(frac_coords, dim=0)[0]) + maxr
+
+    # construct the supercell index list
+    all_ranges = [
+        torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)
+    ]
+    cell_images = torch.cartesian_prod(*all_ranges)
+
+    # tile periodic images into X_dst
+    # index id_dst into X_dst maps to atom id as id_dest % num_atoms
+    X_dst = (cell_images @ lattice_mat)[:, None, :] + X_src
+    X_dst = X_dst.reshape(-1, 3)
+
+    # pairwise distances between atoms in (0,0,0) cell
+    # and atoms in all periodic images
+    dist = torch.cdist(X_src, X_dst)
+
+    # radius graph
+    neighbor_mask = torch.bitwise_and(
+        dist <= cutoff,
+        ~torch.isclose(dist, torch.DoubleTensor([0]), atol=atol),
+    )
+    # get node indices for edgelist from neighbor mask
+    src, v = torch.where(neighbor_mask)
+
+    # index into tiled cell image index to atom ids
+    g = dgl.graph((src, v % num_atoms))
+    g.ndata["cart_coords"] = X_src.float()
+    g.ndata["frac_coords"] = frac_coords.float()
+    g.gdata = lattice_mat
+    g.edata["r"] = (X_dst[v] - X_src[src]).float()
+    g.edata["X_src"] = X_src[src]
+    g.edata["X_dst"] = X_dst[v]
+    g.edata["src"] = src
 
     return g
 
@@ -372,6 +477,12 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         """Get StructureDataset sample."""
+
+        # JVASP-119960_main-1 causing problems
+        # also JVASP-118572_main-1
+        # this is because the shorted bond is greater than the cutoff length
+        # key = self.df[self.id_tag].iloc[idx]
+        # print(key)
 
         g, lg = self.load_graph(idx)
 

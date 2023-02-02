@@ -16,7 +16,12 @@ from torch import nn
 from torch.autograd import grad
 from torch.nn import functional as F
 
-from alignn.models.utils import RBFExpansion, MLPLayer, ALIGNNConv, EdgeGatedGraphConv
+from alignn.models.utils import (
+    RBFExpansion,
+    MLPLayer,
+    SparseALIGNNConv,
+    EdgeGatedGraphConv,
+)
 from alignn.utils import BaseSettings
 
 from jarvis.core.graphs import compute_bond_cosines
@@ -45,7 +50,6 @@ class ALIGNNForceFieldConfig(BaseSettings):
         env_prefix = "jv_model"
 
 
-
 class ALIGNNForceField(nn.Module):
     """Atomistic Line graph network.
 
@@ -55,7 +59,9 @@ class ALIGNNForceField(nn.Module):
 
     def __init__(
         self,
-        config: ALIGNNForceFieldConfig = ALIGNNForceFieldConfig(name="alignn_forcefield"),
+        config: ALIGNNForceFieldConfig = ALIGNNForceFieldConfig(
+            name="alignn_forcefield"
+        ),
     ):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
@@ -92,7 +98,7 @@ class ALIGNNForceField(nn.Module):
 
         self.alignn_layers = nn.ModuleList(
             [
-                ALIGNNConv(
+                SparseALIGNNConv(
                     config.hidden_features,
                     config.hidden_features,
                 )
@@ -101,7 +107,9 @@ class ALIGNNForceField(nn.Module):
         )
         self.gcn_layers = nn.ModuleList(
             [
-                EdgeGatedGraphConv(config.hidden_features, config.hidden_features)
+                EdgeGatedGraphConv(
+                    config.hidden_features, config.hidden_features
+                )
                 for idx in range(config.gcn_layers)
             ]
         )
@@ -124,25 +132,20 @@ class ALIGNNForceField(nn.Module):
         z: angle features (lg.edata)
         """
 
-        if len(self.alignn_layers) > 0:
+        # precomputed line graph
+        precomputed_lg = False
+        if isinstance(g, tuple):
+            precomputed_lg = True
             g, lg = g
             lg = lg.local_var()
-            lg.apply_edges(compute_bond_cosines)
-
-            # angle features (fixed)
-            z = self.angle_embedding(lg.edata.pop("h"))
 
         g = g.local_var()
 
-        # initial node features: atom feature network...
-        if self.config.sparse_atom_embedding:
-            x = g.ndata.pop("atomic_number").long().squeeze()
-        else:
-            x = g.ndata.pop("atom_features")
-
-        x = self.atom_embedding(x)
+        # initial bond features: bond displacement vectors
         r = g.edata["r"]
 
+        # to compute forces, take gradient wrt g.edata["r"]
+        # need to add bond vectors to autograd graph
         if self.config.calculate_gradient:
             r.requires_grad_(True)
 
@@ -154,10 +157,51 @@ class ALIGNNForceField(nn.Module):
         bondlength = torch.norm(r, dim=1)
         # print(bondlength.sort()[0][:10])
         y = self.edge_embedding(bondlength)
+        g.edata["y"] = y
+
+        # Local: apply GCN to local neighborhoods
+        # problem: need to match number of edges...
+        # solution: index into bond features and turn it into a residual connection?
+        # crystal graph convolution
+        # x, m = self.node_update(g, x, y)
+        # line graph convolution:
+        # m = m[local_edge_mask]
+        # y_update, z = self.edge_update(lg, m, z)
+        # y[local_edge_mask] += y_update
+
+        local_cutoff = 4.0
+        if len(self.alignn_layers) > 0:
+            if not precomputed_lg:
+                g_local = dgl.edge_subgraph(
+                    g, bondlength <= local_cutoff, relabel_nodes=False
+                )
+                if g.num_nodes() != g_local.num_nodes():
+                    print("problem with edge_subgraph!")
+                # y = g_local.edata.pop("y")
+
+                lg = g_local.line_graph(shared=True)
+
+            # angle features (fixed)
+            lg.apply_edges(compute_bond_cosines)
+            z = self.angle_embedding(lg.edata.pop("h"))
+
+        # initial node features: atom feature network...
+        if self.config.sparse_atom_embedding:
+            x = g.ndata.pop("atomic_number").long().squeeze()
+        else:
+            x = g.ndata.pop("atom_features")
+
+        x = self.atom_embedding(x)
 
         # ALIGNN updates: update node, edge, triplet features
+        # print(f"{x.shape=}")
+        # print(f"{y.shape=}")
+        # print(f"{z.shape=}")
+        # print(f"{g=}")
+        # print(f"{lg=}")
+        y_mask = torch.where(bondlength <= local_cutoff)[0]
         for alignn_layer in self.alignn_layers:
-            x, y, z = alignn_layer(g, lg, x, y, z)
+            x, y, z = alignn_layer(g, lg, x, y, z, y_mask=y_mask)
 
         # gated GCN updates: update node, edge features
         for gcn_layer in self.gcn_layers:
@@ -194,7 +238,9 @@ class ALIGNNForceField(nn.Module):
 
             # reduce over bonds to get forces on each atom
             g.edata["pairwise_forces"] = pairwise_forces
-            g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
+            g.update_all(
+                fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces")
+            )
 
             forces = torch.squeeze(g.ndata["forces"])
 
@@ -203,7 +249,10 @@ class ALIGNNForceField(nn.Module):
                 # broadcast |v(g)| across forces to under per-atom energy scaling
 
                 n_nodes = torch.cat(
-                    [i * torch.ones(i, device=g.device) for i in g.batch_num_nodes()]
+                    [
+                        i * torch.ones(i, device=g.device)
+                        for i in g.batch_num_nodes()
+                    ]
                 )
 
                 forces = forces * n_nodes[:, None]
@@ -217,7 +266,9 @@ class ALIGNNForceField(nn.Module):
                 # Following Virial stress formula, assuming inital velocity = 0
                 # Save volume as g.gdta['V']?
                 stress = -1 * (
-                    160.21766208 * torch.matmul(r.T, dy_dr) / (2 * g.ndata["V"][0])
+                    160.21766208
+                    * torch.matmul(r.T, dy_dr)
+                    / (2 * g.ndata["V"][0])
                 )
                 # virial = (
                 #    160.21766208

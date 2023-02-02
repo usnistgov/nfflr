@@ -110,7 +110,7 @@ def get_dataflow(config):
 
     dataset = AtomisticConfigurationDataset(
         df,
-        line_graph=True,
+        line_graph=False,
         cutoff_radius=config.dataset.cutoff,
         neighbor_strategy="cutoff",
         energy_units="eV/atom",
@@ -159,12 +159,19 @@ def train():
         calculate_gradient=True,
     )
 
+    # model_cfg = BondOrderConfig(
+    #     name="bondorder",
+    #     alignn_layers=2,
+    #     gcn_layers=2,
+    #     calculate_gradient=True,
+    # )
+
     data_cfg = DatasetConfig(
         name="alignn_ff_db",
         n_train=1000,
         n_val=1000,
         num_workers=4,
-        cutoff=6.0,
+        cutoff=8.0,
     )
 
     opt_cfg = OptimizerConfig(
@@ -196,7 +203,11 @@ def run_train(local_rank, config):
 
     print(f"running training {config.model.name} on {device}")
 
+    # todo: make a model setup function?
+    # todo: soft cutoffs in models
+    # also todo: set this up with ray.tune?
     model = ALIGNNForceField(config.model)
+    # model = NeuralBondOrder(config.model)
     idist.auto_model(model)
 
     train_loader, val_loader = get_dataflow(config)
@@ -370,7 +381,7 @@ def lr():
         n_train=1000,
         n_val=1000,
         num_workers=4,
-        cutoff=6.0,
+        cutoff=8.0,
     )
 
     opt_cfg = OptimizerConfig(
@@ -381,20 +392,20 @@ def lr():
         output_dir="./models/ff-300k",
     )
 
-    # model_cfg = ALIGNNForceFieldConfig(
-    #     name="alignn_forcefield",
-    #     alignn_layers=2,
-    #     gcn_layers=2,
-    #     atom_input_features=1,
-    #     sparse_atom_embedding=True,
-    #     calculate_gradient=True,
-    # )
-    model_cfg = BondOrderConfig(
-        name="bondorder",
+    model_cfg = ALIGNNForceFieldConfig(
+        name="alignn_forcefield",
         alignn_layers=2,
         gcn_layers=2,
+        atom_input_features=1,
+        sparse_atom_embedding=True,
         calculate_gradient=True,
     )
+    # model_cfg = BondOrderConfig(
+    #     name="bondorder",
+    #     alignn_layers=2,
+    #     gcn_layers=2,
+    #     calculate_gradient=True,
+    # )
 
     config = FFConfig(dataset=data_cfg, optimizer=opt_cfg, model=model_cfg)
 
@@ -417,8 +428,8 @@ def run_lr(local_rank, config):
     device = idist.device()
     print(f"running lr finder on {device}")
 
-    # model = ALIGNNForceField(config.model)
-    model = NeuralBondOrder(config.model)
+    model = ALIGNNForceField(config.model)
+    # model = NeuralBondOrder(config.model)
     idist.auto_model(model)
 
     train_loader, val_loader = get_dataflow(config)
