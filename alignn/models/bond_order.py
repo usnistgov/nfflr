@@ -3,7 +3,7 @@
 parameterize a bond order style potential with an ALIGNN network
 """
 
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 
 import dgl
 import dgl.function as fn
@@ -29,6 +29,8 @@ class BondOrderConfig(BaseSettings):
     """Hyperparameter schema for alignn.models.bond_order."""
 
     name: Literal["bondorder"]
+    cutoff: float = 8.0
+    cutoff_onset: Optional[float] = 7.5
     alignn_layers: int = 2
     gcn_layers: int = 2
     atom_input_features: int = 1
@@ -240,9 +242,7 @@ class NeuralBondOrder(nn.Module):
         elif self.config.energy_units == "eV":
             self.readout = SumPooling()
 
-    def forward(
-        self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]
-    ):
+    def forward(self, g: dgl.DGLGraph):
         """NeuralBondOrder : start with `atom_features`.
 
         V_ij = f_repulse(r_ij) + b_ij * f_attract(r_ij)
@@ -277,7 +277,7 @@ class NeuralBondOrder(nn.Module):
         g.edata["y"] = y_initial
 
         # Local: apply GCN to local neighborhoods
-        g_local = dgl.edge_subgraph(g, bondlength <= 4.0, preserve_nodes=True)
+        g_local = dgl.edge_subgraph(g, bondlength <= 4.0, relabel_nodes=False)
         if g.num_nodes() != g_local.num_nodes():
             print("problem with edge_subgraph!")
         y = g_local.edata.pop("y")
@@ -293,6 +293,9 @@ class NeuralBondOrder(nn.Module):
 
         # ALIGNN updates: update node, edge, triplet features
         # print(x.size(), y.size(), z.size())
+        # print(f"{x.shape=}")
+        # print(f"{y.shape=}")
+        # print(f"{z.shape=}")
 
         for alignn_layer in self.alignn_layers:
             x, y, z = alignn_layer(g_local, lg, x, y, z)
