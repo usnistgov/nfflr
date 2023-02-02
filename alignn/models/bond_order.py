@@ -3,7 +3,7 @@
 parameterize a bond order style potential with an ALIGNN network
 """
 
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 
 import dgl
 import dgl.function as fn
@@ -29,6 +29,8 @@ class BondOrderConfig(BaseSettings):
     """Hyperparameter schema for alignn.models.bond_order."""
 
     name: Literal["bondorder"]
+    cutoff: float = 8.0
+    cutoff_onset: Optional[float] = 7.5
     alignn_layers: int = 2
     gcn_layers: int = 2
     atom_input_features: int = 1

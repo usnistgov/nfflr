@@ -11,6 +11,30 @@ import dgl
 import dgl.function as fn
 
 
+def smooth_cutoff(r, r_onset=3.5, r_cutoff=4):
+    """Apply smooth cutoff to pairwise interactions
+    XPLOR smoothing function following HOOMD-blue and jax-md
+
+    r: bond lengths
+    r_onset: inner cutoff radius
+    r_cutoff: cutoff radius
+
+    inside cutoff radius, apply smooth cutoff envelope
+    outside cutoff radius: hard zeros
+    """
+    r2 = r**2
+    r2_on = r_onset**2
+    r2_cut = r_cutoff**2
+
+    # fmt: off
+    smoothed = torch.where(
+        r < r_cutoff,
+        (r2_cut - r2) ** 2 * (r2_cut + 2 * r2 - 3 * r2_on) / (r2_cut - r2_on) ** 3,
+        0,
+    )
+    return torch.where(r < r_onset, 1, smoothed)
+
+
 class RBFExpansion(nn.Module):
     """Expand interatomic distances with radial basis functions."""
 
@@ -140,7 +164,15 @@ class EdgeGatedGraphConv(nn.Module):
         g.apply_edges(fn.u_add_v("e_src", "e_dst", "e_nodes"))
         m = g.edata.pop("e_nodes") + self.edge_gate(edge_feats)
 
-        g.edata["sigma"] = torch.sigmoid(m)
+        # if edge attributes have a cutoff function value
+        # multiply the edge gate values with the cutoff value
+        cutoff_value = g.edata.get("cutoff_value")
+
+        if cutoff_value is not None:
+            g.edata["sigma"] = torch.sigmoid(m) * cutoff_value.unsqueeze(1)
+        else:
+            g.edata["sigma"] = torch.sigmoid(m)
+
         g.ndata["Bh"] = self.dst_update(node_feats)
         g.update_all(
             fn.u_mul_e("Bh", "sigma", "m"), fn.sum("m", "sum_sigma_h")

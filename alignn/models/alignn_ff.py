@@ -2,7 +2,7 @@
 
 A prototype crystal line graph network dgl implementation.
 """
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 
 import dgl
 import dgl.function as fn
@@ -17,6 +17,7 @@ from torch.autograd import grad
 from torch.nn import functional as F
 
 from alignn.models.utils import (
+    smooth_cutoff,
     RBFExpansion,
     MLPLayer,
     SparseALIGNNConv,
@@ -31,6 +32,8 @@ class ALIGNNForceFieldConfig(BaseSettings):
     """Hyperparameter schema for jarvisdgl.models.alignn_ff"""
 
     name: Literal["alignn_forcefield"] = "alignn_forcefield"
+    cutoff: float = 8.0
+    cutoff_onset: Optional[float] = 7.5
     alignn_layers: int = 4
     gcn_layers: int = 4
     atom_input_features: int = 92
@@ -155,6 +158,16 @@ class ALIGNNForceField(nn.Module):
         # using float64 and self-interaction threshold 1e-8 works
         # with float32, need to increase the threshold... to 1e-2
         bondlength = torch.norm(r, dim=1)
+
+        if self.config.cutoff_onset is not None:
+            # save cutoff function value for application in EdgeGatedGraphconv
+            fcut = smooth_cutoff(
+                bondlength,
+                r_onset=self.config.cutoff_onset,
+                r_cutoff=self.config.cutoff,
+            )
+            g.edata["cutoff_value"] = fcut
+
         # print(bondlength.sort()[0][:10])
         y = self.edge_embedding(bondlength)
         g.edata["y"] = y

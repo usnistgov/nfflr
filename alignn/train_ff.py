@@ -40,6 +40,8 @@ from alignn.training_utils import (
     setup_scheduler,
 )
 
+# torch.autograd.set_detect_anomaly(True)
+
 cli = typer.Typer()
 
 device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
@@ -63,7 +65,6 @@ class DatasetConfig:
     n_val: Optional[Union[int, float]] = 0.1
     n_train: Optional[Union[int, float]] = 0.8
     num_workers: int = 4
-    cutoff: float = 6.0
     jarvis_cache: Path = Path("~/.jarvis").expanduser()
 
 
@@ -111,7 +112,7 @@ def get_dataflow(config):
     dataset = AtomisticConfigurationDataset(
         df,
         line_graph=False,
-        cutoff_radius=config.dataset.cutoff,
+        cutoff_radius=config.model.cutoff,
         neighbor_strategy="cutoff",
         energy_units="eV/atom",
         n_train=config.dataset.n_train,
@@ -152,6 +153,8 @@ def train():
 
     model_cfg = ALIGNNForceFieldConfig(
         name="alignn_forcefield",
+        cutoff=8.0,
+        cutoff_onset=7.5,
         alignn_layers=2,
         gcn_layers=2,
         atom_input_features=1,
@@ -161,6 +164,8 @@ def train():
 
     # model_cfg = BondOrderConfig(
     #     name="bondorder",
+    # cutoff=8.0,
+    # cutoff_onset=7.5,
     #     alignn_layers=2,
     #     gcn_layers=2,
     #     calculate_gradient=True,
@@ -171,7 +176,6 @@ def train():
         n_train=1000,
         n_val=1000,
         num_workers=4,
-        cutoff=8.0,
     )
 
     opt_cfg = OptimizerConfig(
@@ -203,11 +207,10 @@ def run_train(local_rank, config):
 
     print(f"running training {config.model.name} on {device}")
 
-    # todo: soft cutoffs in models
     # also todo: set this up with ray.tune?
     if config.model.name == "alignn_forcefield":
         model = ALIGNNForceField(config.model)
-    elif config.model.name == "bond_order":
+    elif config.model.name == "bondorder":
         model = NeuralBondOrder(config.model)
 
     idist.auto_model(model)
@@ -383,7 +386,6 @@ def lr():
         n_train=1000,
         n_val=1000,
         num_workers=4,
-        cutoff=8.0,
     )
 
     opt_cfg = OptimizerConfig(
@@ -396,6 +398,8 @@ def lr():
 
     model_cfg = ALIGNNForceFieldConfig(
         name="alignn_forcefield",
+        cutoff=8.0,
+        cutoff_onset=7.5,
         alignn_layers=2,
         gcn_layers=2,
         atom_input_features=1,
@@ -404,6 +408,8 @@ def lr():
     )
     # model_cfg = BondOrderConfig(
     #     name="bondorder",
+    #     cutoff=8.0,
+    #     cutoff_onset=7.5,
     #     alignn_layers=2,
     #     gcn_layers=2,
     #     calculate_gradient=True,
@@ -430,10 +436,9 @@ def run_lr(local_rank, config):
     device = idist.device()
     print(f"running lr finder on {device}")
 
-
     if config.model.name == "alignn_forcefield":
         model = ALIGNNForceField(config.model)
-    elif config.model.name == "bond_order":
+    elif config.model.name == "bondorder":
         model = NeuralBondOrder(config.model)
 
     idist.auto_model(model)
@@ -486,6 +491,7 @@ def run_lr(local_rank, config):
         start_lr=1e-6,
         end_lr=1.0,
         num_iter=400,
+        diverge_th=1000,
     ) as finder:
         finder.run(train_loader)
 
