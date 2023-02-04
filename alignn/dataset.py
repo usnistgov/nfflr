@@ -326,35 +326,19 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.split = self.split_dataset_by_id(n_train, n_val)
 
         # features = self._get_attribute_lookup(atom_features)
-        self.lmdb_name = "jv_300k_scratch.db"
-        # self.lmdb_name = "jv_2M.db"
-        self.lmdb_path = Path("data")
 
-        scratch = get_scratch_dir()
+        scratch = get_scratch_dir() / "jv_300k"
         scratch.mkdir(exist_ok=True)
-        if (self.lmdb_path / self.lmdb_name).exists():
-            shutil.copytree(
-                self.lmdb_path / self.lmdb_name, scratch / self.lmdb_name
-            )
-        self.lmdb_scratch_path = str(scratch / self.lmdb_name)
+        self.scratchdir = scratch
 
-        self.lmdb_sz = int(1e11)
-        self.env = None
-
-    def load_graph(self, idx: int):
+    def load_graph_torch(self, idx: int):
         """Deserialize graph from lmdb store using calculation key."""
         key = self.df[self.id_tag].iloc[idx]
 
-        if self.env is None:
-            self.env = lmdb.open(
-                str(self.lmdb_scratch_path), map_size=self.lmdb_sz
-            )
+        cachefile = self.scratchdir / f"jarvis-{key}.pkl"
 
-        with self.env.begin() as txn:
-            record = txn.get(key.encode())
-
-        if record is not None:
-            g, lg = pickle.loads(record)
+        if cachefile.is_file():
+            g, lg = torch.load(cachefile)
 
         else:
             a = Atoms.from_dict(self.df["atoms"].iloc[idx])
@@ -369,8 +353,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
             else:
                 lg = None
 
-            with self.env.begin(write=True) as txn:
-                txn.put(key.encode(), pickle.dumps((g, lg)))
+            torch.save((g, lg), cachefile)
 
         # don't serialize redundant edge data...
         if self.line_graph:
@@ -484,7 +467,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         # key = self.df[self.id_tag].iloc[idx]
         # print(key)
 
-        g, lg = self.load_graph(idx)
+        g, lg = self.load_graph_torch(idx)
 
         g.ndata["atomic_number"] = g.ndata["atom_features"]
 

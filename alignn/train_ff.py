@@ -1,8 +1,10 @@
 """Prototype training code for force field models."""
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
 from typing import Any, Literal, Optional, Union
+
+from ray.air import session
 
 import ignite.distributed as idist
 import matplotlib.pyplot as plt
@@ -87,6 +89,14 @@ class FFConfig:
     model: Any
 
 
+def ff_config(config: dict):
+    return FFConfig(
+        dataset=DatasetConfig(**config["dataset"]),
+        optimizer=OptimizerConfig(**config["optimizer"]),
+        model=ALIGNNForceFieldConfig(**config["model"]),
+    )
+
+
 def get_dataflow(config):
     """Set up force field dataloaders."""
     # _epa suffix has energies per atom...
@@ -135,6 +145,7 @@ def get_dataflow(config):
         sampler=SubsetRandomSampler(dataset.split["train"]),
         drop_last=True,
         pin_memory=True,
+        num_workers=config.dataset.num_workers,
     )
     val_loader = idist.auto_dataloader(
         dataset,
@@ -199,6 +210,9 @@ def train():
 
 
 def run_train(local_rank, config):
+    if isinstance(config, dict):
+        config = ff_config(config)
+
     # torch.set_default_dtype(torch.float64)  # batch size=64
 
     rank = idist.get_rank()
@@ -207,13 +221,10 @@ def run_train(local_rank, config):
 
     print(f"running training {config.model.name} on {device}")
 
-    # also todo: set this up with ray.tune?
     if config.model.name == "alignn_forcefield":
-        model = ALIGNNForceField(config.model)
+        model = idist.auto_model(ALIGNNForceField(config.model))
     elif config.model.name == "bondorder":
-        model = NeuralBondOrder(config.model)
-
-    idist.auto_model(model)
+        model = idist.auto_model(NeuralBondOrder(config.model))
 
     train_loader, val_loader = get_dataflow(config)
     prepare_batch = partial(
@@ -223,7 +234,6 @@ def run_train(local_rank, config):
     params = group_decay(model)
     optimizer = setup_optimizer(params, config.optimizer)
     optimizer = idist.auto_optim(optimizer)
-
     scheduler = setup_scheduler(config.optimizer, optimizer, len(train_loader))
 
     criteria = {
@@ -251,7 +261,7 @@ def run_train(local_rank, config):
         device=device,
     )
 
-    if rank == 0:
+    if config.optimizer.progress and rank == 0:
         pbar = ProgressBar()
         pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
@@ -330,6 +340,7 @@ def run_train(local_rank, config):
     #     Events.ITERATION_COMPLETED, lambda engine: print("evaluation step")
     # )
 
+    # TODO: refactor for readability
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(engine):
         """Log training results."""
@@ -347,7 +358,16 @@ def run_train(local_rank, config):
                 "validation": val_evaluator,
             }
         else:
-            evaluators = {}
+            # only root process logs results
+            return
+
+        checkpoint_results = {}
+        for phase, evaluator in evaluators.items():
+            m = evaluator.state.metrics
+            results = {f"{phase}_{key}": v for key, v in m.items()}
+            checkpoint_results.update(results)
+
+        session.report(checkpoint_results)
 
         for phase, evaluator in evaluators.items():
 
@@ -376,6 +396,8 @@ def run_train(local_rank, config):
     # train the model!
     print("go")
     trainer.run(train_loader, max_epochs=config.optimizer.epochs)
+
+    return val_evaluator.state.metrics["loss"]
 
 
 @cli.command()
