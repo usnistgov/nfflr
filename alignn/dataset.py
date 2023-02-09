@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 import dgl
-import lmdb
 import numpy as np
 import pandas as pd
 import torch
@@ -332,7 +331,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         self.scratchdir = scratch
 
     def load_graph_torch(self, idx: int):
-        """Deserialize graph from lmdb store using calculation key."""
+        """Deserialize graph from torch pickle store using calculation key."""
         key = self.df[self.id_tag].iloc[idx]
 
         cachefile = self.scratchdir / f"jarvis-{key}.pkl"
