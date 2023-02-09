@@ -12,6 +12,7 @@ import pandas as pd
 import torch
 import typer
 from ignite.contrib.engines.common import setup_common_training_handlers
+from ignite.engine import Engine, supervised_training_step_amp
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.engine import (
     Events,
@@ -67,13 +68,14 @@ class DatasetConfig:
     n_val: Optional[Union[int, float]] = 0.1
     n_train: Optional[Union[int, float]] = 0.8
     num_workers: int = 4
-    jarvis_cache: Path = Path("~/.jarvis").expanduser()
+    # jarvis_cache: Path = Path("~/.jarvis").expanduser()
+    jarvis_cache: Path = Path("/wrk/bld/shared/jarvis").expanduser()
 
 
 @dataclass
 class OptimizerConfig:
     optimizer: Literal["sgd", "adamw"] = "adamw"
-    batch_size: int = 64
+    batch_size: int = 256
     learning_rate: float = 1e-2
     weight_decay: float = 1e-5
     epochs: int = 30
@@ -144,8 +146,10 @@ def get_dataflow(config):
         batch_size=config.optimizer.batch_size,
         sampler=SubsetRandomSampler(dataset.split["train"]),
         drop_last=True,
+
         pin_memory=True,
         num_workers=config.dataset.num_workers,
+        # pin_memory="cuda" in idist.device().type
     )
     val_loader = idist.auto_dataloader(
         dataset,
@@ -407,11 +411,11 @@ def lr():
         name="alignn_ff_db",
         n_train=1000,
         n_val=1000,
-        num_workers=4,
+        num_workers=6,
     )
 
     opt_cfg = OptimizerConfig(
-        batch_size=16,
+        batch_size=100,
         weight_decay=1e-1,
         learning_rate=1e-2,
         progress=True,
@@ -492,6 +496,10 @@ def run_lr(local_rank, config):
 
         return energy_loss + force_scale * force_loss
 
+    # scaler = torch.cuda.amp.GradScaler()
+    # update_fn = supervised_training_step_amp(model, optimizer, ff_criterion, 'cuda', scaler=scaler, prepare_batch=prepare_batch)
+    # trainer = Engine(update_fn)
+
     trainer = create_supervised_trainer(
         model,
         optimizer,
@@ -511,9 +519,9 @@ def run_lr(local_rank, config):
         trainer,
         to_save,
         start_lr=1e-6,
-        end_lr=1.0,
+        end_lr=0.1,
         num_iter=400,
-        diverge_th=1000,
+        diverge_th=1e9,
     ) as finder:
         finder.run(train_loader)
 
