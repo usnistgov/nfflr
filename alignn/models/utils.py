@@ -115,6 +115,7 @@ class EdgeGatedGraphConv(nn.Module):
         output_features: int,
         residual: bool = True,
         norm: Literal["layernorm", "batchnorm"] = "layernorm",
+        skip_edgenorm: bool = False,
     ):
         """Initialize parameters for ALIGNN update."""
         super().__init__()
@@ -123,6 +124,8 @@ class EdgeGatedGraphConv(nn.Module):
             Norm = nn.LayerNorm
         elif norm == "batchnorm":
             Norm = nn.BatchNorm
+
+        self.skip_edgenorm = skip_edgenorm
 
         self.residual = residual
         # CGCNN-Conv operates on augmented edge features
@@ -133,7 +136,11 @@ class EdgeGatedGraphConv(nn.Module):
         self.src_gate = nn.Linear(input_features, output_features)
         self.dst_gate = nn.Linear(input_features, output_features)
         self.edge_gate = nn.Linear(input_features, output_features)
-        self.norm_edges = Norm(output_features)
+
+        if self.skip_edgenorm:
+            self.norm_edges = nn.Identity()
+        else:
+            self.norm_edges = Norm(output_features)
 
         self.src_update = nn.Linear(input_features, output_features)
         self.dst_update = nn.Linear(input_features, output_features)
@@ -216,7 +223,9 @@ class ALIGNNConv(nn.Module):
             in_features, out_features, norm=norm
         )
         self.edge_update = EdgeGatedGraphConv(
-            out_features, out_features, norm=norm
+            out_features,
+            out_features,
+            norm=norm,
         )
 
     def forward(
@@ -252,6 +261,7 @@ class SparseALIGNNConv(nn.Module):
         in_features: int,
         out_features: int,
         norm: Literal["layernorm", "batchnorm"] = "layernorm",
+        skip_last_norm: bool = False,
     ):
         """Set up ALIGNN parameters."""
         super().__init__()
@@ -260,7 +270,11 @@ class SparseALIGNNConv(nn.Module):
             in_features, out_features, norm=norm, residual=True
         )
         self.edge_update = EdgeGatedGraphConv(
-            out_features, out_features, norm=norm, residual=False
+            out_features,
+            out_features,
+            norm=norm,
+            residual=False,
+            skip_edgenorm=skip_last_norm,
         )
 
     def forward(

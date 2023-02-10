@@ -1,4 +1,6 @@
 """Prototype training code for force field models."""
+import os
+from datetime import timedelta
 from dataclasses import dataclass, asdict
 from functools import partial
 from pathlib import Path
@@ -49,6 +51,10 @@ cli = typer.Typer()
 
 device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
 
+gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
+num_gpus = len(gpus.split(","))
+
+
 # https://pytorch.org/docs/stable/distributed.html#which-backend-to-use
 distributed_backend = None
 if torch.distributed.is_nccl_available():
@@ -56,6 +62,8 @@ if torch.distributed.is_nccl_available():
     distributed_backend = "nccl"
 elif torch.distributed.is_gloo_available():
     distributed_backend = "gloo"
+
+# distributed_backend = "gloo"
 
 
 @dataclass
@@ -136,7 +144,6 @@ def get_dataflow(config):
 
     # and now non-root processes can continue
     if idist.get_local_rank() == 0:
-
         idist.barrier()
 
     # configure training and validation datasets...
@@ -146,17 +153,16 @@ def get_dataflow(config):
         batch_size=config.optimizer.batch_size,
         sampler=SubsetRandomSampler(dataset.split["train"]),
         drop_last=True,
-
-        pin_memory=True,
         num_workers=config.dataset.num_workers,
-        # pin_memory="cuda" in idist.device().type
+        pin_memory="cuda" in idist.device().type,
     )
     val_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
         batch_size=config.optimizer.batch_size,
         sampler=SubsetRandomSampler(dataset.split["val"]),
-        pin_memory=True,
+        num_workers=config.dataset.num_workers,
+        pin_memory="cuda" in idist.device().type,
     )
 
     return train_loader, val_loader
@@ -188,23 +194,27 @@ def train():
 
     data_cfg = DatasetConfig(
         name="alignn_ff_db",
-        n_train=1000,
+        n_train=10000,
         n_val=1000,
-        num_workers=4,
+        num_workers=6,
     )
 
     opt_cfg = OptimizerConfig(
-        batch_size=16,  # 128 * 4
+        batch_size=64 * num_gpus,  # 128 * 4
         weight_decay=1e-1,
-        learning_rate=1e-2,
+        learning_rate=1e-3,
         progress=True,
-        output_dir="./models/ff-300k-dist",
+        output_dir="./ff-300k-dist",
     )
 
     config = FFConfig(model=model_cfg, optimizer=opt_cfg, dataset=data_cfg)
 
-    # spawn_kwargs = {"nproc_per_node": 2}
-    spawn_kwargs = {}
+    # this can't be None if training distributed...
+    spawn_kwargs = {
+        "nproc_per_node": num_gpus,
+        "timeout": timedelta(seconds=60),
+    }
+    # spawn_kwargs = {}
 
     print("launching...")
     with idist.Parallel(
@@ -374,7 +384,6 @@ def run_train(local_rank, config):
         session.report(checkpoint_results)
 
         for phase, evaluator in evaluators.items():
-
             m = evaluator.state.metrics
             loss = m["loss"]
 
@@ -406,7 +415,6 @@ def run_train(local_rank, config):
 
 @cli.command()
 def lr():
-
     data_cfg = DatasetConfig(
         name="alignn_ff_db",
         n_train=1000,

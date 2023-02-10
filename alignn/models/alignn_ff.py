@@ -105,16 +105,30 @@ class ALIGNNForceField(nn.Module):
                     config.hidden_features,
                     config.hidden_features,
                 )
-                for idx in range(config.alignn_layers)
+                for idx in range(config.alignn_layers - 1)
             ]
+        )
+        self.alignn_layers.append(
+            SparseALIGNNConv(
+                config.hidden_features,
+                config.hidden_features,
+                skip_last_norm=True,
+            )
         )
         self.gcn_layers = nn.ModuleList(
             [
                 EdgeGatedGraphConv(
                     config.hidden_features, config.hidden_features
                 )
-                for idx in range(config.gcn_layers)
+                for idx in range(config.gcn_layers - 1)
             ]
+        )
+        self.gcn_layers.append(
+            EdgeGatedGraphConv(
+                config.hidden_features,
+                config.hidden_features,
+                skip_edgenorm=True,
+            )
         )
 
         if self.config.energy_units == "eV/atom":
