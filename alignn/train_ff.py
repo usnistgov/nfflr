@@ -117,8 +117,9 @@ def get_dataflow(config):
 
     if isinstance(config.dataset.name, Path):
         # e.g., "jdft_max_min_307113_id_prop.json"
-        df = pd.read_json(config.dataset.name)
-        # df = pd.read_pickle(datadir / dataset.replace("json", "pkl"))
+        lines = "jsonl" in config.dataset.name
+        df = pd.read_json(config.dataset.name, lines=lines)
+
     elif config.dataset.name == "alignn_ff_db":
         df = pd.DataFrame(
             jdata(config.dataset.name, store_dir=config.dataset.jarvis_cache)
@@ -194,7 +195,7 @@ def train():
 
     data_cfg = DatasetConfig(
         name="alignn_ff_db",
-        n_train=10000,
+        n_train=50000,
         n_val=1000,
         num_workers=6,
     )
