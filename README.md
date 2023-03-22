@@ -1,3 +1,4 @@
+# NFFLR - Neural Force Field Learning toolkit
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 [![PyPI version](https://badge.fury.io/py/alignn.svg)](https://badge.fury.io/py/nfflr)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/usnistgov/nfflr)
