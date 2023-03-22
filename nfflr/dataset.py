@@ -1,283 +1,49 @@
 """Standalone dataset for training force field models."""
 import os
+import tempfile
 from functools import partial
-from pathlib import Path
-from typing import Dict, List, Literal, Tuple, Union
+from typing import List, Literal, Tuple, Union, Optional, Callable
 
 import dgl
 import numpy as np
 import pandas as pd
 import torch
-from jarvis.core.atoms import Atoms
-from jarvis.core.graphs import (
-    chem_data,
-    get_node_attributes,
-)
+from jarvis.core.atoms import Atoms as jAtoms
 from numpy.random import default_rng
 
-from alignn.graphs import Graph
+from nfflr.atoms import Atoms
 
 
-def get_scratch_dir():
+def get_cachedir():
     """Get local scratch directory."""
-    scratch = Path("/tmp/alignnff")
+
+    scratchdir = None
+    prefix = "nfflr-"
 
     slurm_job = os.environ.get("SLURM_JOB_ID")
     if slurm_job is not None:
-        scratch = Path(f"/scratch/{slurm_job}")
+        scratchdir = "/scratch"
+        prefix = f"{slurm_job}-"
 
-    return scratch
+    cachedir = tempfile.TemporaryDirectory(dir=scratchdir, prefix=prefix)
 
-
-def atoms_to_graph(atoms):
-    """Convert structure dict to DGLGraph."""
-    structure = Atoms.from_dict(atoms)
-    return Graph.atom_dgl_multigraph(
-        structure,
-        cutoff=8.0,
-        atom_features="atomic_number",
-        max_neighbors=12,
-        compute_line_graph=False,
-        use_canonize=True,
-    )
+    return cachedir
 
 
-def build_radius_graph_torch(
-    a: Atoms,
-    r: float = 5,
-    bond_tol: float = 0.15,
-    neighbor_strategy: Literal["cutoff", "12nn"] = "cutoff",
-):
-    """
-    Get neighbors for each atom in the unit cell, out to a distance r.
-    Contains [index_i, index_j, distance, image] array.
-    Adapted from jarvis-tools, in turn adapted from pymatgen.
-
-    Optionally, use a 12th-neighbor-shell graph
-
-    might be differentiable wrt atom coords, definitely not wrt cell params
-    """
-    precision = torch.float64
-    atol = 1e-5
-
-    n = a.num_atoms
-    X_src = torch.tensor(a.cart_coords, dtype=precision)
-    lattice_matrix = torch.tensor(a.lattice_mat, dtype=precision)
-
-    # cutoff -> calculate which periodic images to consider
-    recp_len = np.array(a.lattice.reciprocal_lattice().abc)
-    maxr = np.ceil((r + bond_tol) * recp_len / (2 * np.pi))
-    nmin = np.floor(np.min(a.frac_coords, axis=0)) - maxr
-    nmax = np.ceil(np.max(a.frac_coords, axis=0)) + maxr
-    all_ranges = [torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)]
-    cell_images = torch.cartesian_prod(*all_ranges)
-
-    # tile periodic images into X_dst
-    # index id_dst into X_dst maps to atom id as id_dest % num_atoms
-    X_dst = (cell_images @ lattice_matrix)[:, None, :] + X_src
-    X_dst = X_dst.reshape(-1, 3)
-
-    # pairwise distances between atoms in (0,0,0) cell
-    # and atoms in all periodic images
-    dist = torch.cdist(X_src, X_dst)
-
-    if neighbor_strategy == "cutoff":
-        neighbor_mask = torch.bitwise_and(
-            dist <= r, ~torch.isclose(dist, torch.DoubleTensor([0]), atol=atol)
-        )
-
-    elif neighbor_strategy == "12nn":
-        # collect 12th-nearest neighbor distance
-        # topk: k = 13 because first neighbor is a self-interaction
-        # this is filtered out in the neighbor_mask selection
-        nbrdist, _ = dist.topk(13, largest=False)
-        k_dist = nbrdist[:, -1]
-
-        # expand k-NN graph to include all atoms in the
-        # neighbor shell of the twelfth neighbor
-        # broadcast the <= along the src axis
-        neighbor_mask = torch.bitwise_and(
-            dist <= 1.05 * k_dist[:, None],
-            ~torch.isclose(dist, torch.DoubleTensor([0]), atol=atol),
-        )
-
-    # get node indices for edgelist from neighbor mask
-    src, v = torch.where(neighbor_mask)
-
-    # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % n))
-
-    if torch.get_default_dtype() == torch.float32:
-        try:
-            g.ndata["coord"] = X_src.float()
-            g.edata["r"] = (X_dst[v] - X_src[src]).float()
-        except:
-            print(a)
-            print(g)
-            print(X_src)
-            raise
-    else:
-        g.ndata["coord"] = X_src
-        g.edata["r"] = X_dst[v] - X_src[src]
-
-    g.ndata["atom_features"] = torch.tensor(a.atomic_numbers)[:, None]
-
-    return g
-
-
-def atom_dgl_multigraph_torch(
-    atoms: Atoms,
-    cutoff: float = 8,
-    bond_tol: float = 0.15,
-    atol=1e-5,
-    topk_tol=1.001,
-    precision=torch.float64,
-):
-    """
-    Get neighbors for each atom in the unit cell, out to a distance r.
-
-    Contains [index_i, index_j, distance, image] array.
-
-    This function builds a supercell and identifies all edges  by
-    brute force calculation of the pairwise distances between atoms
-    in the original cell and atoms in the supercell. If the kNN graph
-    construction is used, do some extra work to make sure that all
-    edges have a reverse pair for dgl undirected graph representation,
-    but also that edges are not double counted.
-
-    # check that torch knn graph is equivalent to pytorch version (with canonical edges)
-    a = Atoms(...)
-    pg = graphs.Graph.atom_dgl_multigraph(a, use_canonize=True, compute_line_graph=False)
-    tg = graphs.Graph.atom_dgl_multigraph_torch(a, compute_line_graph=False)
-
-    # round bond displacement vectors to add tolerance to numerical error
-    pg_edata = list(
-        zip(
-            map(int, pg.edges()[0]),
-            map(int, pg.edges()[1]),
-            map(tuple, torch.round(pg.edata["r"], decimals=3).tolist()),
-        )
-    )
-    tg_edata = list(
-        zip(
-            map(int, tg.edges()[0]),
-            map(int, tg.edges()[1]),
-            map(tuple, torch.round(tg.edata["r"], decimals=3).tolist()),
-        )
-    )
-    set(tg_edata).difference(pg_edata) # -> yields empty set
-
-    """
-
-    if atoms is not None:
-        cart_coords = torch.tensor(atoms.cart_coords, dtype=precision)
-        frac_coords = torch.tensor(atoms.frac_coords, dtype=precision)
-        lattice_mat = torch.tensor(atoms.lattice_mat, dtype=precision)
-
-    X_src = cart_coords
-    num_atoms = X_src.shape[0]
-
-    # determine how many supercells are needed for the cutoff radius
-    recp = 2 * torch.pi * torch.linalg.inv(lattice_mat).T
-    recp_len = torch.tensor([i for i in (torch.sqrt(torch.sum(recp**2, dim=1)))])
-
-    maxr = torch.ceil((cutoff + bond_tol) * recp_len / (2 * torch.pi))
-    nmin = torch.floor(torch.min(frac_coords, dim=0)[0]) - maxr
-    nmax = torch.ceil(torch.max(frac_coords, dim=0)[0]) + maxr
-
-    # construct the supercell index list
-    all_ranges = [torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)]
-    cell_images = torch.cartesian_prod(*all_ranges)
-
-    # tile periodic images into X_dst
-    # index id_dst into X_dst maps to atom id as id_dest % num_atoms
-    X_dst = (cell_images @ lattice_mat)[:, None, :] + X_src
-    X_dst = X_dst.reshape(-1, 3)
-
-    # pairwise distances between atoms in (0,0,0) cell
-    # and atoms in all periodic images
-    dist = torch.cdist(X_src, X_dst)
-
-    # radius graph
-    neighbor_mask = torch.bitwise_and(
-        dist <= cutoff,
-        ~torch.isclose(dist, torch.DoubleTensor([0]), atol=atol),
-    )
-    # get node indices for edgelist from neighbor mask
-    src, v = torch.where(neighbor_mask)
-
-    # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % num_atoms))
-    g.ndata["cart_coords"] = X_src.float()
-    g.ndata["frac_coords"] = frac_coords.float()
-    g.gdata = lattice_mat
-    g.edata["r"] = (X_dst[v] - X_src[src]).float()
-    g.edata["X_src"] = X_src[src]
-    g.edata["X_dst"] = X_dst[v]
-    g.edata["src"] = src
-
-    return g
-
-
-def prepare_line_graph_batch(
-    batch: Tuple[dgl.DGLGraph, dgl.DGLGraph, Dict[str, torch.Tensor]],
-    device=None,
-    non_blocking=False,
-) -> Tuple[Tuple[dgl.DGLGraph, dgl.DGLGraph], Dict[str, torch.Tensor]]:
-    """Send batched dgl crystal graph to device."""
-    g, lg, t = batch
-    t = {k: v.to(device, non_blocking=non_blocking) for k, v in t.items()}
-
-    batch = (
-        (
-            g.to(device, non_blocking=non_blocking),
-            lg.to(device, non_blocking=non_blocking),
-        ),
-        t,
-    )
-
-    return batch
-
-
-def prepare_dgl_batch(
-    batch: Tuple[dgl.DGLGraph, Dict[str, torch.Tensor]],
-    device=None,
-    non_blocking=False,
-) -> Tuple[dgl.DGLGraph, Dict[str, torch.Tensor]]:
-    """Send batched dgl crystal graph to device."""
-    g, t = batch
-    t = {k: v.to(device, non_blocking=non_blocking) for k, v in t.items()}
-
-    batch = (g.to(device, non_blocking=non_blocking), t)
-
-    return batch
-
-
-class AtomisticConfigurationDataset(torch.utils.data.Dataset):
-    """Dataset of crystal DGLGraphs.
-
-    build (and cache) graphs on each access instead of precomputing them
-    also, make sure to split sections grouped on id column
-
-    example_data = Path("alignn/examples/sample_data")
-    df = pd.read_json(example_data / "id_prop.json")
-
-    target: total_energy, forces, stresses
-    """
+class AtomsDataset(torch.utils.data.Dataset):
+    """Dataset of Atoms."""
 
     def __init__(
         self,
         df: pd.DataFrame,
-        atom_features: str = "atomic_number",
-        transform: bool = None,
-        line_graph: bool = False,
+        target: str = "formation_energy_peratom",
+        transform: Optional[Callable] = None,
         train_val_seed: int = 42,
         id_tag: str = "jid",
-        cutoff_radius: float = 6.0,
         n_train: Union[float, int] = 0.8,
         n_val: Union[float, int] = 0.1,
-        neighbor_strategy: Literal["cutoff", "12nn"] = "cutoff",
         energy_units: Literal["eV", "eV/atom"] = "eV/atom",
+        diskcache: bool = False,
     ):
         """Pytorch Dataset for atomistic graphs.
 
@@ -288,66 +54,81 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         if isinstance(example_id, int):
             df["group_id"] = df[id_tag]
             df["step_id"] = df.index
+        elif "_" not in example_id:
+            df["group_id"] = df[id_tag]
+            df["step_id"] = np.ones(df.shape[0])
         else:
             # split key like "JVASP-6664_main-5"
             df["group_id"], df["step_id"] = zip(
                 *df[id_tag].apply(partial(str.split, sep="_"))
             )
 
+        self.atoms = df.atoms.apply(lambda x: Atoms(jAtoms.from_dict(x)))
+        self.transform = transform
+        self.target = target
+
         self.df = df
-        self.line_graph = line_graph
         self.train_val_seed = train_val_seed
         self.id_tag = id_tag
-        self.cutoff_radius = cutoff_radius
-        self.neighbor_strategy = neighbor_strategy
         self.energy_units = energy_units
-
-        if self.line_graph:
-            self.collate = self.collate_line_graph
-            self.prepare_batch = prepare_line_graph_batch
-        else:
-            self.collate = self.collate_default
-            self.prepare_batch = prepare_dgl_batch
-
         self.ids = self.df[id_tag]
 
         self.split = self.split_dataset_by_id(n_train, n_val)
 
-        # features = self._get_attribute_lookup(atom_features)
-
-        scratch = get_scratch_dir() / "jv_300k"
-        scratch.mkdir(exist_ok=True)
-        self.scratchdir = scratch
-
-    def load_graph_torch(self, idx: int):
-        """Deserialize graph from torch pickle store using calculation key."""
-        key = self.df[self.id_tag].iloc[idx]
-
-        cachefile = self.scratchdir / f"jarvis-{key}.pkl"
-
-        if cachefile.is_file():
-            g, lg = torch.load(cachefile)
-
+        if diskcache:
+            self.diskcache = get_cachedir()
         else:
-            a = Atoms.from_dict(self.df["atoms"].iloc[idx])
-            g = build_radius_graph_torch(
-                a,
-                neighbor_strategy=self.neighbor_strategy,
-                r=self.cutoff_radius,
-            )
+            self.diskcache = None
 
-            if self.line_graph:
-                lg = g.line_graph(shared=False)
-            else:
-                lg = None
+    def __len__(self):
+        """Get length."""
+        return self.df.shape[0]
 
-            torch.save((g, lg), cachefile)
+    def __getitem__(self, idx):
+        """Get AtomsDataset sample."""
 
-        # don't serialize redundant edge data...
-        if self.line_graph:
-            lg.ndata["r"] = g.edata["r"]
+        key = self.df[self.id_tag].iloc[idx]
+        atoms = self.atoms[idx]
 
-        return g, lg
+        if self.diskcache is not None:
+            cachefile = self.diskcache / f"jarvis-{key}.pkl"
+
+            if cachefile.is_file():
+                g, lg = torch.load(cachefile)
+
+        if self.transform:
+            atoms = self.transform(atoms)
+
+        if self.target == "energy_and_forces":
+            target = self.get_energy_and_forces(idx)
+        else:
+            target = {self.target: self.df[self.target].iloc[idx]}
+
+        target = {
+            k: torch.tensor(t, dtype=torch.get_default_dtype())
+            for k, t in target.items()
+        }
+
+        return atoms, target
+
+    def get_energy_and_forces(self, idx) -> dict:
+
+        target = {
+            "energy": self.df["total_energy"][idx],
+            "forces": self.df["forces"][idx],
+            "stresses": self.df["stresses"][idx],
+        }
+
+        # TODO: make sure datasets use standard units...
+        # data store should have total energies in eV
+        if self.energy_units == "eV/atom":
+            target["energy"] = target["energy"] / target["forces"].shape[0]
+            # note: probably keep forces in eV/at and scale up predictions...
+        elif self.energy_units == "eV":
+            # data store should have total energies in eV, so do nothing
+            pass
+
+        return target
 
     def split_dataset_by_id(self, n_train: Union[float, int], n_val: Union[float, int]):
         """Get train/val/test split indices for SubsetRandomSampler.
@@ -416,70 +197,6 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         train_ids = train_val_ids[n_val:]
 
         return {"train": train_ids, "val": val_ids, "test": test_ids}
-
-    @staticmethod
-    def _get_attribute_lookup(atom_features: str = "cgcnn"):
-        """Build a lookup array indexed by atomic number."""
-        max_z = max(v["Z"] for v in chem_data.values())
-
-        # get feature shape (referencing Carbon)
-        template = get_node_attributes("C", atom_features)
-
-        features = np.zeros((1 + max_z, len(template)))
-
-        for element, v in chem_data.items():
-            z = v["Z"]
-            x = get_node_attributes(element, atom_features)
-
-            if x is not None:
-                features[z, :] = x
-
-        return features
-
-    def __len__(self):
-        """Get length."""
-        return self.df.shape[0]
-
-    def __getitem__(self, idx):
-        """Get StructureDataset sample."""
-
-        # JVASP-119960_main-1 causing problems
-        # also JVASP-118572_main-1
-        # this is because the shorted bond is greater than the cutoff length
-        # key = self.df[self.id_tag].iloc[idx]
-        # print(key)
-
-        g, lg = self.load_graph_torch(idx)
-
-        g.ndata["atomic_number"] = g.ndata["atom_features"]
-
-        target = {
-            "energy": self.df["total_energy"][idx],
-            "forces": self.df["forces"][idx],
-            "stresses": self.df["stresses"][idx],
-        }
-
-        target = {
-            k: torch.tensor(t, dtype=torch.get_default_dtype())
-            for k, t in target.items()
-        }
-
-        # TODO: make sure datasets use standard units...
-        # data store should have total energies in eV
-        if self.energy_units == "eV/atom":
-            target["energy"] = target["energy"] / g.num_nodes()
-            # note: probably keep forces in eV/at and scale up predictions...
-            # target["forces"] = target["forces"] / g.num_nodes()
-        elif self.energy_units == "eV":
-            # data store should have total energies in eV, so do nothing
-            pass
-
-        if self.line_graph:
-            # lg = g.line_graph(shared=True)
-            # lg.apply_edges(compute_bond_cosines)
-            return g, lg, target
-
-        return g, target
 
     @staticmethod
     def collate_default(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
