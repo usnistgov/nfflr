@@ -69,9 +69,7 @@ elif torch.distributed.is_gloo_available():
 @dataclass
 class DatasetConfig:
     name: Union[Literal["alignn_ff_db"], Path]
-    atom_features: Literal[
-        "basic", "atomic_number", "cfid", "cgcnn"
-    ] = "atomic_number"
+    atom_features: Literal["basic", "atomic_number", "cfid", "cgcnn"] = "atomic_number"
     random_seed: Optional[int] = 123
     n_val: Optional[Union[int, float]] = 0.1
     n_train: Optional[Union[int, float]] = 0.8
@@ -218,9 +216,7 @@ def train():
     # spawn_kwargs = {}
 
     print("launching...")
-    with idist.Parallel(
-        backend=distributed_backend, **spawn_kwargs
-    ) as parallel:
+    with idist.Parallel(backend=distributed_backend, **spawn_kwargs) as parallel:
         parallel.run(run_train, config)
 
 
@@ -292,9 +288,7 @@ def run_train(local_rank, config):
             scheduler=scheduler,
             trainer=trainer,
         ),
-        DiskSaver(
-            config.optimizer.output_dir, create_dir=True, require_empty=False
-        ),
+        DiskSaver(config.optimizer.output_dir, create_dir=True, require_empty=False),
         n_saved=1,
         global_step_transform=lambda *_: trainer.state.epoch,
     )
@@ -362,9 +356,7 @@ def run_train(local_rank, config):
         epoch = engine.state.epoch
 
         n_train_eval = int(0.1 * len(train_loader))
-        train_evaluator.run(
-            train_loader, epoch_length=n_train_eval, max_epochs=1
-        )
+        train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
         val_evaluator.run(val_loader)
 
         if rank == 0:
@@ -389,9 +381,7 @@ def run_train(local_rank, config):
             loss = m["loss"]
 
             print(f"{phase} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-            print(
-                f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}"
-            )
+            print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
 
             parity_plots(
                 evaluator.state.output,
@@ -403,9 +393,7 @@ def run_train(local_rank, config):
             for key, value in m.items():
                 history[phase][key].append(value)
 
-        torch.save(
-            history, Path(config.optimizer.output_dir) / "metric_history.pkl"
-        )
+        torch.save(history, Path(config.optimizer.output_dir) / "metric_history.pkl")
 
     # train the model!
     print("go")
@@ -456,9 +444,7 @@ def lr():
     spawn_kwargs = {}
 
     print("launching...")
-    with idist.Parallel(
-        backend=distributed_backend, **spawn_kwargs
-    ) as parallel:
+    with idist.Parallel(backend=distributed_backend, **spawn_kwargs) as parallel:
         parallel.run(run_lr, config)
 
 

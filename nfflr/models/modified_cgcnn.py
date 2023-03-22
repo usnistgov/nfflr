@@ -235,18 +235,14 @@ class CGCNN(nn.Module):
                 dtype=torch.float,
             )
             if self.classification:
-                raise ValueError(
-                    "Classification not implemented for zero_inflated"
-                )
+                raise ValueError("Classification not implemented for zero_inflated")
         else:
             self.zero_inflated = False
             if self.classification:
                 self.fc_out = nn.Linear(config.fc_features, 2)
                 self.softmax = nn.LogSoftmax(dim=1)
             else:
-                self.fc_out = nn.Linear(
-                    config.fc_features, config.output_features
-                )
+                self.fc_out = nn.Linear(config.fc_features, config.output_features)
 
         self.link = None
         self.link_name = config.link
@@ -256,9 +252,7 @@ class CGCNN(nn.Module):
             self.link = torch.exp
             avg_gap = 0.7  # magic number -- average bandgap in dft_3d
             if not self.zero_inflated:
-                self.fc_out.bias.data = torch.tensor(
-                    np.log(avg_gap), dtype=torch.float
-                )
+                self.fc_out.bias.data = torch.tensor(np.log(avg_gap), dtype=torch.float)
         elif config.link == "logit":
             self.link = torch.sigmoid
 
@@ -337,9 +331,7 @@ class ZeroInflatedGammaLoss(nn.modules.loss._Loss):
         # logit_p, log_scale, log_shape = inputs
         logit_p, log_scale = inputs
 
-        bce_loss = F.binary_cross_entropy_with_logits(
-            logit_p, target, reduction="sum"
-        )
+        bce_loss = F.binary_cross_entropy_with_logits(logit_p, target, reduction="sum")
 
         indicator = target > 0
         # g_loss = F.mse_loss(

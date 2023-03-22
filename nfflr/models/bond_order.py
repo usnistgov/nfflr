@@ -108,9 +108,7 @@ class BondOrderConv(nn.Module):
 
 
 class BondOrderInteraction(nn.Module):
-    def __init__(
-        self, node_input_features, cutoff_distance=4, cutoff_onset=3.8
-    ):
+    def __init__(self, node_input_features, cutoff_distance=4, cutoff_onset=3.8):
         super().__init__()
         self.pair_parameters = 4
         self.src_params = nn.Linear(node_input_features, self.pair_parameters)
@@ -183,18 +181,14 @@ class NeuralBondOrder(nn.Module):
     and atomistic line graph.
     """
 
-    def __init__(
-        self, config: BondOrderConfig = BondOrderConfig(name="bondorder")
-    ):
+    def __init__(self, config: BondOrderConfig = BondOrderConfig(name="bondorder")):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
         self.config = config
 
         # just use atom embedding layer
         DICTIONARY_SIZE = 128
-        self.atom_embedding = nn.Embedding(
-            DICTIONARY_SIZE, config.atom_features
-        )
+        self.atom_embedding = nn.Embedding(DICTIONARY_SIZE, config.atom_features)
 
         self.edge_embedding = nn.Sequential(
             RBFExpansion(
@@ -226,9 +220,7 @@ class NeuralBondOrder(nn.Module):
         )
         self.gcn_layers = nn.ModuleList(
             [
-                EdgeGatedGraphConv(
-                    config.hidden_features, config.hidden_features
-                )
+                EdgeGatedGraphConv(config.hidden_features, config.hidden_features)
                 for idx in range(config.gcn_layers)
             ]
         )
@@ -313,9 +305,7 @@ class NeuralBondOrder(nn.Module):
         # potential function reduces edge -> node
         # f(r) = cutoff(r) * (f_repulse(r) + bond_order * f_attract(r))
         # E_i = sum_j(f(r_ij))
-        atomwise_energy = self.interaction(
-            g, x_initial, bond_order, bondlength
-        )
+        atomwise_energy = self.interaction(g, x_initial, bond_order, bondlength)
 
         # use sum pooling to predict total energy
         # for each atomistic configuration in the batch
@@ -339,9 +329,7 @@ class NeuralBondOrder(nn.Module):
 
             # reduce over bonds to get forces on each atom
             g.edata["pairwise_forces"] = pairwise_forces
-            g.update_all(
-                fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces")
-            )
+            g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
             forces = torch.squeeze(g.ndata["forces"])
 
             # if training against reduced energies, correct the force predictions
@@ -349,10 +337,7 @@ class NeuralBondOrder(nn.Module):
                 # broadcast |v(g)| across forces to under per-atom energy scaling
 
                 n_nodes = torch.cat(
-                    [
-                        i * torch.ones(i, device=g.device)
-                        for i in g.batch_num_nodes()
-                    ]
+                    [i * torch.ones(i, device=g.device) for i in g.batch_num_nodes()]
                 )
 
                 forces = forces * n_nodes[:, None]

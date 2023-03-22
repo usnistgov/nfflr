@@ -92,23 +92,13 @@ class EdgeGatedGraphConv(nn.Module):
         # coalesce parameters for W_f and W_s
         # but -- split them up along feature dimension
         self.norm_edges = norm(edge_input_features)
-        self.src_gate = nn.Linear(
-            node_input_features, output_features, bias=False
-        )
-        self.dst_gate = nn.Linear(
-            node_input_features, output_features, bias=False
-        )
-        self.edge_gate = nn.Linear(
-            edge_input_features, output_features, bias=False
-        )
+        self.src_gate = nn.Linear(node_input_features, output_features, bias=False)
+        self.dst_gate = nn.Linear(node_input_features, output_features, bias=False)
+        self.edge_gate = nn.Linear(edge_input_features, output_features, bias=False)
 
         self.norm_nodes = norm(node_input_features)
-        self.src_update = nn.Linear(
-            node_input_features, output_features, bias=False
-        )
-        self.dst_update = nn.Linear(
-            node_input_features, output_features, bias=False
-        )
+        self.src_update = nn.Linear(node_input_features, output_features, bias=False)
+        self.dst_update = nn.Linear(node_input_features, output_features, bias=False)
 
     def forward(
         self,
@@ -142,9 +132,7 @@ class EdgeGatedGraphConv(nn.Module):
 
         g.edata["sigma"] = torch.sigmoid(y)
         g.ndata["Bh"] = self.dst_update(x)
-        g.update_all(
-            fn.u_mul_e("Bh", "sigma", "m"), fn.sum("m", "sum_sigma_h")
-        )
+        g.update_all(fn.u_mul_e("Bh", "sigma", "m"), fn.sum("m", "sum_sigma_h"))
         g.update_all(fn.copy_e("sigma", "m"), fn.sum("m", "sum_sigma"))
         g.ndata["h"] = g.ndata["sum_sigma_h"] / (g.ndata["sum_sigma"] + 1e-6)
         x = self.src_update(x) + g.ndata.pop("h")
@@ -214,9 +202,7 @@ class ALIGNNConv(nn.Module):
 class MLPLayer(nn.Module):
     """Multilayer perceptron layer helper."""
 
-    def __init__(
-        self, in_features: int, out_features: int, norm=nn.BatchNorm1d
-    ):
+    def __init__(self, in_features: int, out_features: int, norm=nn.BatchNorm1d):
         """Linear, Batchnorm, SiLU layer."""
         super().__init__()
         self.layer = nn.ModuleDict(
@@ -379,9 +365,7 @@ class DenseALIGNN(nn.Module):
         super().__init__()
         print(config)
         self.classification = config.classification
-        norm = {"batchnorm": nn.BatchNorm1d, "layernorm": nn.LayerNorm}[
-            config.norm
-        ]
+        norm = {"batchnorm": nn.BatchNorm1d, "layernorm": nn.LayerNorm}[config.norm]
 
         self.atom_embedding = MLPLayer(
             config.atom_input_features, config.initial_features, norm
@@ -394,9 +378,7 @@ class DenseALIGNN(nn.Module):
                 bins=config.edge_input_features,
                 lengthscale=0.5,
             ),
-            MLPLayer(
-                config.edge_input_features, config.embedding_features, norm
-            ),
+            MLPLayer(config.edge_input_features, config.embedding_features, norm),
             MLPLayer(config.embedding_features, config.initial_features, norm),
         )
         self.angle_embedding = nn.Sequential(
@@ -405,9 +387,7 @@ class DenseALIGNN(nn.Module):
                 vmax=np.pi,
                 bins=config.triplet_input_features,
             ),
-            MLPLayer(
-                config.triplet_input_features, config.embedding_features, norm
-            ),
+            MLPLayer(config.triplet_input_features, config.embedding_features, norm),
             MLPLayer(config.embedding_features, config.initial_features, norm),
         )
 
@@ -439,9 +419,7 @@ class DenseALIGNN(nn.Module):
             self.fc = nn.Linear(config.bottleneck_features, 2)
             self.softmax = nn.LogSoftmax(dim=1)
         else:
-            self.fc = nn.Linear(
-                config.bottleneck_features, config.output_features
-            )
+            self.fc = nn.Linear(config.bottleneck_features, config.output_features)
 
         self.link = None
         self.link_name = config.link
@@ -450,9 +428,7 @@ class DenseALIGNN(nn.Module):
         elif config.link == "log":
             self.link = torch.exp
             avg_gap = 0.7  # magic number -- average bandgap in dft_3d
-            self.fc.bias.data = torch.tensor(
-                np.log(avg_gap), dtype=torch.float
-            )
+            self.fc.bias.data = torch.tensor(np.log(avg_gap), dtype=torch.float)
         elif config.link == "logit":
             self.link = torch.sigmoid
 
@@ -464,14 +440,10 @@ class DenseALIGNN(nn.Module):
     def reset_parameters(m):
         """He initialization."""
         if isinstance(m, nn.Linear):
-            nn.init.kaiming_normal_(
-                m.weight, mode="fan_out", nonlinearity="relu"
-            )
+            nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             # nn.init.constant_(m.bias, 0)
 
-    def forward(
-        self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]
-    ):
+    def forward(self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]):
         """ALIGNN : start with `atom_features`.
 
         x: atom features (g.ndata)

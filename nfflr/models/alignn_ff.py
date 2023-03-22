@@ -117,9 +117,7 @@ class ALIGNNForceField(nn.Module):
         )
         self.gcn_layers = nn.ModuleList(
             [
-                EdgeGatedGraphConv(
-                    config.hidden_features, config.hidden_features
-                )
+                EdgeGatedGraphConv(config.hidden_features, config.hidden_features)
                 for idx in range(config.gcn_layers - 1)
             ]
         )
@@ -265,9 +263,7 @@ class ALIGNNForceField(nn.Module):
 
             # reduce over bonds to get forces on each atom
             g.edata["pairwise_forces"] = pairwise_forces
-            g.update_all(
-                fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces")
-            )
+            g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
 
             forces = torch.squeeze(g.ndata["forces"])
 
@@ -276,10 +272,7 @@ class ALIGNNForceField(nn.Module):
                 # broadcast |v(g)| across forces to under per-atom energy scaling
 
                 n_nodes = torch.cat(
-                    [
-                        i * torch.ones(i, device=g.device)
-                        for i in g.batch_num_nodes()
-                    ]
+                    [i * torch.ones(i, device=g.device) for i in g.batch_num_nodes()]
                 )
 
                 forces = forces * n_nodes[:, None]
@@ -293,9 +286,7 @@ class ALIGNNForceField(nn.Module):
                 # Following Virial stress formula, assuming inital velocity = 0
                 # Save volume as g.gdta['V']?
                 stress = -1 * (
-                    160.21766208
-                    * torch.matmul(r.T, dy_dr)
-                    / (2 * g.ndata["V"][0])
+                    160.21766208 * torch.matmul(r.T, dy_dr) / (2 * g.ndata["V"][0])
                 )
                 # virial = (
                 #    160.21766208

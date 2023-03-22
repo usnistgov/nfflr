@@ -141,9 +141,7 @@ class ACGCNNConv(nn.Module):
 class ACGCNN(nn.Module):
     """CGCNN dgl implementation."""
 
-    def __init__(
-        self, config: ACGCNNConfig = ACGCNNConfig(name="alignn_cgcnn")
-    ):
+    def __init__(self, config: ACGCNNConfig = ACGCNNConfig(name="alignn_cgcnn")):
         """Set up CGCNN modules."""
         super().__init__()
 
@@ -188,18 +186,14 @@ class ACGCNN(nn.Module):
                 dtype=torch.float,
             )
             if self.classification:
-                raise ValueError(
-                    "Classification not implemented with ZIG loss."
-                )
+                raise ValueError("Classification not implemented with ZIG loss.")
         else:
             self.zero_inflated = False
             if self.classification:
                 self.fc_out = nn.Linear(config.fc_features, 2)
                 self.softmax = nn.LogSoftmax(dim=1)
             else:
-                self.fc_out = nn.Linear(
-                    config.fc_features, config.output_features
-                )
+                self.fc_out = nn.Linear(config.fc_features, config.output_features)
         self.link = None
         self.link_name = config.link
         if config.link == "identity":
@@ -208,9 +202,7 @@ class ACGCNN(nn.Module):
             self.link = torch.exp
             avg_gap = 0.7  # magic number -- average bandgap in dft_3d
             if not self.zero_inflated:
-                self.fc_out.bias.data = torch.tensor(
-                    np.log(avg_gap), dtype=torch.float
-                )
+                self.fc_out.bias.data = torch.tensor(np.log(avg_gap), dtype=torch.float)
         elif config.link == "logit":
             self.link = torch.sigmoid
 
@@ -230,9 +222,7 @@ class ACGCNN(nn.Module):
         node_features = self.atom_embedding(v)
 
         # CGCNN-Conv block: update node features
-        for conv_layer1, conv_layer2 in zip(
-            self.conv_layers1, self.conv_layers2
-        ):
+        for conv_layer1, conv_layer2 in zip(self.conv_layers1, self.conv_layers2):
             node_features = conv_layer1(g, node_features, edge_features)
             edge_features = conv_layer2(lg, edge_features, angle_features)
 
@@ -293,9 +283,7 @@ class ZeroInflatedGammaLoss(nn.modules.loss._Loss):
         # logit_p, log_scale, log_shape = inputs
         logit_p, log_scale = inputs
 
-        bce_loss = F.binary_cross_entropy_with_logits(
-            logit_p, target, reduction="sum"
-        )
+        bce_loss = F.binary_cross_entropy_with_logits(logit_p, target, reduction="sum")
 
         indicator = target > 0
         # g_loss = F.mse_loss(

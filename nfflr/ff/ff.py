@@ -141,15 +141,11 @@ class AlignnAtomwiseCalculator(ase.calculators.calculator.Calculator):
         import torch
 
         if self.device is None:
-            self.device = torch.device(
-                "cuda" if torch.cuda.is_available() else "cpu"
-            )
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = ALIGNNAtomWise(config.model)
         model.state_dict()
         model.load_state_dict(
-            torch.load(
-                os.path.join(path, model_filename), map_location=self.device
-            )
+            torch.load(os.path.join(path, model_filename), map_location=self.device)
         )
         model.to(device)
         model.eval()
@@ -298,9 +294,7 @@ class ForceField(object):
         if optimize_lattice:
             self.atoms = ExpCellFilter(self.atoms)
         print("OPTIMIZATION")
-        self.dyn = optimizer(
-            self.atoms, trajectory="opt.traj", logfile="opt.log"
-        )
+        self.dyn = optimizer(self.atoms, trajectory="opt.traj", logfile="opt.log")
         self.dyn.attach(self.print_format, interval=interval)
         self.dyn.run(fmax=fmax, steps=steps)
         return (
@@ -319,9 +313,7 @@ class ForceField(object):
         """Run NVE."""
         print("NVE VELOCITY VERLET")
         if initial_temperature_K is not None:
-            self.set_momentum_maxwell_boltzmann(
-                temperature_K=initial_temperature_K
-            )
+            self.set_momentum_maxwell_boltzmann(temperature_K=initial_temperature_K)
         self.dyn = VelocityVerlet(self.atoms, self.timestep)
         # Create monitors for logfile and a trajectory file
         # logfile = os.path.join(".", "%s.log" % filename)
@@ -346,9 +338,7 @@ class ForceField(object):
         """Run NVT."""
         print("NVT LANGEVIN")
         if initial_temperature_K is not None:
-            self.set_momentum_maxwell_boltzmann(
-                temperature_K=initial_temperature_K
-            )
+            self.set_momentum_maxwell_boltzmann(temperature_K=initial_temperature_K)
         self.dyn = Langevin(
             self.atoms,
             self.timestep,
@@ -379,9 +369,7 @@ class ForceField(object):
         """Run NVT."""
         print("NVT ANDERSEN")
         if initial_temperature_K is not None:
-            self.set_momentum_maxwell_boltzmann(
-                temperature_K=initial_temperature_K
-            )
+            self.set_momentum_maxwell_boltzmann(temperature_K=initial_temperature_K)
         self.dyn = Andersen(
             self.atoms,
             self.timestep,
@@ -412,9 +400,7 @@ class ForceField(object):
         """Run NVT."""
         print("NVT BERENDSEN")
         if initial_temperature_K is not None:
-            self.set_momentum_maxwell_boltzmann(
-                temperature_K=initial_temperature_K
-            )
+            self.set_momentum_maxwell_boltzmann(temperature_K=initial_temperature_K)
         if taut is None:
             taut = 100 * self.timestep
         self.dyn = NVTBerendsen(
@@ -450,9 +436,7 @@ class ForceField(object):
         """Run NPT."""
         print("NPT BERENDSEN")
         if initial_temperature_K is not None:
-            self.set_momentum_maxwell_boltzmann(
-                temperature_K=initial_temperature_K
-            )
+            self.set_momentum_maxwell_boltzmann(temperature_K=initial_temperature_K)
         self.dyn = NPTBerendsen(
             self.atoms,
             self.timestep,
@@ -487,9 +471,7 @@ class ForceField(object):
         """Run NPT."""
         print("NPT: Combined Nose-Hoover and Parrinello-Rahman dynamics")
         if initial_temperature_K is not None:
-            self.set_momentum_maxwell_boltzmann(
-                temperature_K=initial_temperature_K
-            )
+            self.set_momentum_maxwell_boltzmann(temperature_K=initial_temperature_K)
         if taut is None:
             taut = 100 * self.timestep
         self.dyn = NPT(
@@ -695,15 +677,9 @@ def surface_energy(
     # epa = energy  # / atoms_cvn.num_atoms
     mem = []
     for j in indices:
-        strt = Surface(
-            atoms=atoms_cvn, indices=j, thickness=thickness
-        ).make_surface()
+        strt = Surface(atoms=atoms_cvn, indices=j, thickness=thickness).make_surface()
 
-        name = (
-            str(strt.composition.reduced_formula)
-            + "_"
-            + str("_".join(map(str, j)))
-        )
+        name = str(strt.composition.reduced_formula) + "_" + str("_".join(map(str, j)))
 
         # info_def = get_energy(strt, relax_atoms=False)
         ff = ForceField(

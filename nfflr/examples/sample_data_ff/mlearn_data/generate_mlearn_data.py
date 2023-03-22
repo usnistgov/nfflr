@@ -22,9 +22,7 @@ test_stresses = [d["outputs"]["virial_stress"] for d in data]
 
 mem = []
 count = 0
-for i, j, k, l in zip(
-    train_structures, train_energies, train_forces, train_stresses
-):
+for i, j, k, l in zip(train_structures, train_energies, train_forces, train_stresses):
     info = {}
     atoms = pmg_to_atoms(i)
     count += 1
@@ -34,9 +32,7 @@ for i, j, k, l in zip(
     info["forces"] = k
     info["stresses"] = l
     mem.append(info)
-for i, j, k, l in zip(
-    test_structures, test_energies, test_forces, train_stresses
-):
+for i, j, k, l in zip(test_structures, test_energies, test_forces, train_stresses):
     info = {}
     count += 1
     info["jid"] = str(count)
@@ -46,9 +42,7 @@ for i, j, k, l in zip(
     info["forces"] = k
     info["stresses"] = l
     mem.append(info)
-for i, j, k, l in zip(
-    test_structures, test_energies, test_forces, train_stresses
-):
+for i, j, k, l in zip(test_structures, test_energies, test_forces, train_stresses):
     info = {}
     count += 1
     info["jid"] = str(count)

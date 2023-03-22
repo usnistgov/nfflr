@@ -73,9 +73,7 @@ def build_radius_graph_torch(
     maxr = np.ceil((r + bond_tol) * recp_len / (2 * np.pi))
     nmin = np.floor(np.min(a.frac_coords, axis=0)) - maxr
     nmax = np.ceil(np.max(a.frac_coords, axis=0)) + maxr
-    all_ranges = [
-        torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)
-    ]
+    all_ranges = [torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)]
     cell_images = torch.cartesian_prod(*all_ranges)
 
     # tile periodic images into X_dst
@@ -186,18 +184,14 @@ def atom_dgl_multigraph_torch(
 
     # determine how many supercells are needed for the cutoff radius
     recp = 2 * torch.pi * torch.linalg.inv(lattice_mat).T
-    recp_len = torch.tensor(
-        [i for i in (torch.sqrt(torch.sum(recp**2, dim=1)))]
-    )
+    recp_len = torch.tensor([i for i in (torch.sqrt(torch.sum(recp**2, dim=1)))])
 
     maxr = torch.ceil((cutoff + bond_tol) * recp_len / (2 * torch.pi))
     nmin = torch.floor(torch.min(frac_coords, dim=0)[0]) - maxr
     nmax = torch.ceil(torch.max(frac_coords, dim=0)[0]) + maxr
 
     # construct the supercell index list
-    all_ranges = [
-        torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)
-    ]
+    all_ranges = [torch.arange(x, y, dtype=precision) for x, y in zip(nmin, nmax)]
     cell_images = torch.cartesian_prod(*all_ranges)
 
     # tile periodic images into X_dst
@@ -360,9 +354,7 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
 
         return g, lg
 
-    def split_dataset_by_id(
-        self, n_train: Union[float, int], n_val: Union[float, int]
-    ):
+    def split_dataset_by_id(self, n_train: Union[float, int], n_val: Union[float, int]):
         """Get train/val/test split indices for SubsetRandomSampler.
 
         Stratify by calculation / trajectory id `"group_id"`
@@ -382,18 +374,14 @@ class AtomisticConfigurationDataset(torch.utils.data.Dataset):
         if isinstance(n_train, float) and isinstance(n_val, float):
             # n_train and n_val specified as fractions of dataset
             if n_train + n_val > 0.9:
-                raise ValueError(
-                    "training and validation set exceed 90% of data"
-                )
+                raise ValueError("training and validation set exceed 90% of data")
             n_val = int(n_val * N)
             n_train = int(n_train * N)
 
         if isinstance(n_train, int) and isinstance(n_val, int):
             # n_train and n_val specified directly as calculation group counts
             if n_train + n_val > 0.9 * N:
-                raise ValueError(
-                    "training and validation set exceed 90% of data"
-                )
+                raise ValueError("training and validation set exceed 90% of data")
 
         # configurable train/val seed
         train_val_rng = default_rng(self.train_val_seed)

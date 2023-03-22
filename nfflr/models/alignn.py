@@ -70,8 +70,12 @@ class ALIGNN(nn.Module):
                 vmax=8.0,
                 bins=config.edge_input_features,
             ),
-            MLPLayer(config.edge_input_features, config.embedding_features, norm="batchnorm"),
-            MLPLayer(config.embedding_features, config.hidden_features, norm="batchnorm"),
+            MLPLayer(
+                config.edge_input_features, config.embedding_features, norm="batchnorm"
+            ),
+            MLPLayer(
+                config.embedding_features, config.hidden_features, norm="batchnorm"
+            ),
         )
         self.angle_embedding = nn.Sequential(
             RBFExpansion(
@@ -79,16 +83,20 @@ class ALIGNN(nn.Module):
                 vmax=1.0,
                 bins=config.triplet_input_features,
             ),
-            MLPLayer(config.triplet_input_features, config.embedding_features, norm="batchnorm"),
-            MLPLayer(config.embedding_features, config.hidden_features, norm="batchnorm"),
+            MLPLayer(
+                config.triplet_input_features,
+                config.embedding_features,
+                norm="batchnorm",
+            ),
+            MLPLayer(
+                config.embedding_features, config.hidden_features, norm="batchnorm"
+            ),
         )
 
         self.alignn_layers = nn.ModuleList(
             [
                 ALIGNNConv(
-                    config.hidden_features,
-                    config.hidden_features,
-                    norm="batchnorm"
+                    config.hidden_features, config.hidden_features, norm="batchnorm"
                 )
                 for idx in range(config.alignn_layers)
             ]
@@ -116,15 +124,11 @@ class ALIGNN(nn.Module):
         elif config.link == "log":
             self.link = torch.exp
             avg_gap = 0.7  # magic number -- average bandgap in dft_3d
-            self.fc.bias.data = torch.tensor(
-                np.log(avg_gap), dtype=torch.float
-            )
+            self.fc.bias.data = torch.tensor(np.log(avg_gap), dtype=torch.float)
         elif config.link == "logit":
             self.link = torch.sigmoid
 
-    def forward(
-        self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]
-    ):
+    def forward(self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]):
         """ALIGNN : start with `atom_features`.
 
         x: atom features (g.ndata)

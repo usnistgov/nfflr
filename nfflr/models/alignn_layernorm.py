@@ -50,9 +50,7 @@ class ALIGNN(nn.Module):
     and atomistic line graph.
     """
 
-    def __init__(
-        self, config: ALIGNNConfig = ALIGNNConfig(name="alignn_layernorm")
-    ):
+    def __init__(self, config: ALIGNNConfig = ALIGNNConfig(name="alignn_layernorm")):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
         print(config)
@@ -92,9 +90,7 @@ class ALIGNN(nn.Module):
         )
         self.gcn_layers = nn.ModuleList(
             [
-                EdgeGatedGraphConv(
-                    config.hidden_features, config.hidden_features
-                )
+                EdgeGatedGraphConv(config.hidden_features, config.hidden_features)
                 for idx in range(config.gcn_layers)
             ]
         )
@@ -113,15 +109,11 @@ class ALIGNN(nn.Module):
         elif config.link == "log":
             self.link = torch.exp
             avg_gap = 0.7  # magic number -- average bandgap in dft_3d
-            self.fc.bias.data = torch.tensor(
-                np.log(avg_gap), dtype=torch.float
-            )
+            self.fc.bias.data = torch.tensor(np.log(avg_gap), dtype=torch.float)
         elif config.link == "logit":
             self.link = torch.sigmoid
 
-    def forward(
-        self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]
-    ):
+    def forward(self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]):
         """ALIGNN : start with `atom_features`.
 
         x: atom features (g.ndata)

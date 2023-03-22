@@ -50,9 +50,7 @@ class RBFExpansion(nn.Module):
         self.vmin = vmin
         self.vmax = vmax
         self.bins = bins
-        self.register_buffer(
-            "centers", torch.linspace(self.vmin, self.vmax, self.bins)
-        )
+        self.register_buffer("centers", torch.linspace(self.vmin, self.vmax, self.bins))
 
         if lengthscale is None:
             # SchNet-style
@@ -66,9 +64,7 @@ class RBFExpansion(nn.Module):
 
     def forward(self, distance: torch.Tensor) -> torch.Tensor:
         """Apply RBF expansion to interatomic distance tensor."""
-        return torch.exp(
-            -self.gamma * (distance.unsqueeze(1) - self.centers) ** 2
-        )
+        return torch.exp(-self.gamma * (distance.unsqueeze(1) - self.centers) ** 2)
 
 
 class MLPLayer(nn.Module):
@@ -181,9 +177,7 @@ class EdgeGatedGraphConv(nn.Module):
             g.edata["sigma"] = torch.sigmoid(m)
 
         g.ndata["Bh"] = self.dst_update(node_feats)
-        g.update_all(
-            fn.u_mul_e("Bh", "sigma", "m"), fn.sum("m", "sum_sigma_h")
-        )
+        g.update_all(fn.u_mul_e("Bh", "sigma", "m"), fn.sum("m", "sum_sigma_h"))
         g.update_all(fn.copy_e("sigma", "m"), fn.sum("m", "sum_sigma"))
         g.ndata["h"] = g.ndata["sum_sigma_h"] / (g.ndata["sum_sigma"] + 1e-6)
         x = self.src_update(node_feats) + g.ndata.pop("h")
@@ -219,9 +213,7 @@ class ALIGNNConv(nn.Module):
     ):
         """Set up ALIGNN parameters."""
         super().__init__()
-        self.node_update = EdgeGatedGraphConv(
-            in_features, out_features, norm=norm
-        )
+        self.node_update = EdgeGatedGraphConv(in_features, out_features, norm=norm)
         self.edge_update = EdgeGatedGraphConv(
             out_features,
             out_features,

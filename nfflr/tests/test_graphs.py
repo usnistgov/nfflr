@@ -59,9 +59,7 @@ def test_graph():
         node_atomwise_rdf=True,
     )
     g = Graph.from_atoms(atoms=atoms, features="basic")
-    g = Graph.from_atoms(
-        atoms=atoms, features=["Z", "atom_mass", "max_oxid_s"]
-    )
+    g = Graph.from_atoms(atoms=atoms, features=["Z", "atom_mass", "max_oxid_s"])
     g = Graph.from_atoms(atoms=atoms, features="cfid", max_cut=10000)
     print(g)
     d = g.to_dict()
@@ -88,9 +86,7 @@ def test_dataset():
         )
         graphs.append(g)
 
-    s = StructureDataset(
-        d, graphs, "formation_energy_peratom", line_graph=True
-    )
+    s = StructureDataset(d, graphs, "formation_energy_peratom", line_graph=True)
     col = s.collate
     col1 = s.collate_line_graph
     ix = s[0]

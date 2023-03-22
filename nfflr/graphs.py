@@ -28,14 +28,14 @@ def _get_attribute_lookup(atom_features: str = "cgcnn"):
     template = get_node_attributes("C", atom_features)
 
     features = np.zeros((1 + max_z, len(template)))
-    
+
     for element, v in chem_data.items():
         z = v["Z"]
         x = get_node_attributes(element, atom_features)
 
         if x is not None:
             features[z, :] = x
-            
+
     return features
 
 
@@ -104,8 +104,5 @@ def compute_bond_cosines(edges):
     )
     bond_cosine = torch.clamp(bond_cosine, -1, 1)
     # bond_cosine = torch.arccos((torch.clamp(bond_cosine, -1, 1)))
-    
+
     return {"h": bond_cosine}
-
-
-

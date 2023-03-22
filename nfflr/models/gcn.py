@@ -27,17 +27,13 @@ class SimpleGCNConfig(BaseSettings):
 class SimpleGCN(nn.Module):
     """GraphConv GCN with DenseNet-style connections."""
 
-    def __init__(
-        self, config: SimpleGCNConfig = SimpleGCNConfig(name="simplegcn")
-    ):
+    def __init__(self, config: SimpleGCNConfig = SimpleGCNConfig(name="simplegcn")):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
         self.edge_lengthscale = config.edge_lengthscale
         self.weight_edges = config.weight_edges
 
-        self.atom_embedding = nn.Linear(
-            config.atom_input_features, config.width
-        )
+        self.atom_embedding = nn.Linear(config.atom_input_features, config.width)
 
         self.layer1 = GraphConv(config.width, config.width)
         self.layer2 = GraphConv(config.width, config.output_features)

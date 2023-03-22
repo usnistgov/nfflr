@@ -44,7 +44,6 @@ class _DenseLayer(nn.Module):
         input: List[torch.Tensor],
         edge_weight: Optional[torch.Tensor],
     ):
-
         prev_features = F.relu(self.bn(torch.cat(input, 1)))
         new_features = self.conv(g, prev_features, edge_weight=edge_weight)
 
@@ -57,9 +56,7 @@ class _DenseBlock(nn.ModuleDict):
     def __init__(self, n_layers: int, in_features: int, growth_rate: int):
         super().__init__()
         for id_layer in range(n_layers):
-            layer = _DenseLayer(
-                in_features + id_layer * growth_rate, growth_rate
-            )
+            layer = _DenseLayer(in_features + id_layer * growth_rate, growth_rate)
             self.add_module(f"denselayer{1+id_layer}", layer)
 
     def forward(
@@ -78,9 +75,7 @@ class _DenseBlock(nn.ModuleDict):
 class DenseGCN(nn.Module):
     """GraphConv GCN with DenseNet-style connections."""
 
-    def __init__(
-        self, config: DenseGCNConfig = DenseGCNConfig(name="densegcn")
-    ):
+    def __init__(self, config: DenseGCNConfig = DenseGCNConfig(name="densegcn")):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
         print(config)
@@ -98,9 +93,7 @@ class DenseGCN(nn.Module):
             config.conv_layers, config.node_features, config.growth_rate
         )
 
-        final_size = (
-            config.node_features + config.conv_layers * config.growth_rate
-        )
+        final_size = config.node_features + config.conv_layers * config.growth_rate
 
         self.bn_final = nn.BatchNorm1d(final_size)
 

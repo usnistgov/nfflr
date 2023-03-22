@@ -48,6 +48,6 @@
         "gradwise_weight":0.05,
         "atomwise_weight":0.05,
         "stresswise_weight":0.05
-          
+
     }
 }

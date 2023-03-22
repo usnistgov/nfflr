@@ -60,9 +60,7 @@ class ALIGNNAtomWise(nn.Module):
 
     def __init__(
         self,
-        config: ALIGNNAtomWiseConfig = ALIGNNAtomWiseConfig(
-            name="alignn_atomwise"
-        ),
+        config: ALIGNNAtomWiseConfig = ALIGNNAtomWiseConfig(name="alignn_atomwise"),
     ):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
@@ -107,9 +105,7 @@ class ALIGNNAtomWise(nn.Module):
         )
         self.gcn_layers = nn.ModuleList(
             [
-                EdgeGatedGraphConv(
-                    config.hidden_features, config.hidden_features
-                )
+                EdgeGatedGraphConv(config.hidden_features, config.hidden_features)
                 for idx in range(config.gcn_layers)
             ]
         )
@@ -132,15 +128,11 @@ class ALIGNNAtomWise(nn.Module):
         elif config.link == "log":
             self.link = torch.exp
             avg_gap = 0.7  # magic number -- average bandgap in dft_3d
-            self.fc.bias.data = torch.tensor(
-                np.log(avg_gap), dtype=torch.float
-            )
+            self.fc.bias.data = torch.tensor(np.log(avg_gap), dtype=torch.float)
         elif config.link == "logit":
             self.link = torch.sigmoid
 
-    def forward(
-        self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]
-    ):
+    def forward(self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]):
         """ALIGNN : start with `atom_features`.
 
         x: atom features (g.ndata)
@@ -219,9 +211,7 @@ class ALIGNNAtomWise(nn.Module):
                 # Following Virial stress formula, assuming inital velocity = 0
                 # Save volume as g.gdta['V']?
                 stress = -1 * (
-                    160.21766208
-                    * torch.matmul(r.T, dy)
-                    / (2 * g.ndata["V"][0])
+                    160.21766208 * torch.matmul(r.T, dy) / (2 * g.ndata["V"][0])
                 )
                 # virial = (
                 #    160.21766208
