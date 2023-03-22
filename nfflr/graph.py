@@ -33,23 +33,6 @@ def _get_attribute_lookup(atom_features: str = "cgcnn"):
     return features
 
 
-class Standardize(torch.nn.Module):
-    """Standardize atom_features: subtract mean and divide by std."""
-
-    def __init__(self, mean: torch.Tensor, std: torch.Tensor):
-        """Register featurewise mean and standard deviation."""
-        super().__init__()
-        self.mean = mean
-        self.std = std
-
-    def forward(self, g: dgl.DGLGraph):
-        """Apply standardization to atom_features."""
-        g = g.local_var()
-        h = g.ndata.pop("atom_features")
-        g.ndata["atom_features"] = (h - self.mean) / self.std
-        return g
-
-
 def compute_bond_cosines(edges):
     """Compute bond angle cosines from bond displacement vectors."""
     # line graph edge: (a, b), (b, c)
@@ -66,6 +49,133 @@ def compute_bond_cosines(edges):
     # bond_cosine = torch.arccos((torch.clamp(bond_cosine, -1, 1)))
 
     return {"h": bond_cosine}
+
+
+def tile_supercell(
+    a: Atoms, r: float = 5, bond_tol: float = 0.15
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Construct supercell coordinate array with indices to atoms in (000) image."""
+    n = len(a)
+    Xfrac = a.positions.clone().detach()
+    Xcart = Xfrac @ a.lattice
+
+    # cutoff -> calculate which periodic images to consider
+    recp = 2 * np.pi * torch.linalg.inv(a.lattice.T)
+    recp_len = torch.sqrt(torch.sum(recp**2, dim=1))
+    # recp_len = torch.tensor(a.lattice.reciprocal_lattice().abc)
+
+    maxr = torch.ceil((r + bond_tol) * recp_len / (2 * np.pi))
+    nmin = torch.floor(Xfrac.min(0).values) - maxr
+    nmax = torch.ceil(Xfrac.max(0).values) + maxr
+    all_ranges = [
+        torch.arange(x, y, dtype=Xfrac.dtype) for x, y in zip(nmin, nmax, strict=True)
+    ]
+    cell_images = torch.cartesian_prod(*all_ranges)
+
+    # get single image index for cell 000
+    root_cell = (cell_images == 0).all(dim=1).nonzero().item()
+    root_ids = n * root_cell + torch.arange(n)
+
+    # tile periodic images into X_dst
+    # index id_dst into X_dst maps to atom id as id_dest % num_atoms
+    X_supercell = (cell_images @ a.lattice).unsqueeze(1) + Xcart
+    X_supercell = X_supercell.reshape(-1, 3)
+
+    return X_supercell, root_ids
+
+
+def reduce_supercell_graph(g: dgl.DGLGraph, root_ids: torch.Tensor) -> dgl.DGLGraph:
+    """Remove edges not involving (000) cell and remap node ids."""
+    n = root_ids.shape[0]
+    X_supercell = g.ndata["Xcart"]
+
+    # keep edges with at least one node in root cell
+    # note: edge_subgraph relabels the nodes
+    src, dst = g.edges()
+    edge_ids = torch.where(torch.isin(src, root_ids) | torch.isin(dst, root_ids))[0]
+    g = dgl.edge_subgraph(g, edge_ids)
+
+    # load coordinates based on original supercell indices
+    g.ndata["Xcart"] = X_supercell[g.ndata["_ID"]]
+
+    # compute all displacement vectors in the supercell subgraph
+    g.apply_edges(dgl.function.v_sub_u("Xcart", "Xcart", "r"))
+
+    # build new graph with same edge data but remap node ids into image (000)
+    # src and dst use subset indices, not full supercell indices
+    src, dst = g.edges()
+
+    # map src and dst ids into periodic image (000)
+    # first look up supercell indices with _ID values for src and dst
+    src = g.ndata["_ID"][src]
+    dst = g.ndata["_ID"][dst]
+
+    # mod n to get original indices
+    periodic_graph = dgl.graph((src % n, dst % n))
+    periodic_graph.ndata["Xcart"] = X_supercell[root_ids]
+    periodic_graph.edata["r"] = g.edata["r"]
+
+    return periodic_graph
+
+
+def periodic_radius_graph(
+    a: Atoms, r: float = 5, bond_tol: float = 0.15
+) -> dgl.DGLGraph:
+    """Build periodic radius graph for crystal.
+
+    TODO: support 2D, 1D, or non-periodic boundary conditions
+    """
+    X_supercell, root_ids = tile_supercell(a, r, bond_tol)
+
+    # build radius graph in supercell
+    g = dgl.radius_graph(X_supercell, r)
+    g.ndata["Xcart"] = X_supercell.type(torch.get_default_dtype())
+
+    # reduce supercell graph to (000) image with periodic edges
+    g = reduce_supercell_graph(g, root_ids)
+
+    # add the fractional coordinates
+    # note: to do this differentiably, probably want to store
+    # fractional coordinates and lattice matrix and compute cartesian coordinates
+    # and bond distances on demand?
+    g.ndata["Xfrac"] = a.positions
+
+    g.ndata["atomic_number"] = a.numbers.type(torch.int8)
+
+    return g
+
+
+def periodic_knn_graph(
+    a: Atoms, k: int = 12, r: float = 5, bond_tol: float = 0.15
+) -> dgl.DGLGraph:
+    """Build periodic knn graph for crystal.
+
+    this doesn't work quite the same as the alignn version, which is a k-shell graph
+    that constructs the shell graph for the kth neighbor's shell...
+
+    TODO: support 2D, 1D, or non-periodic boundary conditions
+    """
+    X_supercell, root_ids = tile_supercell(a, r, bond_tol)
+
+    # build knn graph in supercell
+    g = dgl.knn_graph(X_supercell, k, exclude_self=True)
+    g.ndata["Xcart"] = X_supercell.type(torch.get_default_dtype())
+
+    # reduce supercell graph to (000) image with periodic edges
+    g = reduce_supercell_graph(g, root_ids)
+
+    # add the fractional coordinates
+    # note: to do this differentiably, probably want to store
+    # fractional coordinates and lattice matrix and compute cartesian coordinates
+    # and bond distances on demand?
+    g.ndata["Xfrac"] = a.positions
+
+    g.ndata["atomic_number"] = a.numbers.type(torch.int8)
+
+    return g
+
+
+### old stuff
 
 
 def build_radius_graph_torch(
