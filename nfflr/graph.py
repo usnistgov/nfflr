@@ -1,36 +1,12 @@
-"""Module to generate networkx graphs."""
-import numpy as np
-from jarvis.core.specie import chem_data, get_node_attributes
-
-from jarvis.core.atoms import Atoms as jAtoms
+"""Module to generate DGLGraphs."""
 from typing import Tuple, Literal, Dict
 
-try:
-    import torch
-    import dgl
-except ModuleNotFoundError as exp:
-    print("dgl/torch/tqdm is not installed.", exp)
+import dgl
+import torch
+import numpy as np
+from jarvis.core.atoms import Atoms as jAtoms
 
 from nfflr.atoms import Atoms
-
-
-def _get_attribute_lookup(atom_features: str = "cgcnn"):
-    """Build a lookup array indexed by atomic number."""
-    max_z = max(v["Z"] for v in chem_data.values())
-
-    # get feature shape (referencing Carbon)
-    template = get_node_attributes("C", atom_features)
-
-    features = np.zeros((1 + max_z, len(template)))
-
-    for element, v in chem_data.items():
-        z = v["Z"]
-        x = get_node_attributes(element, atom_features)
-
-        if x is not None:
-            features[z, :] = x
-
-    return features
 
 
 def compute_bond_cosines(edges):
@@ -140,7 +116,7 @@ def periodic_radius_graph(
     # and bond distances on demand?
     g.ndata["Xfrac"] = a.positions
 
-    g.ndata["atomic_number"] = a.numbers.type(torch.int8)
+    g.ndata["atomic_number"] = a.numbers.type(torch.int)
 
     return g
 
@@ -170,7 +146,7 @@ def periodic_knn_graph(
     # and bond distances on demand?
     g.ndata["Xfrac"] = a.positions
 
-    g.ndata["atomic_number"] = a.numbers.type(torch.int8)
+    g.ndata["atomic_number"] = a.numbers.type(torch.int)
 
     return g
 

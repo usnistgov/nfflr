@@ -1,41 +1,39 @@
 """Atomistic LIne Graph Neural Network.
 
-A prototype crystal line graph network dgl implementation.
+A crystal line graph network dgl implementation.
 """
-from typing import Tuple, Union, Optional
+from typing import Tuple, Union, Optional, Literal
+from dataclasses import dataclass
 
 import dgl
 import dgl.function as fn
-import torch
 from dgl.nn import AvgPooling, SumPooling
 
-# from dgl.nn.functional import edge_softmax
-from pydantic.typing import Literal
+import torch
 from torch import nn
 from torch.autograd import grad
 
-from alignn.models.utils import (
+from nfflr.models.utils import (
     smooth_cutoff,
     RBFExpansion,
     MLPLayer,
     SparseALIGNNConv,
     EdgeGatedGraphConv,
 )
-from alignn.utils import BaseSettings
 
-from jarvis.core.graphs import compute_bond_cosines
+from nfflr.graph import compute_bond_cosines
+from nfflr.atoms import _get_attribute_lookup
 
 
-class ALIGNNForceFieldConfig(BaseSettings):
-    """Hyperparameter schema for jarvisdgl.models.alignn_ff"""
+@dataclass
+class ALIGNNConfig:
+    """Hyperparameter schema for jarvisdgl.models.alignn"""
 
-    name: Literal["alignn_forcefield"] = "alignn_forcefield"
     cutoff: float = 8.0
     cutoff_onset: Optional[float] = 7.5
     alignn_layers: int = 4
     gcn_layers: int = 4
-    atom_input_features: int = 92
-    sparse_atom_embedding: bool = False
+    atom_features: str = "cgcnn"
     edge_input_features: int = 80
     triplet_input_features: int = 40
     embedding_features: int = 64
@@ -45,87 +43,52 @@ class ALIGNNForceFieldConfig(BaseSettings):
     calculate_stress: bool = False
     energy_units: Literal["eV", "eV/atom"] = "eV/atom"
 
-    class Config:
-        """Configure model settings behavior."""
 
-        env_prefix = "jv_model"
-
-
-class ALIGNNForceField(nn.Module):
+class ALIGNN(nn.Module):
     """Atomistic Line graph network.
 
     Chain alternating gated graph convolution updates on crystal graph
     and atomistic line graph.
     """
 
-    def __init__(
-        self,
-        config: ALIGNNForceFieldConfig = ALIGNNForceFieldConfig(
-            name="alignn_forcefield"
-        ),
-    ):
+    def __init__(self, config: ALIGNNConfig = ALIGNNConfig()):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
         self.config = config
 
-        if config.sparse_atom_embedding:
-            self.atom_embedding = nn.Sequential(
-                nn.Embedding(108, config.embedding_features),
-                MLPLayer(config.embedding_features, config.hidden_features),
-            )
+        if config.atom_features == "embedding":
+            self.atom_embedding = nn.Embedding(108, config.hidden_features)
         else:
-            self.atom_embedding = MLPLayer(
-                config.atom_input_features, config.hidden_features
+            f = _get_attribute_lookup(atom_features=config.atom_features)
+            self.atom_embedding = nn.Sequential(
+                f, MLPLayer(f.embedding_dim, config.hidden_features)
             )
 
         self.edge_embedding = nn.Sequential(
-            RBFExpansion(
-                vmin=0,
-                vmax=8.0,
-                bins=config.edge_input_features,
-            ),
+            RBFExpansion(vmin=0, vmax=8.0, bins=config.edge_input_features),
             MLPLayer(config.edge_input_features, config.embedding_features),
             MLPLayer(config.embedding_features, config.hidden_features),
         )
         self.angle_embedding = nn.Sequential(
-            RBFExpansion(
-                vmin=-1,
-                vmax=1.0,
-                bins=config.triplet_input_features,
-            ),
+            RBFExpansion(vmin=-1, vmax=1.0, bins=config.triplet_input_features),
             MLPLayer(config.triplet_input_features, config.embedding_features),
             MLPLayer(config.embedding_features, config.hidden_features),
         )
 
-        self.alignn_layers = nn.ModuleList(
-            [
-                SparseALIGNNConv(
-                    config.hidden_features,
-                    config.hidden_features,
-                )
-                for idx in range(config.alignn_layers - 1)
-            ]
-        )
-        self.alignn_layers.append(
-            SparseALIGNNConv(
-                config.hidden_features,
-                config.hidden_features,
-                skip_last_norm=True,
+        width = config.hidden_features
+        self.alignn_layers = nn.ModuleList()
+        for idx in range(1, config.alignn_layers + 1):
+            skipnorm = idx == config.alignn_layers
+            self.alignn_layers.append(
+                SparseALIGNNConv(width, width, skip_last_norm=skipnorm)
             )
-        )
-        self.gcn_layers = nn.ModuleList(
-            [
-                EdgeGatedGraphConv(config.hidden_features, config.hidden_features)
-                for idx in range(config.gcn_layers - 1)
-            ]
-        )
-        self.gcn_layers.append(
-            EdgeGatedGraphConv(
-                config.hidden_features,
-                config.hidden_features,
-                skip_edgenorm=True,
+
+        self.gcn_layers = nn.ModuleList()
+        for idx in range(1, config.gcn_layers + 1):
+            skipnorm = idx == config.gcn_layers
+            self.gcn_layers.append(
+                EdgeGatedGraphConv(width, width, skip_edgenorm=skipnorm)
             )
-        )
 
         if self.config.energy_units == "eV/atom":
             self.readout = AvgPooling()
@@ -209,19 +172,10 @@ class ALIGNNForceField(nn.Module):
             z = self.angle_embedding(lg.edata.pop("h"))
 
         # initial node features: atom feature network...
-        if self.config.sparse_atom_embedding:
-            x = g.ndata.pop("atomic_number").long().squeeze()
-        else:
-            x = g.ndata.pop("atom_features")
-
-        x = self.atom_embedding(x)
+        atomic_number = g.ndata.pop("atomic_number").int().squeeze()
+        x = self.atom_embedding(atomic_number)
 
         # ALIGNN updates: update node, edge, triplet features
-        # print(f"{x.shape=}")
-        # print(f"{y.shape=}")
-        # print(f"{z.shape=}")
-        # print(f"{g=}")
-        # print(f"{lg=}")
         y_mask = torch.where(bondlength <= local_cutoff)[0]
         for alignn_layer in self.alignn_layers:
             x, y, z = alignn_layer(g, lg, x, y, z, y_mask=y_mask)
