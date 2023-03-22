@@ -1,11 +1,9 @@
 """Training script test suite."""
 import time
 import matplotlib.pyplot as plt
-import numpy as np
 from alignn.train import train_dgl
 from alignn.pretrained import get_prediction
 from alignn.pretrained import get_multiple_predictions
-from sklearn.metrics import mean_absolute_error
 import os
 from jarvis.core.atoms import Atoms
 
@@ -51,7 +49,7 @@ def test_minor_configs():
     tmp["n_early_stopping"] = 2
     tmp["model"]["name"] = "alignn"
     config["write_predictions"] = True
-    result = train_dgl(tmp)
+    train_dgl(tmp)
 
 
 def test_models():

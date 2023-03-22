@@ -17,7 +17,7 @@ def test_alignnff():
     # atoms = atoms.make_supercell_matrix([2, 2, 2])
     # atoms=atoms.strain_atoms(.05)
     # print(atoms)
-    ev = ev_curve(atoms=atoms, model_path=model_path)
+    ev_curve(atoms=atoms, model_path=model_path)
     surf = surface_energy(atoms=atoms, model_path=model_path)
     print(surf)
     vac = vacancy_formation(atoms=atoms, model_path=model_path)
@@ -39,10 +39,8 @@ def test_alignnff():
     atoms_al = JAtoms.from_dict(
         get_jid_data(dataset="dft_3d", jid="JVASP-816")["atoms"]
     )
-    atoms_al2o3 = JAtoms.from_dict(
-        get_jid_data(dataset="dft_3d", jid="JVASP-32")["atoms"]
-    )
-    intf = get_interface_energy(
+    JAtoms.from_dict(get_jid_data(dataset="dft_3d", jid="JVASP-32")["atoms"])
+    get_interface_energy(
         film_atoms=atoms_al,
         subs_atoms=atoms_al,
         model_path=model_path,

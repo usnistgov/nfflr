@@ -1,10 +1,8 @@
 """Standalone dataset for training force field models."""
 import os
-import pickle
-import shutil
 from functools import partial
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Literal, Tuple, Union
 
 import dgl
 import numpy as np
@@ -13,11 +11,9 @@ import torch
 from jarvis.core.atoms import Atoms
 from jarvis.core.graphs import (
     chem_data,
-    compute_bond_cosines,
     get_node_attributes,
 )
 from numpy.random import default_rng
-from tqdm import tqdm
 
 from alignn.graphs import Graph
 
@@ -177,7 +173,6 @@ def atom_dgl_multigraph_torch(
         cart_coords = torch.tensor(atoms.cart_coords, dtype=precision)
         frac_coords = torch.tensor(atoms.frac_coords, dtype=precision)
         lattice_mat = torch.tensor(atoms.lattice_mat, dtype=precision)
-        elements = atoms.elements
 
     X_src = cart_coords
     num_atoms = X_src.shape[0]

@@ -1,20 +1,12 @@
 """Module to generate networkx graphs."""
-from jarvis.core.atoms import get_supercell_dims
-from jarvis.core.specie import Specie
-from jarvis.core.utils import random_colors
 import numpy as np
-import pandas as pd
-from collections import OrderedDict
-from jarvis.analysis.structure.neighbors import NeighborsAnalysis
 from jarvis.core.specie import chem_data, get_node_attributes
 
 # from jarvis.core.atoms import Atoms
-from collections import defaultdict
-from typing import List, Tuple, Sequence, Optional
+from typing import Tuple
 
 try:
     import torch
-    from tqdm import tqdm
     import dgl
 except Exception as exp:
     print("dgl/torch/tqdm is not installed.", exp)

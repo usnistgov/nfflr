@@ -6,7 +6,6 @@ from typing import Tuple, Union, Optional
 
 import dgl
 import dgl.function as fn
-import numpy as np
 import torch
 from dgl.nn import AvgPooling, SumPooling
 
@@ -14,7 +13,6 @@ from dgl.nn import AvgPooling, SumPooling
 from pydantic.typing import Literal
 from torch import nn
 from torch.autograd import grad
-from torch.nn import functional as F
 
 from alignn.models.utils import (
     smooth_cutoff,

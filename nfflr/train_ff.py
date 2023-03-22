@@ -1,7 +1,7 @@
 """Prototype training code for force field models."""
 import os
 from datetime import timedelta
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from typing import Any, Literal, Optional, Union
@@ -13,12 +13,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import torch
 import typer
-from ignite.contrib.engines.common import setup_common_training_handlers
-from ignite.engine import Engine, supervised_training_step_amp
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.engine import (
     Events,
-    create_supervised_evaluator,
     create_supervised_trainer,
 )
 from ignite.handlers import (
@@ -36,7 +33,7 @@ from torch.utils.data import SubsetRandomSampler
 
 from alignn.dataset import AtomisticConfigurationDataset
 from alignn.models.alignn_ff import ALIGNNForceField, ALIGNNForceFieldConfig
-from alignn.models.bond_order import BondOrderConfig, NeuralBondOrder
+from alignn.models.bond_order import NeuralBondOrder
 from alignn.training_utils import (
     group_decay,
     select_target,

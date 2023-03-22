@@ -3,7 +3,7 @@
 parameterize a bond order style potential with an ALIGNN network
 """
 
-from typing import Tuple, Union, Optional
+from typing import Optional
 
 import dgl
 import dgl.function as fn
@@ -14,7 +14,6 @@ from jarvis.core.graphs import compute_bond_cosines
 from pydantic.typing import Literal
 from torch import nn
 from torch.autograd import grad
-from torch.nn import functional as F
 
 from alignn.models.utils import (
     RBFExpansion,
@@ -132,7 +131,7 @@ class BondOrderInteraction(nn.Module):
         R = cutoff_distance - D
 
         def cutoff(r):
-            N = r.size()
+            r.size()
             c = torch.where(
                 r < R - D,
                 torch.ones_like(r),

@@ -13,7 +13,6 @@ import torch
 # from dgl.nn.functional import edge_softmax
 from pydantic.typing import Literal
 from torch import nn
-from torch.nn import functional as F
 from alignn.models.utils import RBFExpansion, MLPLayer, ALIGNNConv
 from alignn.utils import BaseSettings
 

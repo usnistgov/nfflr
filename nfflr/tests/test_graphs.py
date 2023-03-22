@@ -28,10 +28,10 @@ def test_graph():
         g = Graph.atom_dgl_multigraph(atoms=atoms, atom_features=i)
         g = Graph.atom_dgl_multigraph(atoms=atoms, atom_features=i)
         print(i, g)
-    batch = prepare_dgl_batch(torch.tensor([1, 1]))
-    batch = prepare_line_graph_batch(torch.tensor([1, 1, 1]))
+    prepare_dgl_batch(torch.tensor([1, 1]))
+    prepare_line_graph_batch(torch.tensor([1, 1, 1]))
     g = Graph.from_atoms(atoms=atoms, features="atomic_number")
-    gnx = g.to_networkx()
+    g.to_networkx()
     g = Graph.from_atoms(atoms=atoms, features="atomic_number")
     g = Graph.from_atoms(atoms=atoms, features="atomic_fraction")
     g = Graph.from_atoms(
@@ -87,11 +87,9 @@ def test_dataset():
         graphs.append(g)
 
     s = StructureDataset(d, graphs, "formation_energy_peratom", line_graph=True)
-    col = s.collate
-    col1 = s.collate_line_graph
-    ix = s[0]
-    sz = len(s)
-    s_std = s.setup_standardizer([1, 2])
+    s[0]
+    len(s)
+    s.setup_standardizer([1, 2])
 
 
 # test_graph()
