@@ -6,15 +6,14 @@ from typing import Tuple, Union, Optional, Literal
 from dataclasses import dataclass
 
 import dgl
-import dgl.function as fn
 from dgl.nn import AvgPooling, SumPooling
 
 import torch
 from torch import nn
-from torch.autograd import grad
 
 from nfflr.models.utils import (
     smooth_cutoff,
+    autograd_forces,
     RBFExpansion,
     MLPLayer,
     SparseALIGNNConv,
@@ -39,8 +38,7 @@ class ALIGNNConfig:
     embedding_features: int = 64
     hidden_features: int = 256
     output_features: int = 1
-    calculate_gradient: bool = True
-    calculate_stress: bool = False
+    compute_forces: bool = False
     energy_units: Literal["eV", "eV/atom"] = "eV/atom"
 
 
@@ -107,6 +105,7 @@ class ALIGNN(nn.Module):
         y: bond features (g.edata and lg.ndata)
         z: angle features (lg.edata)
         """
+        config = self.config
 
         # precomputed line graph
         precomputed_lg = False
@@ -122,7 +121,7 @@ class ALIGNN(nn.Module):
 
         # to compute forces, take gradient wrt g.edata["r"]
         # need to add bond vectors to autograd graph
-        if self.config.calculate_gradient:
+        if config.compute_forces:
             r.requires_grad_(True)
 
         # JVASP-76516_elast-0 is causing issues!
@@ -132,13 +131,10 @@ class ALIGNN(nn.Module):
         # with float32, need to increase the threshold... to 1e-2
         bondlength = torch.norm(r, dim=1)
 
-        if self.config.cutoff_onset is not None:
+        if config.cutoff_onset is not None:
             # save cutoff function value for application in EdgeGatedGraphconv
-            fcut = smooth_cutoff(
-                bondlength,
-                r_onset=self.config.cutoff_onset,
-                r_cutoff=self.config.cutoff,
-            )
+            r_onset, r_cut = config.cutoff_onset, config.cutoff
+            fcut = smooth_cutoff(bondlength, r_onset=r_onset, r_cutoff=r_cut)
             g.edata["cutoff_value"] = fcut
 
         # print(bondlength.sort()[0][:10])
@@ -163,7 +159,6 @@ class ALIGNN(nn.Module):
                 )
                 if g.num_nodes() != g_local.num_nodes():
                     print("problem with edge_subgraph!")
-                # y = g_local.edata.pop("y")
 
                 lg = g_local.line_graph(shared=True)
 
@@ -189,69 +184,17 @@ class ALIGNN(nn.Module):
 
         # total energy prediction
         # if config.energy_units = eV/atom, mean reduction
-        total_energy = torch.squeeze(self.readout(g, atomwise_energy))
+        output = torch.squeeze(self.readout(g, atomwise_energy))
 
-        forces = torch.empty(1)
-        stress = torch.empty(1)
+        if config.compute_forces:
+            forces = autograd_forces(output, r, g, energy_units=config.energy_units)
 
-        if self.config.calculate_gradient:
-            # potentially we only need to build the computational graph
-            # for the forces at training time, so that we can compute
-            # the gradient of the force (and stress) loss?
-            create_graph = True
-
-            # energy gradient contribution of each bond
-            # dU/dr
-            dy_dr = grad(
-                total_energy,
-                r,
-                grad_outputs=torch.ones_like(total_energy),
-                create_graph=create_graph,
-                retain_graph=True,
-            )[0]
-
-            # forces: negative energy gradient -dU/dr
-            pairwise_forces = -dy_dr
-
-            # reduce over bonds to get forces on each atom
-            g.edata["pairwise_forces"] = pairwise_forces
-            g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
-
-            forces = torch.squeeze(g.ndata["forces"])
-
-            # if training against reduced energies, correct the force predictions
-            if self.config.energy_units == "eV/atom":
-                # broadcast |v(g)| across forces to under per-atom energy scaling
-
-                n_nodes = torch.cat(
-                    [i * torch.ones(i, device=g.device) for i in g.batch_num_nodes()]
-                )
-
-                forces = forces * n_nodes[:, None]
-
-            if self.config.calculate_stress:
-                # make this a custom DGL aggregation?
-
-                # Under development, use with caution
-                # 1 eV/Angstrom3 = 160.21766208 GPa
-                # 1 GPa = 10 kbar
-                # Following Virial stress formula, assuming inital velocity = 0
-                # Save volume as g.gdta['V']?
-                stress = -1 * (
-                    160.21766208 * torch.matmul(r.T, dy_dr) / (2 * g.ndata["V"][0])
-                )
-                # virial = (
-                #    160.21766208
-                #    * 10
-                #    * torch.einsum("ij, ik->jk", result["r"], result["dy_dr"])
-                #    / 2
-                # )  # / ( g.ndata["V"][0])
-
-        result = dict(
-            total_energy=total_energy,
-            forces=forces,
-            stress=stress,
-            atomwise_energy=atomwise_energy,
-        )
+            result = dict(
+                total_energy=output,
+                forces=forces,
+                atomwise_energy=atomwise_energy,
+            )
+        else:
+            result = output
 
         return result

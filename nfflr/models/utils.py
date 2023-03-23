@@ -5,10 +5,54 @@ import numpy as np
 
 import torch
 from torch import nn
+from torch.autograd import grad
 from torch.nn import functional as F
 
 import dgl
 import dgl.function as fn
+
+
+def autograd_forces(
+    total_energy: torch.tensor,
+    displacement_vectors: torch.tensor,
+    g: dgl.DGLGraph,
+    energy_units="eV/atom",
+):
+    # potentially we only need to build the computational graph
+    # for the forces at training time, so that we can compute
+    # the gradient of the force (and stress) loss?
+    create_graph = True
+
+    # energy gradient contribution of each bond
+    # dU/dr
+    dy_dr = grad(
+        total_energy,
+        displacement_vectors,
+        grad_outputs=torch.ones_like(total_energy),
+        create_graph=create_graph,
+        retain_graph=True,
+    )[0]
+
+    # forces: negative energy gradient -dU/dr
+    pairwise_forces = -dy_dr
+
+    # reduce over bonds to get forces on each atom
+    g.edata["pairwise_forces"] = pairwise_forces
+    g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
+
+    forces = torch.squeeze(g.ndata["forces"])
+
+    # if training against reduced energies, correct the force predictions
+    if energy_units == "eV/atom":
+        # broadcast |v(g)| across forces to under per-atom energy scaling
+
+        n_nodes = torch.cat(
+            [i * torch.ones(i, device=g.device) for i in g.batch_num_nodes()]
+        )
+
+        forces = forces * n_nodes[:, None]
+
+    return forces
 
 
 def smooth_cutoff(r, r_onset=3.5, r_cutoff=4):
@@ -288,7 +332,7 @@ class SparseALIGNNConv(nn.Module):
         lg = lg.local_var()
 
         # handle residual for line graph manually
-        y_residual, z_residual = y, z
+        z_residual = z
 
         # Edge-gated graph convolution update on crystal graph
         x, m = self.node_update(g, x, y)
@@ -300,7 +344,7 @@ class SparseALIGNNConv(nn.Module):
             y = m
 
         else:
-            y_update, z_update = self.edge_update(lg, m_residual, z)
+            y_update, z_update = self.edge_update(lg, m, z)
             y = y_update + m
 
         z = z_update + z_residual
