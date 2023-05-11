@@ -174,7 +174,37 @@ def tile_supercell_2(
     # X_dst = X_dst.reshape(-1, 3)
     X_supercell = X_supercell.reshape(-1, 3)
 
-    return Xcart, X_supercell, root_ids
+    return Xcart, X_supercell, root_ids, cell_images
+
+
+def pad_ghost_region(atoms: Atoms, cutoff: float = 5):
+    """Pad ghost atoms using supercell tiling method."""
+
+    # note: maybe don't need to do this in double precision?
+    X_src, X_supercell, root_ids, offsets = tile_supercell_2(
+        atoms.positions, atoms.lattice, cutoff
+    )
+
+    X_supercell = X_supercell.reshape(-1, 3)  # (n_cells * n_atoms, n_dim)
+
+    # pairwise distances between atoms in (0,0,0) cell
+    # and atoms in all periodic images
+    dist = torch.cdist(X_src, X_supercell)
+
+    atol = 1e-5
+    neighbor_mask = (dist > atol) & (dist < cutoff)
+
+    # get node indices for edgelist from neighbor mask
+    src, v = torch.where(neighbor_mask)
+
+    # keep only unique images
+    v = torch.unique(v)
+
+    # divmod to get cell and atom ids
+    cell_ids = torch.div(v, len(atoms), rounding_mode="floor")
+    atom_ids = v % len(atoms)
+
+    return offsets[cell_ids], atom_ids
 
 
 def periodic_radius_graph(
@@ -186,7 +216,7 @@ def periodic_radius_graph(
     """
 
     # build radius graph in supercell
-    X_src, X_supercell, root_ids = tile_supercell_2(
+    X_src, X_supercell, root_ids, cell_images = tile_supercell_2(
         a.positions.double(), a.lattice.double(), r, bond_tol
     )
 
@@ -196,10 +226,6 @@ def periodic_radius_graph(
 
     atol = 1e-5
     neighbor_mask = (dist > atol) & (dist < r)
-    # slooooow version:
-    # neighbor_mask = torch.bitwise_and(
-    #     dist <= r, ~torch.isclose(dist, torch.DoubleTensor([0]), atol=atol)
-    # )
 
     # get node indices for edgelist from neighbor mask
     src, v = torch.where(neighbor_mask)

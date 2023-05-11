@@ -17,7 +17,7 @@ from pykeops.torch import LazyTensor
 
 from nfflr.models.abstract import AbstractModel
 from nfflr.atoms import Atoms
-from nfflr.graph import periodic_radius_graph
+from nfflr.graph import periodic_radius_graph, pad_ghost_region
 from nfflr.models.utils import autograd_forces
 
 
@@ -101,8 +101,13 @@ class LennardJonesK(nn.Module):
         if ps.smooth:
             raise NotImplementedError("cutoff function not implemented")
 
-        xs = a.positions @ a.lattice
-        xs.requires_grad_(True)
+        offsets, atom_ids = pad_ghost_region(a)
+        root_cell = (offsets == 0).all(dim=1).nonzero().flatten()
+
+        _xs = a.positions @ a.lattice
+        _xs.requires_grad_(True)
+
+        xs = offsets @ a.lattice + _xs[atom_ids]
 
         N, D = xs.shape
 
@@ -124,12 +129,15 @@ class LennardJonesK(nn.Module):
 
         energy_i = (0.5 * pairwise_energies).sum(dim=1)  # (N, 1, 1)
 
+        # slice only (000) cell
+        energy_i = energy_i[root_cell]
+
         total_energy = energy_i.sum()
 
         # force calculation based on position
         # retain graph for displacement-based grad calculation
         forces_x = -torch.autograd.grad(
-            total_energy, xs, create_graph=True, retain_graph=True
+            total_energy, _xs, create_graph=True, retain_graph=True
         )[0]
 
         return total_energy, forces_x
