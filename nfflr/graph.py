@@ -178,7 +178,7 @@ def tile_supercell_2(
 
 
 def periodic_radius_graph(
-    a: Atoms, r: float = 5, bond_tol: float = 0.15
+    a: Atoms, r: float = 5, bond_tol: float = 0.15, dtype=torch.float
 ) -> dgl.DGLGraph:
     """Build periodic radius graph for crystal.
 
@@ -211,10 +211,12 @@ def periodic_radius_graph(
     # note: to do this differentiably, probably want to store
     # fractional coordinates and lattice matrix and compute cartesian coordinates
     # and bond distances on demand?
-    g.ndata["Xfrac"] = a.positions
+    g.ndata["Xfrac"] = a.positions.to(dtype)
 
-    g.ndata["coord"] = X_src.float()
-    g.edata["r"] = (X_supercell[v] - X_src[src]).float()
+    # messages propagate src -> dst
+    # this means propagation from *neighbor* to *self*
+    g.ndata["coord"] = X_src.to(dtype)
+    g.edata["r"] = (X_supercell[v] - X_src[src]).to(dtype)
 
     g.ndata["atomic_number"] = a.numbers.type(torch.int)
 

@@ -2,10 +2,12 @@
 
 A crystal line graph network dgl implementation.
 """
+from plum import dispatch
 from typing import Tuple, Union, Optional, Literal
 from dataclasses import dataclass
 
 import dgl
+import dgl.function as fn
 from dgl.nn import AvgPooling, SumPooling
 
 import torch
@@ -20,13 +22,15 @@ from nfflr.models.utils import (
     EdgeGatedGraphConv,
 )
 
-from nfflr.graph import compute_bond_cosines
-from nfflr.atoms import _get_attribute_lookup
+from nfflr.models.abstract import AbstractModel
+
+from nfflr.graph import compute_bond_cosines, periodic_radius_graph
+from nfflr.atoms import _get_attribute_lookup, Atoms
 
 
 @dataclass
 class ALIGNNConfig:
-    """Hyperparameter schema for jarvisdgl.models.alignn"""
+    """Hyperparameter schema for nfflr.models.alignn"""
 
     cutoff: float = 8.0
     cutoff_onset: Optional[float] = 7.5
@@ -95,6 +99,17 @@ class ALIGNN(nn.Module):
 
         self.fc = nn.Linear(config.hidden_features, config.output_features)
 
+    @dispatch
+    def forward(self, x):
+        print("convert")
+        return self.forward(Atoms(x))
+
+    @dispatch
+    def forward(self, x: Atoms):
+        print("construct graph")
+        return self.forward(periodic_radius_graph(x, r=self.config.cutoff))
+
+    @dispatch
     def forward(
         self,
         g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph],
@@ -105,6 +120,7 @@ class ALIGNN(nn.Module):
         y: bond features (g.edata and lg.ndata)
         z: angle features (lg.edata)
         """
+        # print("forward")
         config = self.config
 
         # precomputed line graph
@@ -137,7 +153,6 @@ class ALIGNN(nn.Module):
             fcut = smooth_cutoff(bondlength, r_onset=r_onset, r_cutoff=r_cut)
             g.edata["cutoff_value"] = fcut
 
-        # print(bondlength.sort()[0][:10])
         y = self.edge_embedding(bondlength)
         g.edata["y"] = y
 

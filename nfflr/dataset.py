@@ -112,7 +112,6 @@ class AtomsDataset(torch.utils.data.Dataset):
         return atoms, target
 
     def get_energy_and_forces(self, idx) -> dict:
-
         target = {
             "energy": self.df["total_energy"][idx],
             "forces": self.df["forces"][idx],

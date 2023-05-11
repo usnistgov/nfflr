@@ -17,6 +17,7 @@ def autograd_forces(
     displacement_vectors: torch.tensor,
     g: dgl.DGLGraph,
     energy_units="eV/atom",
+    reduce=True,
 ):
     # potentially we only need to build the computational graph
     # for the forces at training time, so that we can compute
@@ -36,11 +37,18 @@ def autograd_forces(
     # forces: negative energy gradient -dU/dr
     pairwise_forces = -dy_dr
 
+    if not reduce:
+        return pairwise_forces
+
     # reduce over bonds to get forces on each atom
     g.edata["pairwise_forces"] = pairwise_forces
-    g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
+    g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces_ji"))
 
-    forces = torch.squeeze(g.ndata["forces"])
+    # reduce over reverse edges too!
+    rg = dgl.reverse(g, copy_edata=True)
+    rg.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces_ij"))
+
+    forces = torch.squeeze(g.ndata["forces_ji"] - rg.ndata["forces_ij"])
 
     # if training against reduced energies, correct the force predictions
     if energy_units == "eV/atom":
@@ -142,7 +150,8 @@ class MLPLayer(nn.Module):
 class EdgeGatedGraphConv(nn.Module):
     """Edge gated graph convolution from arxiv:1711.07553.
 
-    see also arxiv:2003.0098.
+    see also https://www.jmlr.org/papers/v24/22-0567.html
+
 
     This is similar to CGCNN, but edge features only go into
     the soft attention / edge gating function, and the primary
