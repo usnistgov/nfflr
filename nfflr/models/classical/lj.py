@@ -45,41 +45,6 @@ def cutoff_function(r: float, rc: float, ro: float):
     )
 
 
-def autograd_forces_bondlength(
-    total_energy: torch.tensor,
-    bondlengths: torch.tensor,
-    bondvec: torch.tensor,
-    g: dgl.DGLGraph,
-    reduce=True,
-):
-    # compute gradient of total energy wrt bond lengths
-    dy_dr = grad(
-        total_energy,
-        bondlengths,
-        grad_outputs=torch.ones_like(total_energy),
-        create_graph=True,
-        retain_graph=True,
-    )[0]
-
-    # forces: negative energy gradient -dU/dr
-    pairwise_forces = -dy_dr
-
-    if not reduce:
-        return pairwise_forces
-
-    pairwise_forces = (
-        pairwise_forces.unsqueeze(-1) * bondvec / bondlengths.unsqueeze(-1)
-    )
-
-    # reduce over bonds to get forces on each atom
-    g.edata["pairwise_forces"] = pairwise_forces
-    g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
-
-    forces = torch.squeeze(g.ndata["forces"])
-
-    return forces
-
-
 @dataclass
 class LJParams:
     epsilon: float = 1.0
@@ -151,14 +116,11 @@ class LennardJones(nn.Module):
         self.parameters = parameters
 
     def forward(self, a: Atoms):
-        """EAM
+        """LennardJones
 
-        The energy is decomposed into pairwise ϕ terms and an embedding function U
-        of the electron density n around each atom.
+        The energy is decomposed into pairwise ϕ terms
 
-        E = \sum_{i < j} Φᵢⱼ(rᵢⱼ) + \sum_i Uᵢ(nᵢ)
-        nᵢ = \sum_{j ≠ i} ρⱼ(rᵢⱼ)
-
+        E = \sum_{i < j} Φᵢⱼ(rᵢⱼ)
         """
         ps = self.parameters
         if ps.smooth:
@@ -174,14 +136,11 @@ class LennardJones(nn.Module):
         # need to add bond vectors to autograd graph
         bond_vectors = g.edata.pop("r")
         bond_vectors.requires_grad_(True)
-        bondlen = torch.norm(bond_vectors, dim=1)
-        r2 = torch.square(bondlen)
-        # r2 = (bond_vectors ** 2).sum(dim=1)
+        # bondlen = torch.norm(bond_vectors, dim=1)
+        r2 = (bond_vectors**2).sum(dim=1)
 
         c6 = (ps.sigma**2 / r2) ** 3
-        # c6[r2 > ps.rc ** 2] = 0.0 # no neighbors past cutoff by construction
         c12 = c6**2
-
         pairwise_energies = 4 * ps.epsilon * (c12 - c6)
         analytic_pairwise_forces = -24 * ps.epsilon * (2 * c12 - c6) / r2  # du_ij
 
@@ -190,10 +149,6 @@ class LennardJones(nn.Module):
 
         # reduce pair potential from edges -> atoms
         # (src -> dst) :: energy[src] ++
-        # energies[ii] += 0.5 * pairwise_energies.sum()  # atomic energies
-        # pairwise_forces = pairwise_forces[:, np.newaxis] * distance_vectors
-        # forces[ii] += pairwise_forces.sum(axis=0)
-
         # each edge counts for half the energy since LJ is defined
         # in a way that does not double-count bonds...
         g.edata["pair_energy"] = 0.5 * pairwise_energies
@@ -201,19 +156,6 @@ class LennardJones(nn.Module):
 
         potential_energy = g.ndata["energy"].sum()
         forces = autograd_forces(potential_energy, bond_vectors, g, energy_units="eV")
-
-        # some assumption about message passing is wrong because directly summing the pair energies works
-        # but reducing over nodes does not....
-        # hold on - pairwise_energies.sum() was skipping the factor of two all along!
-        # forces = autograd_forces_bondlength(potential_energy, bondlen, bond_vectors, g, reduce=False)
-        # forces = autograd_forces_bondlength(0.5 * pairwise_energies.sum(), bondlen, bond_vectors, g, reduce=False)
-
-        # # # add back the factor of 2!
-        # forces = 2 * forces.unsqueeze(-1) * bond_vectors / bondlen.unsqueeze(-1)
-        # # reduce over bonds to get forces on each atom
-        # g.edata["pairwise_forces"] = forces
-        # g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces"))
-        # forces = torch.squeeze(g.ndata["forces"])
 
         g.edata["analytic_pair_forces"] = (
             analytic_pairwise_forces.unsqueeze(-1) * bond_vectors
