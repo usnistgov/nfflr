@@ -2,47 +2,46 @@
 
 A prototype crystal line graph network dgl implementation.
 """
-from typing import Tuple, Union
+from plum import dispatch
+
+import logging
+from dataclasses import dataclass
+from typing import Tuple, Union, Optional, Literal
 
 import dgl
-import numpy as np
 import torch
-from dgl.nn import AvgPooling
-
-# from dgl.nn.functional import edge_softmax
-from pydantic.typing import Literal
 from torch import nn
 
-from nfflr.models.utils import RBFExpansion, MLPLayer, ALIGNNConv
-from nfflr.utils import BaseSettings
+from dgl.nn import AvgPooling
+
+from nfflr.models.utils import (
+    smooth_cutoff,
+    autograd_forces,
+    RBFExpansion,
+    MLPLayer,
+    ALIGNNConv,
+    EdgeGatedGraphConv,
+)
+from nfflr.data.graph import compute_bond_cosines, periodic_radius_graph
+from nfflr.data.atoms import _get_attribute_lookup, Atoms
 
 
-class ALIGNNConfig(BaseSettings):
-    """Hyperparameter schema for jarvisdgl.models.alignn."""
+@dataclass
+class ALIGNNConfig:
+    """Hyperparameter schema for nfflr.models.gnn.alignn."""
 
-    name: Literal["alignn"]
+    cutoff: float = 8.0
+    cutoff_onset: Optional[float] = 7.5
     alignn_layers: int = 4
     gcn_layers: int = 4
-    atom_input_features: int = 92
+    atom_features: str = "cgcnn"
     edge_input_features: int = 80
     triplet_input_features: int = 40
     embedding_features: int = 64
     hidden_features: int = 256
-    # fc_layers: int = 1
-    # fc_features: int = 64
     output_features: int = 1
-
-    # if link == log, apply `exp` to final outputs
-    # to constrain predictions to be positive
-    link: Literal["identity", "log", "logit"] = "identity"
-    zero_inflated: bool = False
-    classification: bool = False
-    num_classes: int = 2
-
-    class Config:
-        """Configure model settings behavior."""
-
-        env_prefix = "jv_model"
+    compute_forces: bool = False
+    energy_units: Literal["eV", "eV/atom"] = "eV/atom"
 
 
 class ALIGNN(nn.Module):
@@ -52,15 +51,19 @@ class ALIGNN(nn.Module):
     and atomistic line graph.
     """
 
-    def __init__(self, config: ALIGNNConfig = ALIGNNConfig(name="alignn")):
+    def __init__(self, config: ALIGNNConfig = ALIGNNConfig()):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
-        # print(config)
-        self.classification = config.classification
+        self.config = config
+        logging.debug(f"{config=}")
 
-        self.atom_embedding = MLPLayer(
-            config.atom_input_features, config.hidden_features, norm="batchnorm"
-        )
+        if config.atom_features == "embedding":
+            self.atom_embedding = nn.Embedding(108, config.hidden_features)
+        else:
+            f = _get_attribute_lookup(atom_features=config.atom_features)
+            self.atom_embedding = nn.Sequential(
+                f, MLPLayer(f.embedding_dim, config.hidden_features)
+            )
 
         self.edge_embedding = nn.Sequential(
             RBFExpansion(
@@ -110,22 +113,19 @@ class ALIGNN(nn.Module):
 
         self.readout = AvgPooling()
 
-        if self.classification:
-            self.fc = nn.Linear(config.hidden_features, config.num_classes)
-            self.softmax = nn.LogSoftmax(dim=1)
-        else:
-            self.fc = nn.Linear(config.hidden_features, config.output_features)
-        self.link = None
-        self.link_name = config.link
-        if config.link == "identity":
-            self.link = lambda x: x
-        elif config.link == "log":
-            self.link = torch.exp
-            avg_gap = 0.7  # magic number -- average bandgap in dft_3d
-            self.fc.bias.data = torch.tensor(np.log(avg_gap), dtype=torch.float)
-        elif config.link == "logit":
-            self.link = torch.sigmoid
+        self.fc = nn.Linear(config.hidden_features, config.output_features)
 
+    @dispatch
+    def forward(self, x):
+        print("convert")
+        return self.forward(Atoms(x))
+
+    @dispatch
+    def forward(self, x: Atoms):
+        print("construct graph")
+        return self.forward(periodic_radius_graph(x, r=self.config.cutoff))
+
+    @dispatch
     def forward(self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]):
         """ALIGNN : start with `atom_features`.
 
@@ -133,22 +133,41 @@ class ALIGNN(nn.Module):
         y: bond features (g.edata and lg.ndata)
         z: angle features (lg.edata)
         """
-        if len(self.alignn_layers) > 0:
-            g, lg = g
-            lg = lg.local_var()
+        config = self.config
 
-            # angle features (fixed)
-            z = self.angle_embedding(lg.edata.pop("h"))
+        if isinstance(g, dgl.DGLGraph):
+            lg = None
+        else:
+            g, lg = g
 
         g = g.local_var()
 
+        # to compute forces, take gradient wrt g.edata["r"]
+        # need to add bond vectors to autograd graph
+        if config.compute_forces:
+            g.edata["r"].requires_grad_(True)
+
         # initial node features: atom feature network...
-        x = g.ndata.pop("atom_features")
-        x = self.atom_embedding(x)
+        atomic_number = g.ndata.pop("atomic_number").int().squeeze()
+        x = self.atom_embedding(atomic_number)
 
         # initial bond features
-        bondlength = torch.norm(g.edata.pop("r"), dim=1)
+        bondlength = torch.norm(g.edata["r"], dim=1)
         y = self.edge_embedding(bondlength)
+
+        if config.cutoff_onset is not None:
+            # save cutoff function value for application in EdgeGatedGraphconv
+            r_onset, r_cut = config.cutoff_onset, config.cutoff
+            fcut = smooth_cutoff(bondlength, r_onset=r_onset, r_cutoff=r_cut)
+            g.edata["cutoff_value"] = fcut
+
+        # initial triplet features
+        if len(self.alignn_layers) > 0:
+            if lg is None:
+                lg = g.line_graph(shared=True)
+                lg.apply_edges(compute_bond_cosines)
+
+            z = self.angle_embedding(lg.edata.pop("h"))
 
         # ALIGNN updates: update node, edge, triplet features
         for alignn_layer in self.alignn_layers:
@@ -160,12 +179,16 @@ class ALIGNN(nn.Module):
 
         # norm-activation-pool-classify
         h = self.readout(g, x)
-        out = self.fc(h)
+        output = torch.squeeze(self.fc(h))
 
-        if self.link:
-            out = self.link(out)
+        if config.compute_forces:
+            forces = autograd_forces(
+                output, g.edata["r"], g, energy_units=config.energy_units
+            )
 
-        if self.classification:
-            # out = torch.round(torch.sigmoid(out))
-            out = self.softmax(out)
-        return torch.squeeze(out)
+            return dict(
+                total_energy=output,
+                forces=forces,
+            )
+
+        return output

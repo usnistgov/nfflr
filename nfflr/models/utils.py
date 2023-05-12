@@ -134,7 +134,7 @@ class MLPLayer(nn.Module):
         if norm == "layernorm":
             Norm = nn.LayerNorm
         elif norm == "batchnorm":
-            Norm = nn.BatchNorm
+            Norm = nn.BatchNorm1d
 
         self.layer = nn.Sequential(
             nn.Linear(in_features, out_features),
@@ -172,7 +172,7 @@ class EdgeGatedGraphConv(nn.Module):
         if norm == "layernorm":
             Norm = nn.LayerNorm
         elif norm == "batchnorm":
-            Norm = nn.BatchNorm
+            Norm = nn.BatchNorm1d
 
         self.skip_edgenorm = skip_edgenorm
 

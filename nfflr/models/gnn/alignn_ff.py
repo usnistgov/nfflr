@@ -7,7 +7,6 @@ from typing import Tuple, Union, Optional, Literal
 from dataclasses import dataclass
 
 import dgl
-import dgl.function as fn
 from dgl.nn import AvgPooling, SumPooling
 
 import torch
@@ -22,15 +21,13 @@ from nfflr.models.utils import (
     EdgeGatedGraphConv,
 )
 
-from nfflr.models.abstract import AbstractModel
-
 from nfflr.data.graph import compute_bond_cosines, periodic_radius_graph
 from nfflr.data.atoms import _get_attribute_lookup, Atoms
 
 
 @dataclass
 class ALIGNNConfig:
-    """Hyperparameter schema for nfflr.models.alignn"""
+    """Hyperparameter schema for nfflr.models.gnn.alignn"""
 
     cutoff: float = 8.0
     cutoff_onset: Optional[float] = 7.5
@@ -123,29 +120,26 @@ class ALIGNN(nn.Module):
         # print("forward")
         config = self.config
 
-        # precomputed line graph
-        precomputed_lg = False
-        if isinstance(g, tuple):
-            precomputed_lg = True
+        if isinstance(g, dgl.DGLGraph):
+            lg = None
+        else:
             g, lg = g
-            lg = lg.local_var()
 
         g = g.local_var()
-
-        # initial bond features: bond displacement vectors
-        r = g.edata["r"]
 
         # to compute forces, take gradient wrt g.edata["r"]
         # need to add bond vectors to autograd graph
         if config.compute_forces:
-            r.requires_grad_(True)
+            g.edata["r"].requires_grad_(True)
 
-        # JVASP-76516_elast-0 is causing issues!
-        # i.e. bond length of zero...
-        # this is is a precision bug related to distance filtering
-        # using float64 and self-interaction threshold 1e-8 works
-        # with float32, need to increase the threshold... to 1e-2
-        bondlength = torch.norm(r, dim=1)
+        # initial node features: atom feature network...
+        atomic_number = g.ndata.pop("atomic_number").int().squeeze()
+        x = self.atom_embedding(atomic_number)
+
+        # initial bond features
+        bondlength = torch.norm(g.edata["r"], dim=1)
+        y = self.edge_embedding(bondlength)
+        g.edata["y"] = y
 
         if config.cutoff_onset is not None:
             # save cutoff function value for application in EdgeGatedGraphconv
@@ -153,22 +147,11 @@ class ALIGNN(nn.Module):
             fcut = smooth_cutoff(bondlength, r_onset=r_onset, r_cutoff=r_cut)
             g.edata["cutoff_value"] = fcut
 
-        y = self.edge_embedding(bondlength)
-        g.edata["y"] = y
-
         # Local: apply GCN to local neighborhoods
-        # problem: need to match number of edges...
         # solution: index into bond features and turn it into a residual connection?
-        # crystal graph convolution
-        # x, m = self.node_update(g, x, y)
-        # line graph convolution:
-        # m = m[local_edge_mask]
-        # y_update, z = self.edge_update(lg, m, z)
-        # y[local_edge_mask] += y_update
-
         local_cutoff = 4.0
         if len(self.alignn_layers) > 0:
-            if not precomputed_lg:
+            if lg is None:
                 g_local = dgl.edge_subgraph(
                     g, bondlength <= local_cutoff, relabel_nodes=False
                 )
@@ -180,10 +163,6 @@ class ALIGNN(nn.Module):
             # angle features (fixed)
             lg.apply_edges(compute_bond_cosines)
             z = self.angle_embedding(lg.edata.pop("h"))
-
-        # initial node features: atom feature network...
-        atomic_number = g.ndata.pop("atomic_number").int().squeeze()
-        x = self.atom_embedding(atomic_number)
 
         # ALIGNN updates: update node, edge, triplet features
         y_mask = torch.where(bondlength <= local_cutoff)[0]
@@ -202,14 +181,13 @@ class ALIGNN(nn.Module):
         output = torch.squeeze(self.readout(g, atomwise_energy))
 
         if config.compute_forces:
-            forces = autograd_forces(output, r, g, energy_units=config.energy_units)
+            forces = autograd_forces(
+                output, g.edata["r"], g, energy_units=config.energy_units
+            )
 
-            result = dict(
+            return dict(
                 total_energy=output,
                 forces=forces,
-                atomwise_energy=atomwise_energy,
             )
-        else:
-            result = output
 
-        return result
+        return output
