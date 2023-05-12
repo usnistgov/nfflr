@@ -24,8 +24,8 @@ from nfflr.models.utils import (
 
 from nfflr.models.abstract import AbstractModel
 
-from nfflr.graph import compute_bond_cosines, periodic_radius_graph
-from nfflr.atoms import _get_attribute_lookup, Atoms
+from nfflr.data.graph import compute_bond_cosines, periodic_radius_graph
+from nfflr.data.atoms import _get_attribute_lookup, Atoms
 
 
 @dataclass

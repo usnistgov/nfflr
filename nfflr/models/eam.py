@@ -19,8 +19,8 @@ from torch_scatter import scatter
 from torchcubicspline import natural_cubic_spline_coeffs, NaturalCubicSpline
 
 from nfflr.models.abstract import AbstractModel
-from nfflr.atoms import Atoms
-from nfflr.graph import periodic_radius_graph
+from nfflr.data.atoms import Atoms
+from nfflr.data.graph import periodic_radius_graph
 from nfflr.models.utils import autograd_forces
 
 
