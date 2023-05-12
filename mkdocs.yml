@@ -1,0 +1,34 @@
+### Site metadata ###
+
+site_name: NFFLr Documentation
+site_description: Documenation for Neural Force Field Learning toolkit
+site_url: https://pages.nist.gov/nfflr/
+
+repo_url: https://github.com/usnistgov/nfflr
+edit_uri: edit/main/docs/docs
+
+### Build settings ###
+
+theme:
+    name: material
+    custom_dir: custom_theme/
+
+plugins:
+- search
+- mkdocstrings:
+    handlers:
+      python:
+        import:
+        - https://installer.readthedocs.io/en/stable/objects.inv
+
+watch:
+  - nfflr/
+
+nav:
+  - About: index.md
+  - Get Started: quickstart.md
+  - "NFFLr interfaces":
+      - Data: data.md
+      - Model Interface: model.md
+      - Training Utilities: training.md
+  - Reference: reference.md
