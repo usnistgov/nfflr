@@ -66,15 +66,14 @@ def read_setfl(p: Path, comment_rows=3, dtype=torch.float):
 
 
 class TorchEAM(nn.Module):
-    """
+    """Pytorch implementation of (single-element) Embedded Atom Method.
 
-    currently 4-5x slower than ASE EAM for FCC Al `bulk("Al", "fcc", 4.05)`
-    not including the overhead of graph construction
-    including that overhead, it's closer to 15x slower...
+    Currently slower than LAMMPS by about 3.3x (evaluated on 32k atoms)
 
-    should profile where the overhead is
+    LAMMPS does 32k atoms in 29 ms (0.209 s for 7 energy+force evaluations).
+    TorchEAM takes 400 ms for neighbors with kd-tree, then 96 ms for energy+forces.
 
-    energy evaluation is close, forces not so close...
+    so LAMMPS is faster by about 3.3x, but LAMMPS neighbor list is *way* faster.
     """
 
     def __init__(self, potential: Path, dtype=torch.float):
@@ -116,7 +115,7 @@ class TorchEAM(nn.Module):
         bondlen = torch.norm(r, dim=1)
 
         # evaluate electron density and pair repulsion at |r|
-        # for unary crystals, phi should be symmetric. also local density?
+        # for unary crystals, phi should be symmetric.
         # \rho_ij = spline(r_ij)
         # \phi_ij = spline(r_ij) / |r_ij|
         rho_and_phi = self.radial_spline.evaluate(bondlen)
@@ -126,16 +125,13 @@ class TorchEAM(nn.Module):
         repulsion_ij = phi.detach().contiguous()
 
         # aggregate local densities and pair interactions over bonds
-        # src, dst = g.all_edges()
-        # rho_and_phi = scatter(rho_and_phi, dst, dim=0, reduce="sum")
-
         g.edata["rho_and_phi"] = torch.hstack((rho.unsqueeze(1), phi.unsqueeze(1)))
         g.update_all(fn.copy_e("rho_and_phi", "m"), fn.sum("m", "rho_and_phi"))
         rho_and_phi = g.ndata.pop("rho_and_phi")
 
         # ensure contiguous inputs to spline evaluation
         density = rho_and_phi[:, 0].contiguous()
-        pair_repulsion = rho_and_phi[:, 1].contiguous()  # / 2
+        pair_repulsion = rho_and_phi[:, 1].contiguous()
         F = self.embedding_energy.evaluate(density)
 
         self.components = {
@@ -145,23 +141,7 @@ class TorchEAM(nn.Module):
             "repulsion_ij": repulsion_ij,
             "density_ij": density_ij,
         }
-        # potential_energy = F.sum() + 0.5 * rho_and_phi[:, 1].sum()
         potential_energy = F.sum() + pair_repulsion.sum()
 
         forces = autograd_forces(potential_energy, r, g, energy_units="eV")
         return potential_energy, forces
-
-        # F_energy = F.sum()
-        # pair_energy = pair_repulsion.sum()
-
-        # reduce = False
-        # F_forces = autograd_forces(F_energy, r, g, scalefactor=1, energy_units="eV", reduce=reduce)
-        # pair_forces = autograd_forces(pair_energy, r, g, scalefactor=2, energy_units="eV", reduce=reduce)
-
-        # self.force_contributions = {
-        #     "embedded_ij": F_forces.detach(),
-        #     "phi_ij": pair_forces.detach()
-
-        # }
-
-        # return F_energy + pair_energy, F_forces + pair_forces
