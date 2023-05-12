@@ -14,8 +14,6 @@ from dgl.nn import AvgPooling, SumPooling
 import torch
 from torch import nn
 
-from torch_scatter import scatter
-
 from torchcubicspline import natural_cubic_spline_coeffs, NaturalCubicSpline
 
 from nfflr.models.abstract import AbstractModel
