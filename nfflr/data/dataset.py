@@ -1,6 +1,7 @@
 """Standalone dataset for training force field models."""
 import os
 import tempfile
+from pathlib import Path
 from functools import partial
 from typing import List, Literal, Tuple, Union, Optional, Callable
 
@@ -8,10 +9,25 @@ import dgl
 import numpy as np
 import pandas as pd
 import torch
+from jarvis.db.figshare import data as jdata
 from jarvis.core.atoms import Atoms as jAtoms
 from numpy.random import default_rng
 
 from nfflr.data.atoms import Atoms
+
+
+def _load_dataset(dataset_name, cache_dir=None):
+    """Set up dataset."""
+
+    if isinstance(dataset_name, Path):
+        # e.g., "jdft_max_min_307113_id_prop.json"
+        lines = "jsonl" in dataset_name.name
+        df = pd.read_json(dataset_name, lines=lines)
+
+    elif dataset_name == "alignn_ff_db":
+        df = pd.DataFrame(jdata(dataset_name, store_dir=cache_dir))
+
+    return df
 
 
 def get_cachedir():
@@ -35,7 +51,7 @@ class AtomsDataset(torch.utils.data.Dataset):
 
     def __init__(
         self,
-        df: pd.DataFrame,
+        df: Union[str, Path, pd.DataFrame],
         target: str = "formation_energy_peratom",
         transform: Optional[Callable] = None,
         train_val_seed: int = 42,
@@ -49,6 +65,10 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         `df`: pandas dataframe from e.g. jarvis.db.figshare.data
         """
+
+        if not isinstance(df, pd.DataFrame):
+            df = _load_dataset(df)
+
         example_id = df[id_tag].iloc[0]
 
         if isinstance(example_id, int):
@@ -80,6 +100,8 @@ class AtomsDataset(torch.utils.data.Dataset):
         else:
             self.diskcache = None
 
+        self.collate = self.collate_default
+
     def __len__(self):
         """Get length."""
         return self.df.shape[0]
@@ -89,6 +111,7 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         key = self.df[self.id_tag].iloc[idx]
         atoms = self.atoms[idx]
+        n_atoms = len(atoms)
 
         if self.diskcache is not None:
             cachefile = self.diskcache / f"jarvis-{key}.pkl"
@@ -100,7 +123,7 @@ class AtomsDataset(torch.utils.data.Dataset):
             atoms = self.transform(atoms)
 
         if self.target == "energy_and_forces":
-            target = self.get_energy_and_forces(idx)
+            target = self.get_energy_and_forces(idx, n_atoms=n_atoms)
         else:
             target = {self.target: self.df[self.target].iloc[idx]}
 
@@ -111,7 +134,7 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         return atoms, target
 
-    def get_energy_and_forces(self, idx) -> dict:
+    def get_energy_and_forces(self, idx, n_atoms) -> dict:
         target = {
             "energy": self.df["total_energy"][idx],
             "forces": self.df["forces"][idx],

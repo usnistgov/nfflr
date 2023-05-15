@@ -4,8 +4,6 @@ from typing import Any, Callable
 import torch
 from ignite.engine import Engine
 
-from alignn.config import TrainingConfig
-
 
 def select_target(name: str):
     """Build ignite metric transforms for multi-output models.
@@ -37,32 +35,32 @@ def group_decay(model):
     ]
 
 
-def setup_optimizer(params, config: TrainingConfig):
+def setup_optimizer(params, config):
     """Set up optimizer for param groups."""
-    if config.optimizer == "adamw":
+    if config["optimizer"] == "adamw":
         optimizer = torch.optim.AdamW(
             params,
-            lr=config.learning_rate,
-            weight_decay=config.weight_decay,
+            lr=config["learning_rate"],
+            weight_decay=config["weight_decay"],
         )
     elif config.optimizer == "sgd":
         optimizer = torch.optim.SGD(
             params,
-            lr=config.learning_rate,
+            lr=config["learning_rate"],
             momentum=0.9,
-            weight_decay=config.weight_decay,
+            weight_decay=config["weight_decay"],
         )
     return optimizer
 
 
-def setup_scheduler(config: TrainingConfig, optimizer, steps_per_epoch: int):
+def setup_scheduler(config, optimizer, steps_per_epoch: int):
     """Configure OneCycle scheduler."""
-    pct_start = config.warmup_steps / (config.epochs * steps_per_epoch)
+    pct_start = config["warmup_steps"] / (config["epochs"] * steps_per_epoch)
     pct_start = min(pct_start, 0.3)
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
         optimizer,
-        max_lr=config.learning_rate,
-        epochs=config.epochs,
+        max_lr=config["learning_rate"],
+        epochs=config["epochs"],
         steps_per_epoch=steps_per_epoch,
         pct_start=pct_start,
     )
