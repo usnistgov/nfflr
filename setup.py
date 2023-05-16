@@ -34,6 +34,12 @@ setuptools.setup(
     ],
     package_data={},
     scripts=[],
+    entry_points={
+        "console_scripts": [
+            "nff = nfflr.train:cli",
+            "nffd = nfflr.distributed:main",
+        ]
+    },
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/usnistgov/nfflr",

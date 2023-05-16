@@ -1,9 +1,6 @@
 import os
-from functools import partial
-from datetime import timedelta
 from pathlib import Path
-
-from typing import Any, Dict, Tuple
+from datetime import timedelta
 
 import torch
 from torch.utils.data import SubsetRandomSampler
@@ -117,19 +114,27 @@ def setup_trainer(rank, model, optimizer, scheduler, config):
         pbar = ProgressBar()
         pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
+
     if scheduler is not None:
         trainer.add_event_handler(
             Events.ITERATION_COMPLETED, lambda engine: scheduler.step()
         )
-    trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
+
+    if not config.get("checkpoint", True):
+        return trainer
+
+    to_save = dict(
+        model=model,
+        optimizer=optimizer,
+        trainer=trainer,
+    )
+
+    if scheduler is not None:
+        to_save["scheduler"] = scheduler
 
     checkpoint_handler = Checkpoint(
-        dict(
-            model=model,
-            optimizer=optimizer,
-            scheduler=scheduler,
-            trainer=trainer,
-        ),
+        to_save,
         DiskSaver(config["output_dir"], create_dir=True, require_empty=False),
         n_saved=1,
         global_step_transform=lambda *_: trainer.state.epoch,
@@ -170,7 +175,6 @@ def setup_evaluators(rank, config, model, metrics, transfer_outputs):
 def run_train(local_rank: int, config):
     rank = idist.get_rank()
     manual_seed(config["random_seed"] + local_rank)
-    device = idist.device()
 
     train_loader, val_loader = get_dataflow(config)
 
@@ -204,7 +208,6 @@ def run_train(local_rank: int, config):
 
     @trainer.on(Events.EPOCH_STARTED)  # EPOCH_COMPLETED
     def _eval(engine):
-        epoch = engine.state.epoch
         n_train_eval = int(0.1 * len(train_loader))
         train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
         val_evaluator.run(val_loader)
@@ -245,8 +248,8 @@ def run_train(local_rank: int, config):
 
 def run_lr(local_rank: int, config):
     rank = idist.get_rank()
+    config["checkpoint"] = False
     manual_seed(config["random_seed"] + local_rank)
-    device = idist.device()
 
     train_loader, val_loader = get_dataflow(config)
     model, optimizer, scheduler = _initialize(config, len(train_loader))
@@ -274,6 +277,7 @@ def run_lr(local_rank: int, config):
 
 @cli.command()
 def train(config_path: Path):
+    """NFF training entry point."""
     with idist.Parallel(**spawn_kwargs) as parallel:
         config = ConfigObject(config_path)
         print(config)
@@ -282,6 +286,7 @@ def train(config_path: Path):
 
 @cli.command()
 def lr(config_path: Path):
+    """NFF Learning rate finder entry point."""
     with idist.Parallel(**spawn_kwargs) as parallel:
         config = ConfigObject(config_path)
         print(config)
