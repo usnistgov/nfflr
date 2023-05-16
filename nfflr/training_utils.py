@@ -1,8 +1,80 @@
 """Common training setup utility functions."""
-from typing import Any, Callable
+from typing import Any, Callable, Dict, Tuple
 
 import torch
+from torch import nn
 from ignite.engine import Engine
+from ignite.engine import Events, create_supervised_trainer
+
+
+def multitarget_loss(criteria: Dict[dict, nn.Module], scales: Dict[str, float]):
+    def loss(outputs, targets):
+        return sum(
+            scales.get(key, 1.0) * criteria[key](outputs[key], targets[key])
+            for key in criteria
+        )
+
+    return loss
+
+
+def losswrapper(criterion):
+    def loss(outputs, targets):
+        return sum(criterion(outputs[key], targets[key]) for key in outputs)
+
+    return loss
+
+
+def setup_criterion(config):
+    """Optimization criterion helper function.
+
+    config["criterion"] can be
+
+    - a pytorch loss (nn.Module)
+    - dict[str, nn.Module]
+    - a `Callable`
+    """
+    criterion = config["criterion"]
+    forcefield = config["dataset"].target == "energy_and_forces"
+
+    if forcefield:
+        if isinstance(criterion, dict):
+            loss_scale = config.get("loss_scale", {})
+            return multitarget_loss(criterion, loss_scale)
+        if isinstance(criterion, nn.Module):
+            return losswrapper(criterion)
+
+    return criterion
+
+
+def transfer_outputs(x, y, y_pred):
+    """Convert outputs for evaluators / metric computation.
+
+    return the format expected by loss function - predict first.
+    """
+    if isinstance(y_pred, dict):
+        return tuple(
+            {key: value.detach().cpu() for key, value in xs.items()}
+            for xs in (y_pred, y)
+        )
+
+    return y_pred.detach().cpu(), y.detach().cpu()
+
+
+def transfer_outputs_eos(outputs):
+    """Save outputs.
+
+    list of outputs for each batch
+    in this case List[Tuple[Dict[str,torch.Tensor], Dict[str,torch.Tensor]]]
+    """
+    y_pred, y = outputs
+
+    if isinstance(y_pred, dict):
+        return tuple(
+            {key: value.detach().cpu() for key, value in xs.items()}
+            for xs in (y_pred, y)
+        )
+
+    return y_pred.detach().cpu(), y.detach().cpu()
 
 
 def select_target(name: str):
@@ -68,16 +140,21 @@ def setup_scheduler(config, optimizer, steps_per_epoch: int):
     return scheduler
 
 
+def default_transfer_outputs(x, y, y_pred):
+    """Default evaluation output transformation.
+
+    Return y_pred and y in the order expected by metrics
+    """
+    return (y_pred, y)
+
+
 def setup_evaluator_with_grad(
     model,
     metrics,
     prepare_batch,
     device="cpu",
     non_blocking=False,
-    output_transform: Callable[[Any, Any, Any], Any] = lambda x, y, y_pred: (
-        y_pred,
-        y,
-    ),
+    output_transform: Callable[[Any, Any, Any], Any] = default_transfer_outputs,
 ):
     """Set up custom ignite evaluation engine.
 

@@ -3,7 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 from functools import partial
-from typing import List, Literal, Tuple, Union, Optional, Callable
+from typing import Any, Dict, List, Literal, Tuple, Union, Optional, Callable
 
 import dgl
 import numpy as np
@@ -24,7 +24,7 @@ def _load_dataset(dataset_name, cache_dir=None):
         lines = "jsonl" in dataset_name.name
         df = pd.read_json(dataset_name, lines=lines)
 
-    elif dataset_name == "alignn_ff_db":
+    elif dataset_name in ("alignn_ff_db", "dft_3d"):
         df = pd.DataFrame(jdata(dataset_name, store_dir=cache_dir))
 
     return df
@@ -100,7 +100,10 @@ class AtomsDataset(torch.utils.data.Dataset):
         else:
             self.diskcache = None
 
-        self.collate = self.collate_default
+        if self.target == "energy_and_forces":
+            self.collate = self.collate_forcefield
+        else:
+            self.collate = self.collate_default
 
     def __len__(self):
         """Get length."""
@@ -124,13 +127,15 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         if self.target == "energy_and_forces":
             target = self.get_energy_and_forces(idx, n_atoms=n_atoms)
-        else:
-            target = {self.target: self.df[self.target].iloc[idx]}
+            target = {
+                k: torch.tensor(t, dtype=torch.get_default_dtype())
+                for k, t in target.items()
+            }
 
-        target = {
-            k: torch.tensor(t, dtype=torch.get_default_dtype())
-            for k, t in target.items()
-        }
+        else:
+            target = torch.tensor(
+                self.df[self.target].iloc[idx], dtype=torch.get_default_dtype()
+            )
 
         return atoms, target
 
@@ -221,7 +226,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         return {"train": train_ids, "val": val_ids, "test": test_ids}
 
     @staticmethod
-    def collate_default(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
+    def collate_forcefield(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
         """Dataloader helper to batch graphs cross `samples`.
 
         Forces get collated into a graph batch
@@ -242,6 +247,40 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         batched_graph = dgl.batch(graphs)
         return batched_graph, targets
+
+    @staticmethod
+    def prepare_batch(
+        batch: Tuple[Any, Dict[str, torch.Tensor]],
+        device=None,
+        non_blocking=False,
+    ) -> Tuple[Any, Dict[str, torch.Tensor]]:
+        """Send batched dgl crystal graph to device."""
+        atoms, targets = batch
+        if isinstance(targets, torch.Tensor):
+            targets = targets.to(device, non_blocking=non_blocking)
+        else:
+            targets = {
+                k: v.to(device, non_blocking=non_blocking) for k, v in targets.items()
+            }
+
+        batch = (atoms.to(device, non_blocking=non_blocking), targets)
+
+        return batch
+
+    @staticmethod
+    def collate_default(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
+        """Dataloader helper to batch graphs cross `samples`.
+
+        Forces get collated into a graph batch
+        by concatenating along the atoms dimension
+
+        energy and stress are global targets (properties of the whole graph)
+        total energy is a scalar, stess is a rank 2 tensor
+
+
+        """
+        graphs, targets = map(list, zip(*samples))
+        return dgl.batch(graphs), torch.tensor(targets)
 
     @staticmethod
     def collate_line_graph(
