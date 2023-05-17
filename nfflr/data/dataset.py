@@ -116,7 +116,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         n_atoms = len(atoms)
 
         if self.transform and self.diskcache is not None:
-            cachefile = os.path.join(self.diskcache.name, f"jarvis-{key}.pkl")
+            cachefile = Path(self.diskcache.name) / f"jarvis-{key}.pkl"
 
             if cachefile.is_file():
                 atoms = torch.load(cachefile)
