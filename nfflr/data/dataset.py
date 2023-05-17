@@ -116,14 +116,14 @@ class AtomsDataset(torch.utils.data.Dataset):
         atoms = self.atoms[idx]
         n_atoms = len(atoms)
 
-        if self.diskcache is not None:
+        if self.transform and self.diskcache is not None:
             cachefile = self.diskcache / f"jarvis-{key}.pkl"
 
             if cachefile.is_file():
-                g, lg = torch.load(cachefile)
-
-        if self.transform:
-            atoms = self.transform(atoms)
+                atoms = torch.load(cachefile)
+            else:
+                atoms = self.transform(atoms)
+                torch.save(atoms, cachefile)
 
         if self.target == "energy_and_forces":
             target = self.get_energy_and_forces(idx, n_atoms=n_atoms)
