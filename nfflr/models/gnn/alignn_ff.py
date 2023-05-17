@@ -149,7 +149,7 @@ class ALIGNN(nn.Module):
 
         # Local: apply GCN to local neighborhoods
         # solution: index into bond features and turn it into a residual connection?
-        local_cutoff = 4.0
+        local_cutoff = 6.0  # 4.0
         if len(self.alignn_layers) > 0:
             if lg is None:
                 g_local = dgl.edge_subgraph(
