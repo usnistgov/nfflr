@@ -206,7 +206,7 @@ def run_train(local_rank: int, config):
         "validation": {m: [] for m in metrics.keys()},
     }
 
-    @trainer.on(Events.EPOCH_STARTED)  # EPOCH_COMPLETED
+    @trainer.on(Events.EPOCH_EPOCH_COMPLETED)
     def _eval(engine):
         n_train_eval = int(0.1 * len(train_loader))
         train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
