@@ -90,7 +90,7 @@ def get_dataflow(config):
 
 
 def _initialize(config, steps_per_epoch):
-    model = config["model"]
+    model = idist.auto_model(config["model"])
     params = group_decay(model)
     optimizer = setup_optimizer(params, config)
     optimizer = idist.auto_optim(optimizer)
