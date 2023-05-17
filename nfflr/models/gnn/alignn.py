@@ -34,6 +34,7 @@ class ALIGNNConfig:
     cutoff_onset: Optional[float] = 7.5
     alignn_layers: int = 4
     gcn_layers: int = 4
+    norm: Literal["batchnorm", "layernorm"] = "batchnorm"
     atom_features: str = "cgcnn"
     edge_input_features: int = 80
     triplet_input_features: int = 40
@@ -62,7 +63,7 @@ class ALIGNN(nn.Module):
         else:
             f = _get_attribute_lookup(atom_features=config.atom_features)
             self.atom_embedding = nn.Sequential(
-                f, MLPLayer(f.embedding_dim, config.hidden_features)
+                f, MLPLayer(f.embedding_dim, config.hidden_features, norm=config.norm)
             )
 
         self.edge_embedding = nn.Sequential(
@@ -72,10 +73,10 @@ class ALIGNN(nn.Module):
                 bins=config.edge_input_features,
             ),
             MLPLayer(
-                config.edge_input_features, config.embedding_features, norm="batchnorm"
+                config.edge_input_features, config.embedding_features, norm=config.norm
             ),
             MLPLayer(
-                config.embedding_features, config.hidden_features, norm="batchnorm"
+                config.embedding_features, config.hidden_features, norm=config.norm
             ),
         )
         self.angle_embedding = nn.Sequential(
@@ -87,17 +88,17 @@ class ALIGNN(nn.Module):
             MLPLayer(
                 config.triplet_input_features,
                 config.embedding_features,
-                norm="batchnorm",
+                norm=config.norm,
             ),
             MLPLayer(
-                config.embedding_features, config.hidden_features, norm="batchnorm"
+                config.embedding_features, config.hidden_features, norm=config.norm
             ),
         )
 
         self.alignn_layers = nn.ModuleList(
             [
                 ALIGNNConv(
-                    config.hidden_features, config.hidden_features, norm="batchnorm"
+                    config.hidden_features, config.hidden_features, norm=config.norm
                 )
                 for idx in range(config.alignn_layers)
             ]
@@ -105,7 +106,7 @@ class ALIGNN(nn.Module):
         self.gcn_layers = nn.ModuleList(
             [
                 EdgeGatedGraphConv(
-                    config.hidden_features, config.hidden_features, norm="batchnorm"
+                    config.hidden_features, config.hidden_features, norm=config.norm
                 )
                 for idx in range(config.gcn_layers)
             ]
