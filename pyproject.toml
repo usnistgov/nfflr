@@ -2,6 +2,46 @@
 requires = ["setuptools >= 40.6.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "nfflr"
+version = "0.1.0"
+requires-python = ">=3.7"
+description = "neural force field learning toolkit"
+readme = "README.md"
+authors = [
+    {name = "Brian DeCost", email = "brian.decost@nist.gov"},
+    {name = "Kamal Choudhary", email = "kamal.choudhary@nist.gov"}
+]
+dependencies = [
+    "ase",
+    "ray",
+    "numpy",
+    "scipy",
+    "torch",
+    "typer",
+    "pandas",
+    "pykeops",
+    "matplotlib",
+    "plum-dispatch",
+    "pytorch-ignite",
+    "py-config-runner",
+    "dgl>=0.6.0",
+    "jarvis-tools>=2021.07.19"
+]
+
+# [project.urls]
+# homepage = "https://example.com"
+# documentation = "https://readthedocs.org"
+# repository = "https://github.com/me/spam.git"
+# changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
+
+[project.scripts]
+nff = "nfflr.train:cli"
+nffd = "nfflr.distributed:main"
+
+[tool.setuptools]
+packages = ["nfflr"]
+
 [tool.isort]
 multi_line_output = 3
 include_trailing_comma = true
