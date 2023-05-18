@@ -19,13 +19,15 @@ from nfflr.data.atoms import Atoms
 def _load_dataset(dataset_name, cache_dir=None):
     """Set up dataset."""
 
-    if isinstance(dataset_name, Path):
-        # e.g., "jdft_max_min_307113_id_prop.json"
-        lines = "jsonl" in dataset_name.name
-        df = pd.read_json(dataset_name, lines=lines)
-
-    elif dataset_name in ("alignn_ff_db", "dft_3d"):
+    if dataset_name in ("alignn_ff_db", "dft_3d"):
         df = pd.DataFrame(jdata(dataset_name, store_dir=cache_dir))
+
+    if isinstance(dataset_name, str):
+        dataset_name = Path(dataset_name)
+
+    # e.g., "jdft_max_min_307113_id_prop.json"
+    lines = "jsonl" in dataset_name.name
+    df = pd.read_json(dataset_name, lines=lines)
 
     return df
 
