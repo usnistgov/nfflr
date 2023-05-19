@@ -5,7 +5,6 @@ import dgl
 import torch
 import numpy as np
 from scipy import spatial
-from jarvis.core.atoms import Atoms as jAtoms
 
 from nfflr.data.atoms import Atoms
 
@@ -280,6 +279,60 @@ def periodic_radius_graph_kdtree(
 
     g.ndata["coord"] = X_src.float()
     g.edata["r"] = (X_supercell[v] - X_src[src]).float()
+
+    g.ndata["atomic_number"] = a.numbers.type(torch.int)
+
+    return g
+
+
+def periodic_adaptive_radius_graph(
+    a: Atoms, r: float = 5, bond_tol: float = 0.15, dtype=torch.float
+) -> dgl.DGLGraph:
+    """Build periodic radius graph for crystal.
+
+    TODO: support 2D, 1D, or non-periodic boundary conditions
+    """
+
+    # build radius graph in supercell
+    X_src, X_supercell, root_ids, cell_images = tile_supercell_2(
+        a.positions.double(), a.lattice.double(), r, bond_tol
+    )
+
+    # pairwise distances between atoms in (0,0,0) cell
+    # and atoms in all periodic images
+    dist = torch.cdist(X_src, X_supercell)
+
+    # collect nearest neighbor distance
+    # k = 2 because first neighbor is a self-interaction
+    # this is filtered out in the neighbor_mask selection
+    nearest_dist, _ = dist.kthvalue(k=2)
+
+    cutoff = np.sqrt(2) * nearest_dist.max()
+
+    atol = 1e-5
+    neighbor_mask = (dist > atol) & (dist < cutoff)
+
+    # get node indices for edgelist from neighbor mask
+    src, v = torch.where(neighbor_mask)
+
+    # index into tiled cell image index to atom ids
+    g = dgl.graph((src, v % len(a.numbers)))
+
+    # add the fractional coordinates
+    # note: to do this differentiably, probably want to store
+    # fractional coordinates and lattice matrix and compute cartesian coordinates
+    # and bond distances on demand?
+    g.ndata["Xfrac"] = a.positions.to(dtype)
+
+    # messages propagate src -> dst
+    # this means propagation from *neighbor* to *self*
+    g.ndata["coord"] = X_src.to(dtype)
+    g.edata["r"] = (X_supercell[v] - X_src[src]).to(dtype)
+
+    # cosine cutoff
+    g.edata["cutoff_value"] = torch.cos(
+        np.pi * torch.norm(g.edata["r"], dim=1) / cutoff
+    )
 
     g.ndata["atomic_number"] = a.numbers.type(torch.int)
 
