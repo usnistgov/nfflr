@@ -102,10 +102,12 @@ def _initialize(config, steps_per_epoch):
 def setup_trainer(rank, model, optimizer, scheduler, config):
     device = idist.device()
 
+    gradient_accumulation_steps = config.get("gradient_accumulation_steps", 1)
     trainer = create_supervised_trainer(
         model,
         optimizer,
         setup_criterion(config),
+        gradient_accumulation_steps=gradient_accumulation_steps,
         prepare_batch=config["dataset"].prepare_batch,
         device=device,
     )
