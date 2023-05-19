@@ -137,7 +137,6 @@ class AtomsDataset(torch.utils.data.Dataset):
                 k: torch.tensor(t, dtype=torch.get_default_dtype())
                 for k, t in target.items()
             }
-
         else:
             target = torch.tensor(
                 self.df[self.target].iloc[idx], dtype=torch.get_default_dtype()
@@ -246,10 +245,13 @@ class AtomsDataset(torch.utils.data.Dataset):
         graphs, targets = map(list, zip(*samples))
 
         energy = torch.tensor([t["energy"] for t in targets])
+        n_atoms = torch.tensor([t["forces"].size(0) for t in targets])
         forces = torch.cat([t["forces"] for t in targets], dim=0)
         stresses = torch.stack([t["stresses"] for t in targets])
 
-        targets = dict(total_energy=energy, forces=forces, stresses=stresses)
+        targets = dict(
+            total_energy=energy, n_atoms=n_atoms, forces=forces, stresses=stresses
+        )
 
         batched_graph = dgl.batch(graphs)
         return batched_graph, targets
