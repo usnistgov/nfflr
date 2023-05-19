@@ -106,6 +106,10 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         if self.target == "energy_and_forces":
             self.collate = self.collate_forcefield
+            if "total_energy" in self.df.keys():
+                self.energy_key = "total_energy"
+            else:
+                self.energy_key = "energy"
         else:
             self.collate = self.collate_default
 
@@ -146,7 +150,7 @@ class AtomsDataset(torch.utils.data.Dataset):
 
     def get_energy_and_forces(self, idx, n_atoms) -> dict:
         target = {
-            "energy": self.df["total_energy"][idx],
+            "energy": self.df[self.energy_key][idx],
             "forces": self.df["forces"][idx],
             "stresses": self.df["stresses"][idx],
         }
