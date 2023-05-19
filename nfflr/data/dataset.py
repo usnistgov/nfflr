@@ -30,7 +30,7 @@ def _load_dataset(dataset_name, cache_dir=None):
 
     # e.g., "jdft_max_min_307113_id_prop.json"
     lines = "jsonl" in dataset_name.name
-    df = pd.read_json(dataset_name.name, lines=lines)
+    df = pd.read_json(dataset_name, lines=lines)
 
     return df
 
@@ -155,7 +155,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         # TODO: make sure datasets use standard units...
         # data store should have total energies in eV
         if self.energy_units == "eV/atom":
-            target["energy"] = target["energy"] * target["forces"].shape[0]
+            target["energy"] = target["energy"] * len(target["forces"])
             # note: probably keep forces in eV/at and scale up predictions...
         elif self.energy_units == "eV":
             # data store should have total energies in eV, so do nothing
