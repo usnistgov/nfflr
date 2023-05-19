@@ -12,7 +12,7 @@ import dgl
 import torch
 from torch import nn
 
-from dgl.nn import AvgPooling
+from dgl.nn import AvgPooling, SumPooling
 
 from nfflr.models.utils import (
     smooth_cutoff,
@@ -112,7 +112,10 @@ class ALIGNN(nn.Module):
             ]
         )
 
-        self.readout = AvgPooling()
+        if config.energy_units == "eV/atom":
+            self.readout = AvgPooling()
+        else:
+            self.readout = SumPooling()
 
         self.fc = nn.Linear(config.hidden_features, config.output_features)
 

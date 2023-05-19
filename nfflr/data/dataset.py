@@ -155,7 +155,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         # TODO: make sure datasets use standard units...
         # data store should have total energies in eV
         if self.energy_units == "eV/atom":
-            target["energy"] = target["energy"] / target["forces"].shape[0]
+            target["energy"] = target["energy"] * target["forces"].shape[0]
             # note: probably keep forces in eV/at and scale up predictions...
         elif self.energy_units == "eV":
             # data store should have total energies in eV, so do nothing
