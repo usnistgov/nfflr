@@ -166,6 +166,20 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         return target
 
+    def estimate_reference_energies(self):
+
+        sel = self.split["train"]
+
+        e = torch.from_numpy(self.df[self.energy_key].values)
+        if self.energy_units == "eV/atom":
+            e *= self.atoms.apply(len).values
+
+        e = e[sel]
+        zs = self.atoms[sel].apply(lambda a: torch.bincount(a.numbers, minlength=108))
+        zs = torch.stack(zs.values.tolist()).type(e.dtype)
+
+        return torch.linalg.lstsq(zs, e).solution
+
     def split_dataset_by_id(self, n_train: Union[float, int], n_val: Union[float, int]):
         """Get train/val/test split indices for SubsetRandomSampler.
 

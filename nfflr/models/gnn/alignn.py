@@ -43,6 +43,7 @@ class ALIGNNConfig:
     output_features: int = 1
     compute_forces: bool = False
     energy_units: Literal["eV", "eV/atom"] = "eV/atom"
+    reference_energies: Optional[torch.Tensor] = None
 
 
 class ALIGNN(nn.Module):
@@ -64,6 +65,12 @@ class ALIGNN(nn.Module):
             f = _get_attribute_lookup(atom_features=config.atom_features)
             self.atom_embedding = nn.Sequential(
                 f, MLPLayer(f.embedding_dim, config.hidden_features, norm=config.norm)
+            )
+
+        self.reference_energy = None
+        if config.reference_energies is not None:
+            self.reference_energy = nn.Embedding(
+                108, embedding_dim=1, _weight=config.reference_energies.view(-1, 1)
             )
 
         self.edge_embedding = nn.Sequential(
