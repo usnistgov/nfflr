@@ -6,6 +6,7 @@ import torch
 from torch.utils.data import SubsetRandomSampler
 
 import typer
+import matplotlib.pyplot as plt
 import ignite.distributed as idist
 from ignite.utils import manual_seed
 from ignite.metrics import Loss, MeanAbsoluteError
@@ -60,6 +61,34 @@ def log_results(engine, name):
 
     # for key, value in m.items():
     #     history[name][key].append(value)
+
+
+def parity_plots(engine, directory, name="train"):
+    """Plot predictions for energy and forces."""
+    epoch = engine.state.epoch
+    output = engine.state.output
+
+    fig, axes = plt.subplots(ncols=2, figsize=(16, 8))
+    for batch in output:
+        tgt, pred = batch
+
+        axes[0].scatter(
+            tgt["total_energy"].cpu().detach().numpy(),
+            pred["total_energy"].cpu().detach().numpy(),
+            color="k",
+        )
+        axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
+        axes[1].scatter(
+            tgt["forces"].cpu().detach().numpy(),
+            pred["forces"].cpu().detach().numpy(),
+            color="k",
+        )
+        axes[1].set(xlabel="DFT force", ylabel="predicted force")
+
+    plt.tight_layout()
+    plt.savefig(Path(directory) / f"parity_plots_{name}_{epoch:03d}.png")
+    plt.clf()
+    plt.close()
 
 
 def get_dataflow(config):
@@ -238,9 +267,19 @@ def run_train(local_rank: int, config):
             )
 
         # parity plotting
-        # train_evaluator.add_event_handler(
-        #     Events.COMPLETED, parity_plots, dir=config["output_dir"], name="train"
-        # )
+        if config["dataset"].target == "energy_and_forces":
+            train_evaluator.add_event_handler(
+                Events.COMPLETED,
+                parity_plots,
+                directory=config["output_dir"],
+                name="train",
+            )
+            val_evaluator.add_event_handler(
+                Events.COMPLETED,
+                parity_plots,
+                directory=config["output_dir"],
+                name="train",
+            )
 
     print("starting training loop")
     trainer.run(train_loader, max_epochs=config["epochs"])
