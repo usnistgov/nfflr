@@ -111,6 +111,7 @@ class AtomsDataset(torch.utils.data.Dataset):
             else:
                 self.energy_key = "energy"
         else:
+            self.energy_key = self.target
             self.collate = self.collate_default
 
     def __len__(self):

@@ -271,8 +271,8 @@ def run_lr(local_rank: int, config):
         finder.run(train_loader)
 
     if rank == 0:
-        print("Suggested LR", lr_finder.lr_suggestion())
-        ax = lr_finder.plot()
+        # print("Suggested LR", lr_finder.lr_suggestion())
+        ax = lr_finder.plot(display_suggestion=False)
         ax.loglog()
         ax.figure.savefig("lr.png")
 
