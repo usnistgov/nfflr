@@ -167,7 +167,7 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         return target
 
-    def estimate_reference_energies(self):
+    def estimate_reference_energies(self, use_bias=False):
 
         sel = self.split["train"]
 
@@ -178,6 +178,10 @@ class AtomsDataset(torch.utils.data.Dataset):
         e = e[sel]
         zs = self.atoms[sel].apply(lambda a: torch.bincount(a.numbers, minlength=108))
         zs = torch.stack(zs.values.tolist()).type(e.dtype)
+
+        if use_bias:
+            # add constant for zero offset
+            zs[:, 0] = 1
 
         return torch.linalg.lstsq(zs, e).solution
 
