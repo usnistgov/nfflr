@@ -67,23 +67,24 @@ def parity_plots(engine, directory, name="train"):
     """Plot predictions for energy and forces."""
     epoch = engine.state.training_epoch  # custom state field
     output = engine.state.output
+    # output = getattr(engine.state, f"output_{name}")
 
     fig, axes = plt.subplots(ncols=2, figsize=(16, 8))
 
-    pred, tgt = output
+    for (pred, tgt) in output:
 
-    axes[0].scatter(
-        tgt["total_energy"].cpu().detach().numpy(),
-        pred["total_energy"].cpu().detach().numpy(),
-        color="k",
-    )
-    axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
-    axes[1].scatter(
-        tgt["forces"].cpu().detach().numpy(),
-        pred["forces"].cpu().detach().numpy(),
-        color="k",
-    )
-    axes[1].set(xlabel="DFT force", ylabel="predicted force")
+        axes[0].scatter(
+            tgt["total_energy"].cpu().detach().numpy(),
+            pred["total_energy"].cpu().detach().numpy(),
+            # color="k",
+        )
+        axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
+        axes[1].scatter(
+            tgt["forces"].cpu().detach().numpy(),
+            pred["forces"].cpu().detach().numpy(),
+            # color="k",
+        )
+        axes[1].set(xlabel="DFT force", ylabel="predicted force")
 
     plt.tight_layout()
     plt.savefig(Path(directory) / f"parity_plots_{name}_{epoch:03d}.png")
@@ -228,9 +229,10 @@ def run_train(local_rank: int, config):
         rank, config, model, metrics, transfer_outputs
     )
 
-    eos = EpochOutputStore(output_transform=transfer_outputs_eos)
-    eos.attach(train_evaluator, "training")
-    eos.attach(val_evaluator, "validation")
+    eos_train = EpochOutputStore(output_transform=transfer_outputs_eos)
+    eos_train.attach(train_evaluator, "output")
+    eos_val = EpochOutputStore(output_transform=transfer_outputs_eos)
+    eos_val.attach(val_evaluator, "output")
 
     history = {
         "train": {m: [] for m in metrics.keys()},
@@ -240,6 +242,7 @@ def run_train(local_rank: int, config):
     @trainer.on(Events.EPOCH_COMPLETED)
     def _eval(engine):
         n_train_eval = int(0.1 * len(train_loader))
+        # n_train_eval = len(train_loader)
         train_evaluator.state.training_epoch = engine.state.epoch
         val_evaluator.state.training_epoch = engine.state.epoch
         train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
