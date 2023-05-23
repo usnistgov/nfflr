@@ -124,13 +124,16 @@ class AtomsDataset(torch.utils.data.Dataset):
         key = self.df[self.id_tag].iloc[idx]
         atoms = self.atoms[idx]
         n_atoms = len(atoms)
+        # print(f"{key=}, {n_atoms=}")
 
         if self.transform and self.diskcache is not None:
-            cachefile = Path(self.diskcache.name) / f"jarvis-{key}.pkl"
+            cachefile = Path(self.diskcache.name) / f"jarvis-{key}-{idx}.pkl"
 
             if cachefile.is_file():
+                # print(f"loading from {cachefile}")
                 atoms = torch.load(cachefile)
             else:
+                # print(f"saving to {cachefile}")
                 atoms = self.transform(atoms)
                 torch.save(atoms, cachefile)
         elif self.transform:
