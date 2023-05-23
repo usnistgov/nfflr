@@ -51,7 +51,7 @@ spawn_kwargs = {
 
 
 def log_results(engine, name):
-    epoch = engine.state.epoch
+    epoch = engine.state.training_epoch  # custom state field
     m = engine.state.metrics
     loss = m["loss"]
 
@@ -65,25 +65,25 @@ def log_results(engine, name):
 
 def parity_plots(engine, directory, name="train"):
     """Plot predictions for energy and forces."""
-    epoch = engine.state.epoch
+    epoch = engine.state.training_epoch  # custom state field
     output = engine.state.output
 
     fig, axes = plt.subplots(ncols=2, figsize=(16, 8))
-    for batch in output:
-        tgt, pred = batch
 
-        axes[0].scatter(
-            tgt["total_energy"].cpu().detach().numpy(),
-            pred["total_energy"].cpu().detach().numpy(),
-            color="k",
-        )
-        axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
-        axes[1].scatter(
-            tgt["forces"].cpu().detach().numpy(),
-            pred["forces"].cpu().detach().numpy(),
-            color="k",
-        )
-        axes[1].set(xlabel="DFT force", ylabel="predicted force")
+    pred, tgt = output
+
+    axes[0].scatter(
+        tgt["total_energy"].cpu().detach().numpy(),
+        pred["total_energy"].cpu().detach().numpy(),
+        color="k",
+    )
+    axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
+    axes[1].scatter(
+        tgt["forces"].cpu().detach().numpy(),
+        pred["forces"].cpu().detach().numpy(),
+        color="k",
+    )
+    axes[1].set(xlabel="DFT force", ylabel="predicted force")
 
     plt.tight_layout()
     plt.savefig(Path(directory) / f"parity_plots_{name}_{epoch:03d}.png")
@@ -240,6 +240,8 @@ def run_train(local_rank: int, config):
     @trainer.on(Events.EPOCH_COMPLETED)
     def _eval(engine):
         n_train_eval = int(0.1 * len(train_loader))
+        train_evaluator.state.training_epoch = engine.state.epoch
+        val_evaluator.state.training_epoch = engine.state.epoch
         train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
         val_evaluator.run(val_loader)
 
@@ -278,7 +280,7 @@ def run_train(local_rank: int, config):
                 Events.COMPLETED,
                 parity_plots,
                 directory=config["output_dir"],
-                name="train",
+                name="validation",
             )
 
     print("starting training loop")
