@@ -329,10 +329,10 @@ def periodic_adaptive_radius_graph(
     g.ndata["coord"] = X_src.to(dtype)
     g.edata["r"] = (X_supercell[v] - X_src[src]).to(dtype)
 
-    # cosine cutoff
-    g.edata["cutoff_value"] = torch.cos(
-        np.pi * torch.norm(g.edata["r"], dim=1) / cutoff
-    )
+    # cosine cutoff - smoothly go from one to zero in [0, cutoff] interval
+    # consider alternative: HOOMD cutoff with inner radius of nearest_dist.max()?
+    rnorm = torch.norm(g.edata["r"], dim=1)
+    g.edata["cutoff_value"] = (1 + torch.cos(np.pi * rnorm / cutoff)) / 2
 
     g.ndata["atomic_number"] = a.numbers.type(torch.int)
 
