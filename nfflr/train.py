@@ -85,6 +85,7 @@ def parity_plots(engine, directory, name="train"):
             # color="k",
         )
         axes[1].set(xlabel="DFT force", ylabel="predicted force")
+        axes[1].set_ylim(-10, 10)
 
     plt.tight_layout()
     plt.savefig(Path(directory) / f"parity_plots_{name}_{epoch:03d}.png")

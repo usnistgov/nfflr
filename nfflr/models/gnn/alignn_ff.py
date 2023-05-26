@@ -69,7 +69,7 @@ class ALIGNN(nn.Module):
             self.reference_energy = nn.Embedding(
                 108, embedding_dim=1, _weight=config.reference_energies.view(-1, 1)
             )
-            self.reference_energy.weight.requires_grad_(False)
+            # self.reference_energy.weight.requires_grad_(False)
 
         self.edge_embedding = nn.Sequential(
             RBFExpansion(vmin=0, vmax=8.0, bins=config.edge_input_features),

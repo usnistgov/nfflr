@@ -1,3 +1,4 @@
+
 """Common training setup utility functions."""
 from typing import Any, Callable, Dict, Tuple
 
@@ -92,14 +93,15 @@ def select_target(name: str):
 
 
 def group_decay(model):
-    """Omit weight decay from bias and batchnorm params."""
+    """Omit weight decay from everything but `Linear` weights."""
     decay, no_decay = [], []
 
-    for name, p in model.named_parameters():
-        if "bias" in name or "bn" in name or "norm" in name:
-            no_decay.append(p)
-        else:
-            decay.append(p)
+    for mname, m in model.named_modules():
+        for name, p in m.named_parameters(recurse=False):
+            if isinstance(m, nn.Linear) and name == "weight" and not mname == "fc":
+                decay.append(p)
+            else:
+                no_decay.append(p)
 
     return [
         {"params": decay},
