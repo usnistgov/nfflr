@@ -21,7 +21,15 @@ def _load_dataset(dataset_name, cache_dir=None):
 
     print(f"{dataset_name=}")
 
-    if dataset_name in ("alignn_ff_db", "dft_3d"):
+    if dataset_name in (
+        "alignn_ff_db",
+        "dft_2d",
+        "dft_3d",
+        "megnet",
+        "mlearn",
+        "tinnet_N",
+        "jff",
+    ):
         df = pd.DataFrame(jdata(dataset_name, store_dir=cache_dir))
         return df
 
