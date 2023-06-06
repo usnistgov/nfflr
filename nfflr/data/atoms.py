@@ -1,3 +1,4 @@
+import ase
 import dgl
 import torch
 from torch import nn
@@ -93,6 +94,12 @@ class Atoms:
     @dispatch
     def __init__(self, atoms: jarvis.core.atoms.Atoms):  # noqa: F811
         self.__init__(atoms.lattice.matrix, atoms.frac_coords, atoms.atomic_numbers)
+
+    @dispatch
+    def __init__(self, atoms: ase.Atoms):  # noqa: F811
+        self.__init__(
+            atoms.cell.array, atoms.get_scaled_positions(), atoms.get_atomic_numbers()
+        )
 
     @property
     def batch_num_atoms(self):
