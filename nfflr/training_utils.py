@@ -1,4 +1,3 @@
-
 """Common training setup utility functions."""
 from typing import Any, Callable, Dict, Tuple
 
@@ -111,13 +110,15 @@ def group_decay(model):
 
 def setup_optimizer(params, config):
     """Set up optimizer for param groups."""
+    if isinstance(config["optimizer"], torch.optim.Optimizer):
+        optimizer = config["optimizer"]
     if config["optimizer"] == "adamw":
         optimizer = torch.optim.AdamW(
             params,
             lr=config["learning_rate"],
             weight_decay=config["weight_decay"],
         )
-    elif config.optimizer == "sgd":
+    elif config["optimizer"] == "sgd":
         optimizer = torch.optim.SGD(
             params,
             lr=config["learning_rate"],
