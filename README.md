@@ -32,7 +32,7 @@ Now, let's install the package:
 ```
 git clone https://github.com/usnistgov/nfflr
 cd nfflr
-python setup.py develop
+python -m pip install -e .
 ```
 For using GPUs/CUDA, install dgl-cu101 or dgl-cu111 based on the CUDA version available on your system, e.g.
 
