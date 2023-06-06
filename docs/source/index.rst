@@ -55,6 +55,7 @@ High-level training utilities that can be used regardless of the model backend.
 
    quickstart
    overview
+   atoms
    examples
 
 
