@@ -10,4 +10,4 @@ jobs:
         with:
           docs-folder: docs/
           pre-build-command: "apt-get update -y && apt-get install -y pandoc"
-          build-command: sphinx-build -b html -c . source _build/html
+          build-command: sphinx-build -vv -T -b html -c . source _build/html
