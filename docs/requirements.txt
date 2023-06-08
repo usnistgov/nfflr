@@ -1,4 +1,6 @@
 sphinx
 nbsphinx
+ipykernel
 myst-parser
+sphinx-rtd-theme
 -e .
