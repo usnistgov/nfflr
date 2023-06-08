@@ -1,8 +1,10 @@
+from pathlib import Path
+from collections.abc import Iterable
+
 import ase
 import dgl
 import torch
 from torch import nn
-from collections.abc import Iterable
 from typing import TypeAlias, Optional, List
 import jarvis.core.atoms
 from jarvis.core.specie import chem_data, get_node_attributes
@@ -46,6 +48,24 @@ def _get_attribute_lookup(atom_features: str = "cgcnn"):
     features.weight.requires_grad = False
 
     return features
+
+
+def jarvis_load_atoms(path: Path):
+    """Load Atoms data from individual files.
+
+    Assume xyz and pdb formats correspond to non-periodic structures
+    and add vacuum padding to the cell accordingly.
+    """
+    if path.suffix == ".vasp":
+        atoms = jarvis.core.atoms.Atoms.from_poscar(path)
+    elif path.suffix == ".cif":
+        atoms = jarvis.core.atoms.Atoms.from_cif(path)
+    elif path.suffix == ".xyz":
+        atoms = jarvis.core.atoms.Atoms.from_xyz(path, box_size=500)
+    else:
+        raise NotImplementedError(f"{path.suffix} not currently supported.")
+
+    return Atoms(atoms)
 
 
 class Atoms:

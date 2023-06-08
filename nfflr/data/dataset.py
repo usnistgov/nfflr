@@ -13,7 +13,22 @@ from jarvis.db.figshare import data as jdata
 from jarvis.core.atoms import Atoms as jAtoms
 from numpy.random import default_rng
 
-from nfflr.data.atoms import Atoms
+from nfflr.data.atoms import Atoms, jarvis_load_atoms
+
+
+def _load_dataset_directory(directory: Path) -> pd.DataFrame:
+    """Load material dataset from directory format.
+
+    Target properties should be listed in a csv file `id_prop.csv`
+    with two columns: filename and target value.
+    """
+    # assume no header in file...
+    # set `jid` to the file name...
+    info = pd.read_csv(directory / "id_prop.csv", names=["jid", "target"])
+
+    info["atoms"] = [jarvis_load_atoms(directory / name) for name in info["jid"]]
+
+    return info
 
 
 def _load_dataset(dataset_name, cache_dir=None):
@@ -36,9 +51,13 @@ def _load_dataset(dataset_name, cache_dir=None):
     if isinstance(dataset_name, str):
         dataset_name = Path(dataset_name)
 
-    # e.g., "jdft_max_min_307113_id_prop.json"
-    lines = "jsonl" in dataset_name.name
-    df = pd.read_json(dataset_name, lines=lines)
+    if dataset_name.is_file():
+        # assume json or json-lines format
+        # e.g., "jdft_max_min_307113_id_prop.json"
+        lines = "jsonl" in dataset_name.name
+        df = pd.read_json(dataset_name, lines=lines)
+    elif dataset_name.is_dir():
+        df = _load_dataset_directory(dataset_name)
 
     return df
 
@@ -95,7 +114,11 @@ class AtomsDataset(torch.utils.data.Dataset):
                 *df[id_tag].apply(partial(str.split, sep="_"))
             )
 
-        self.atoms = df.atoms.apply(lambda x: Atoms(jAtoms.from_dict(x)))
+        if isinstance(df.atoms[0], dict):
+            self.atoms = df.atoms.apply(lambda x: Atoms(jAtoms.from_dict(x)))
+        elif isinstance(df.atoms[0], Atoms):
+            self.atoms = df.atoms
+
         self.transform = transform
         self.target = target
 
