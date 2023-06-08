@@ -14,7 +14,7 @@
 * [Funding support](#fund)
 
 <a name="intro"></a>
-# NFFLR (Introduction)
+# NFFLr (Introduction)
 The Neural Force Field Learning library is intended to be a flexible toolkit for developing and deploying atomistic machine learning systems, with a particular focus on crystalline material property and energy models.
 
 The initial codebase is a fork of [ALIGNN](https://github.com/usnistgov/alignn), with modified configuration and modeling interfaces for performance.
@@ -22,7 +22,7 @@ The initial codebase is a fork of [ALIGNN](https://github.com/usnistgov/alignn),
 <a name="install"></a>
 Installation
 -------------------------
-Until NFFLR is registered on PyPI, it's best to install directly from github.
+Until NFFLr is registered on PyPI, it's best to install directly from github.
 
 We recommend using a per-project [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) or [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) environment.
 
@@ -42,7 +42,7 @@ pip install dgl-cu111
 
 #### Method 2 (using pypi):
 
-Alternatively, install NFFLR directly from github using `pip`:
+Alternatively, install NFFLr directly from github using `pip`:
 ```
 python -m pip install https://github.com/usnistgov/nfflr
 ```
