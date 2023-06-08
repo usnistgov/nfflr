@@ -9,4 +9,5 @@ jobs:
       - uses: usnistgov/NISTtheDocs2Death@main
         with:
           docs-folder: docs/
-          build-command: sphinx-build -b html source _build/html
+          pre-build-command: "apt-get update -y && apt-get install -y pandoc"
+          build-command: sphinx-build -b html -c . source _build/html
