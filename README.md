@@ -1,8 +1,6 @@
 # NFFLr - Neural Force Field Learning toolkit
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
-[![PyPI version](https://badge.fury.io/py/alignn.svg)](https://badge.fury.io/py/nfflr)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/usnistgov/nfflr)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/usnistgov/alignn)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/usnistgov/nfflr)
 
 # Table of Contents
@@ -15,7 +13,7 @@
 
 <a name="intro"></a>
 # NFFLr (Introduction)
-The Neural Force Field Learning library is intended to be a flexible toolkit for developing and deploying atomistic machine learning systems, with a particular focus on crystalline material property and energy models.
+The Neural Force Field Learning library ([docs](https://pages.nist.gov/nfflr/index.html)) is intended to be a flexible toolkit for developing and deploying atomistic machine learning systems, with a particular focus on crystalline material property and energy models.
 
 The initial codebase is a fork of [ALIGNN](https://github.com/usnistgov/alignn), with modified configuration and modeling interfaces for performance.
 
@@ -50,8 +48,7 @@ python -m pip install https://github.com/usnistgov/nfflr
 <a name="example"></a>
 Examples
 ---------
-
-Coming soon.
+[Under construction here.](https://pages.nist.gov/nfflr/examples.html)
 
 
 <a name="contrib"></a>
