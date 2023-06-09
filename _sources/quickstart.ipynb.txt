@@ -1,0 +1,934 @@
+{
+ "cells": [
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Quickstart"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## `Atoms` Data\n",
+    "\n",
+    "`Atoms` is the primary data structure for atomistic modeling in `NFFLr`.\n",
+    "This represents an atomistic system in the same way as [spglib](https://spglib.readthedocs.io/en/latest/python-spglib.html#crystal-structure-cell):\n",
+    "\n",
+    "- a $3 \\times 3$ `lattice` matrix\n",
+    "- an $N \\times 3$ fractional coordinates array `positions`\n",
+    "- an array of `N` atomic `numbers`\n",
+    "\n",
+    "These variables are stored as PyTorch tensors to facilitate auto-batching, flexible conversion to graph deep learning formats, and automatic differentiation."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Atoms(lattice=tensor([[4.1000, 0.0000, 0.0000],\n",
+       "        [0.0000, 4.1000, 0.0000],\n",
+       "        [0.0000, 0.0000, 4.1000]]), positions=tensor([[0.0000, 0.0000, 0.0000],\n",
+       "        [0.5000, 0.5000, 0.5000]]), numbers=tensor([24, 22]), _batch_num_atoms=None)"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import torch\n",
+    "from nfflr.data.atoms import Atoms\n",
+    "\n",
+    "lattice = 4.1 * torch.eye(3)\n",
+    "positions = torch.tensor([[0,0,0], [0.5, 0.5, 0.5]])\n",
+    "numbers = torch.tensor([24, 22])\n",
+    "atoms = Atoms(lattice, positions, numbers)\n",
+    "atoms"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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",
+      "text/plain": [
+       "<Figure size 300x300 with 1 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "from ase import Atoms as AseAtoms\n",
+    "from ase.visualize.plot import plot_atoms\n",
+    "\n",
+    "import matplotlib.pyplot as plt\n",
+    "%matplotlib inline\n",
+    "\n",
+    "fig, ax = plt.subplots(figsize=(3,3))\n",
+    "ase_atoms = AseAtoms(scaled_positions=positions, numbers=numbers, cell=lattice)\n",
+    "plot_atoms(ase_atoms, ax, radii=0.3, rotation=(\"10x,20y,0z\"), show_unit_cell=2)\n",
+    "ax.axis(\"off\");"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Models\n",
+    "### Common model interface\n",
+    "\n",
+    "`NFFLr` models are PyTorch modules for modeling properties of atomistic systems.\n",
+    "\n",
+    "Different modeling approaches use a variety of input representations;\n",
+    "`NFFLr` aims to simplify exploratory research by providing a common modeling interface, where all models internally transform `Atoms` inputs to their native input representation, *e.g.* the [DGLGraph](https://docs.dgl.ai/api/python/dgl.DGLGraph.html) structure expected by `ALIGNN`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "construct graph\n",
+      "tensor(0.3651)\n"
+     ]
+    }
+   ],
+   "source": [
+    "from nfflr.models.gnn import alignn\n",
+    "cfg = alignn.ALIGNNConfig(alignn_layers=2, gcn_layers=2)\n",
+    "alignn_model = alignn.ALIGNN(cfg)\n",
+    "with torch.no_grad():\n",
+    "    print(alignn_model(atoms))"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "`NFFLr` also transparently converts inputs from common atomistic modeling libraries, such as jarvis and ase.\n",
+    "This is an experimental feature that is currently implemented with the [plum multiple dispatch library](https://github.com/beartype/plum#plum-multiple-dispatch-in-python).\n",
+    "For example, calling `alignn_model` on an `ase.Atoms` structure automatically converts the data to `nfflr.Atoms` and then to the `ALIGNN` `DGLGraph` format:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "convert\n",
+      "construct graph\n",
+      "tensor(0.3651)\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/bld/.pyenv/versions/3.10.9/envs/nfflr/lib/python3.10/site-packages/dgl/backend/pytorch/tensor.py:445: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()\n",
+      "  assert input.numel() == input.storage().size(), (\n"
+     ]
+    }
+   ],
+   "source": [
+    "with torch.no_grad():\n",
+    "    print(alignn_model(ase_atoms))"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Force field models"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Enabling the `compute_forces` model configuration field will cause the model to compute both a scalar property prediction\n",
+    "and its (negative) gradient with respect to the (cartesian) atomic coordinates - *i.e.* the force components on each atom."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "construct graph\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "{'total_energy': tensor(-0.2599, grad_fn=<SqueezeBackward0>),\n",
+       " 'forces': tensor([[-1.3188e-06, -1.6764e-07,  2.0303e-07],\n",
+       "         [ 5.7369e-07,  4.3586e-07, -3.9674e-07]], grad_fn=<MulBackward0>)}"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cfg = alignn.ALIGNNConfig(\n",
+    "    alignn_layers=2, \n",
+    "    gcn_layers=2, \n",
+    "    compute_forces=True\n",
+    ")\n",
+    "alignn_model = alignn.ALIGNN(cfg)\n",
+    "alignn_model(atoms)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### input representations\n",
+    "`NFFLr` also allows to directly provide inputs to models in the native input representation expected by the model.\n",
+    "This facilitates efficient precomputation and caching during training.\n",
+    "For example, `ALIGNN` requires `DGLGraph` inputs with node features `atomic_number` and edge features `r` (the bond vectors pointing from atoms to their neighbors)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Graph(num_nodes=2, num_edges=52,\n",
+       "      ndata_schemes={'Xfrac': Scheme(shape=(3,), dtype=torch.float32), 'coord': Scheme(shape=(3,), dtype=torch.float32), 'atomic_number': Scheme(shape=(), dtype=torch.int32)}\n",
+       "      edata_schemes={'r': Scheme(shape=(3,), dtype=torch.float32)})"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "from nfflr.data.graph import periodic_radius_graph\n",
+    "g = periodic_radius_graph(atoms, r=6)\n",
+    "g"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'total_energy': tensor(0.3146, grad_fn=<SqueezeBackward0>),\n",
+       " 'forces': tensor([[-6.5804e-05, -5.1502e-05,  5.5355e-05],\n",
+       "         [ 4.2915e-05,  4.5771e-05, -5.2891e-05]], grad_fn=<MulBackward0>)}"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "alignn_model(g)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Training utilities\n",
+    "### `AtomsDataset`\n",
+    "NFFLr makes it easy to load data and transform it into various formats.\n",
+    "\n",
+    "The primary ways of interacting with data are `Atoms` and `AtomsDataset`,\n",
+    "which is a [PyTorch DataSet](https://pytorch.org/docs/stable/data.html) that returns `Atoms` instances.\n",
+    "The most convenient way to get started is with a [named Jarvis dataset](https://jarvis-tools.readthedocs.io/en/master/databases.html):"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "dataset_name='dft_3d'\n",
+      "Obtaining 3D dataset 76k ...\n",
+      "Reference:https://www.nature.com/articles/s41524-020-00440-1\n",
+      "Other versions:https://doi.org/10.6084/m9.figshare.6815699\n",
+      "Loading the zipfile...\n",
+      "Loading completed.\n"
+     ]
+    }
+   ],
+   "source": [
+    "from nfflr.data.dataset import AtomsDataset\n",
+    "dataset = AtomsDataset(\"dft_3d\", target=\"formation_energy_peratom\")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The dataset yields a tuple of an `Atoms` instance and the target value, *e.g.,* `target=\"formation_energy_peratom\"`:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "atoms.lattice=tensor([[3.5669, 0.0000, -0.0000],\n",
+      "        [0.0000, 3.5669, -0.0000],\n",
+      "        [-0.0000, -0.0000, 9.3971]])\n",
+      "atoms.positions=tensor([[0.7500, 0.7500, 0.7849],\n",
+      "        [0.2500, 0.2500, 0.2151],\n",
+      "        [0.2500, 0.7500, 0.5000],\n",
+      "        [0.7500, 0.2500, 0.5000],\n",
+      "        [0.2500, 0.7500, 0.0000],\n",
+      "        [0.7500, 0.2500, 0.0000],\n",
+      "        [0.7500, 0.7500, 0.3075],\n",
+      "        [0.2500, 0.2500, 0.6925]])\n",
+      "atoms.numbers=tensor([22, 22, 29, 29, 14, 14, 33, 33], dtype=torch.int32)\n",
+      "target=tensor(-0.4276)\n"
+     ]
+    }
+   ],
+   "source": [
+    "atoms, target = dataset[0]\n",
+    "print(f\"{atoms.lattice=}\")\n",
+    "print(f\"{atoms.positions=}\")\n",
+    "print(f\"{atoms.numbers=}\")\n",
+    "print(f\"{target=}\")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Internally, `AtomsDataset` uses a [pandas dataframe](https://pandas.pydata.org/docs/user_guide/dsintro.html#dataframe) to store the datasets, so any key in the jarvis dataset is a valid `target`.\n",
+    "For example, `dft_3d` contains a large number of target properties, including some non-scalar quantities:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>jid</th>\n",
+       "      <th>formula</th>\n",
+       "      <th>formation_energy_peratom</th>\n",
+       "      <th>optb88vdw_bandgap</th>\n",
+       "      <th>elastic_tensor</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>JVASP-90856</td>\n",
+       "      <td>TiCuSiAs</td>\n",
+       "      <td>-0.42762</td>\n",
+       "      <td>0.000</td>\n",
+       "      <td>na</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>JVASP-86097</td>\n",
+       "      <td>DyB6</td>\n",
+       "      <td>-0.41596</td>\n",
+       "      <td>0.000</td>\n",
+       "      <td>na</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>JVASP-64906</td>\n",
+       "      <td>Be2OsRu</td>\n",
+       "      <td>0.04847</td>\n",
+       "      <td>0.000</td>\n",
+       "      <td>na</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>JVASP-98225</td>\n",
+       "      <td>KBi</td>\n",
+       "      <td>-0.44140</td>\n",
+       "      <td>0.472</td>\n",
+       "      <td>na</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>JVASP-10</td>\n",
+       "      <td>VSe2</td>\n",
+       "      <td>-0.71026</td>\n",
+       "      <td>0.000</td>\n",
+       "      <td>[[136.4, 27.8, 17.5, 0.0, -5.5, 0.0], [27.8, 1...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "           jid   formula  formation_energy_peratom  optb88vdw_bandgap  \\\n",
+       "0  JVASP-90856  TiCuSiAs                  -0.42762              0.000   \n",
+       "1  JVASP-86097      DyB6                  -0.41596              0.000   \n",
+       "2  JVASP-64906   Be2OsRu                   0.04847              0.000   \n",
+       "3  JVASP-98225       KBi                  -0.44140              0.472   \n",
+       "4     JVASP-10      VSe2                  -0.71026              0.000   \n",
+       "\n",
+       "                                      elastic_tensor  \n",
+       "0                                                 na  \n",
+       "1                                                 na  \n",
+       "2                                                 na  \n",
+       "3                                                 na  \n",
+       "4  [[136.4, 27.8, 17.5, 0.0, -5.5, 0.0], [27.8, 1...  "
+      ]
+     },
+     "execution_count": 34,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "selected_cols = (\"jid\", \"formula\", \"formation_energy_peratom\", \"optb88vdw_bandgap\", \"elastic_tensor\")\n",
+    "dataset.df.loc[:,selected_cols].head()"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can change the target column, but missing values currently need to be handled manually."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "tensor([[136.4000,  27.8000,  17.5000,   0.0000,  -5.5000,   0.0000],\n",
+       "        [ 27.8000, 136.4000,  17.5000,   0.0000,   5.5000,   0.0000],\n",
+       "        [ 17.5000,  17.5000,  40.7000,   0.0000,   0.0000,   0.0000],\n",
+       "        [  0.0000,   0.0000,   0.0000,  54.3000,   0.0000,  -5.5000],\n",
+       "        [ -5.5000,   5.5000,   0.0000,   0.0000,  13.7000,   0.0000],\n",
+       "        [  0.0000,   0.0000,   0.0000,  -5.5000,   0.0000,  13.7000]])"
+      ]
+     },
+     "execution_count": 33,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dataset.target = \"elastic_tensor\"\n",
+    "atoms, elastic_tensor = dataset[4]\n",
+    "elastic_tensor"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Force field datasets\n",
+    "\n",
+    "Force field datasets like `mlearn`, `alignn_ff_db`, and `m3gnet` have a special target key `target=\"energy_and_forces\"` that configure `AtomsDataset` to return a dictionary of target values containing the total energy of the atomic configuration, the forces, and the stresses if they are available."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "dataset_name='mlearn'\n",
+      "Obtaining mlearn dataset 1730...\n",
+      "Reference:https://github.com/materialsvirtuallab/mlearn\n",
+      "Loading the zipfile...\n",
+      "Loading completed.\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "{'energy': tensor(-64656.0625),\n",
+       " 'forces': tensor([[-1.9282e-01, -1.8793e+00, -6.6374e-01],\n",
+       "         [-8.2543e-03, -2.0313e-01,  3.6808e-01],\n",
+       "         [-5.5372e-01, -1.4736e+00,  1.2997e+00],\n",
+       "         [ 4.5678e-01,  5.1175e-01, -1.0934e+00],\n",
+       "         [-1.6499e+00, -1.6259e+00,  4.5255e-01],\n",
+       "         [-1.6698e-01,  6.8080e-01,  6.7749e-01],\n",
+       "         [ 3.6802e-02, -3.1423e+00, -2.0166e+00],\n",
+       "         [-1.0730e-01, -3.5780e-01,  1.1357e+00],\n",
+       "         [-1.9132e-01,  5.1381e-01,  3.4296e-01],\n",
+       "         [ 2.0090e+00,  1.5143e+00, -3.5578e-01],\n",
+       "         [-1.7128e-01, -2.7808e+00, -1.4215e+00],\n",
+       "         [-9.3987e-01, -1.6757e-02,  7.9322e-01],\n",
+       "         [ 3.7190e-01, -9.0627e-01, -5.2933e-01],\n",
+       "         [ 5.6458e-01, -9.6833e-01, -7.0043e-01],\n",
+       "         [-4.5756e-01, -6.5868e-02, -3.7038e-01],\n",
+       "         [-1.2044e+00,  6.3979e-01,  7.5036e-01],\n",
+       "         [-1.5743e+00,  6.4479e-02, -6.7272e-01],\n",
+       "         [-9.8223e-01, -9.5903e-02, -8.7198e-01],\n",
+       "         [ 4.9518e-01, -2.7982e-01, -4.6208e-01],\n",
+       "         [ 3.3000e-01,  1.7643e-01,  2.0947e+00],\n",
+       "         [ 3.3517e-01,  1.4522e+00,  3.6359e-01],\n",
+       "         [-4.4930e-01, -3.1648e-01,  2.1246e-01],\n",
+       "         [-5.8361e-01,  1.0337e+00, -1.0099e+00],\n",
+       "         [ 1.4334e+00,  1.4563e+00,  4.8775e-01],\n",
+       "         [-1.2193e+00, -1.8368e-01,  1.7678e-01],\n",
+       "         [-1.8822e-02, -3.3724e-01,  5.0373e-01],\n",
+       "         [ 9.7925e-01,  3.4629e-01,  2.7126e-01],\n",
+       "         [ 1.3972e+00,  1.0313e-01,  2.1936e+00],\n",
+       "         [ 1.4154e+00,  1.0657e+00,  5.6893e-01],\n",
+       "         [-5.3909e-01,  6.2667e-01,  7.9585e-01],\n",
+       "         [-8.0468e-02,  9.3723e-01, -1.7657e+00],\n",
+       "         [ 6.4826e-01,  1.3950e-03, -1.1809e+00],\n",
+       "         [ 1.7236e+00,  5.0571e-01,  2.0909e-01],\n",
+       "         [-6.3469e-01,  3.2798e+00,  1.3690e+00],\n",
+       "         [-2.8363e-01,  1.3372e+00, -3.8005e-01],\n",
+       "         [-1.0848e+00, -5.7622e-01, -6.1141e-01],\n",
+       "         [-1.8884e+00,  5.1697e-01, -1.0889e-01],\n",
+       "         [-5.3894e-01,  2.1740e+00,  2.2013e+00],\n",
+       "         [ 1.5727e+00, -9.5217e-01,  9.6934e-01],\n",
+       "         [ 3.8191e-01,  3.4829e-01,  1.2664e+00],\n",
+       "         [-1.1411e+00,  1.2328e+00,  1.2866e+00],\n",
+       "         [ 1.1776e+00,  7.2366e-01, -1.5056e+00],\n",
+       "         [-1.3455e+00, -4.8714e-01,  4.1776e-01],\n",
+       "         [ 2.7808e-01, -1.4488e-01,  1.2792e+00],\n",
+       "         [-2.0664e-01,  1.4243e+00,  1.2686e+00],\n",
+       "         [ 1.3897e+00,  7.7333e-01, -8.4011e-01],\n",
+       "         [-7.0459e-01, -2.1634e+00,  1.0630e+00],\n",
+       "         [-9.9009e-01, -6.2214e-01, -9.4072e-03],\n",
+       "         [ 3.3802e-01,  3.1611e-01,  1.3336e-01],\n",
+       "         [-1.2308e+00, -2.7998e-01, -9.0719e-01],\n",
+       "         [ 1.5169e+00, -6.4886e-01, -1.4431e+00],\n",
+       "         [ 2.3966e+00,  1.3065e+00,  3.9503e-01],\n",
+       "         [ 4.8711e-01,  2.6996e-03,  5.6954e-01],\n",
+       "         [ 3.0038e-02,  9.8048e-01,  9.6736e-02],\n",
+       "         [-2.8896e-01,  6.9839e-01,  1.1865e-01],\n",
+       "         [-7.0303e-01,  1.5889e+00,  1.0517e+00],\n",
+       "         [ 1.4835e+00, -7.5193e-01, -4.8107e-01],\n",
+       "         [ 4.3507e-01, -7.6680e-01, -7.6512e-01],\n",
+       "         [ 1.6324e+00, -9.0497e-01, -1.7391e-01],\n",
+       "         [-7.7163e-01,  8.8480e-01, -1.0546e-01],\n",
+       "         [ 1.5508e+00, -1.4519e-01, -6.3183e-01],\n",
+       "         [ 1.4062e+00,  4.8017e-01,  2.4209e-01],\n",
+       "         [-8.2076e-01, -1.1055e+00, -3.7652e-01],\n",
+       "         [-1.7866e+00, -1.0725e-01, -7.5774e-01],\n",
+       "         [ 6.6219e-01, -1.1061e+00,  6.6820e-01],\n",
+       "         [ 4.5689e-01, -3.1297e-01,  5.2079e-01],\n",
+       "         [-2.3750e-01,  1.6904e+00, -7.2430e-01],\n",
+       "         [ 1.5449e+00,  1.4885e+00, -5.6164e-01],\n",
+       "         [ 1.6403e+00, -1.3929e+00, -1.3473e-01],\n",
+       "         [-5.0026e-01, -7.1965e-01, -6.3690e-01],\n",
+       "         [ 1.8875e-01, -8.0416e-01,  1.0578e+00],\n",
+       "         [ 7.4767e-01, -2.7263e-01,  1.0396e-01],\n",
+       "         [ 1.0797e+00,  6.2834e-01, -1.0441e+00],\n",
+       "         [-9.1592e-01, -1.0053e+00, -1.6651e-01],\n",
+       "         [-2.4538e-01,  1.1315e+00, -2.5051e-01],\n",
+       "         [-2.6349e-01, -3.9915e-01,  5.2209e-01],\n",
+       "         [ 8.3324e-01,  2.9588e-02,  4.1156e-01],\n",
+       "         [ 1.3736e-01,  5.2689e-01, -7.6983e-01],\n",
+       "         [ 1.8699e+00, -5.6415e-01, -1.2089e+00],\n",
+       "         [-8.2056e-01, -5.2394e-01, -1.0657e-01],\n",
+       "         [-1.3969e-01, -2.1350e-01,  2.1012e-01],\n",
+       "         [-8.5827e-01, -2.9145e-01, -8.8987e-02],\n",
+       "         [-2.7861e-01, -6.4112e-01,  2.7514e-01],\n",
+       "         [-7.0377e-01, -1.6119e-01, -1.6974e-02],\n",
+       "         [-4.9227e-01, -5.5502e-01, -1.6419e+00],\n",
+       "         [ 1.3265e+00,  5.1135e-01, -2.0431e-01],\n",
+       "         [-6.3025e-01, -4.0777e-01, -7.4116e-01],\n",
+       "         [-2.7982e+00, -8.6561e-01,  7.2870e-01],\n",
+       "         [ 4.4176e-01, -6.1487e-01, -1.5266e+00],\n",
+       "         [-8.2469e-01, -1.5254e+00,  2.2129e-01],\n",
+       "         [-4.1837e-01,  4.5957e-01, -9.3009e-01],\n",
+       "         [-1.3448e+00, -3.8741e-01,  5.7946e-01],\n",
+       "         [-3.5803e-02, -4.9431e-01, -3.3611e-01],\n",
+       "         [ 1.3890e+00, -2.3396e-01, -5.8913e-01],\n",
+       "         [ 4.6561e-01, -1.6739e+00, -5.8580e-01],\n",
+       "         [-5.4732e-02,  1.2076e+00, -6.2845e-01],\n",
+       "         [-1.9202e+00,  2.6483e-01, -4.7163e-01],\n",
+       "         [ 2.3382e-01, -1.9371e-01,  8.8642e-01],\n",
+       "         [-5.4136e-02,  7.5257e-01, -7.5428e-01],\n",
+       "         [-1.2954e+00, -8.2409e-01, -2.3798e-01],\n",
+       "         [ 2.2413e-01, -5.5878e-02, -5.6709e-01],\n",
+       "         [ 1.0508e+00,  4.7083e-01,  1.0494e+00],\n",
+       "         [ 1.1418e+00,  3.9075e-01,  2.2798e-01],\n",
+       "         [-1.6860e+00,  8.3186e-01,  7.9992e-01],\n",
+       "         [-1.1271e+00,  7.7508e-02,  9.2828e-01],\n",
+       "         [-1.0157e+00,  5.2795e-01, -1.9179e-01],\n",
+       "         [ 4.6428e-01, -1.5829e-01,  7.1079e-01]]),\n",
+       " 'stresses': tensor([[41.4064,  5.9450, -4.7715],\n",
+       "         [ 5.9450, 41.1876,  1.0425],\n",
+       "         [-4.7715,  1.0425, 51.0653]])}"
+      ]
+     },
+     "execution_count": 35,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dataset = AtomsDataset(\"mlearn\", target=\"energy_and_forces\")\n",
+    "atoms, target = dataset[0]\n",
+    "target"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "from nfflr.data.graph import periodic_adaptive_radius_graph"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(Atoms(lattice=tensor([[10.5241,  0.0000,  0.0000],\n",
+       "         [ 0.0000, 10.5241,  0.0000],\n",
+       "         [ 0.0000,  0.0000, 10.5241]]), positions=tensor([[8.8610e-03, 1.2966e-02, 3.4177e-01],\n",
+       "         [1.1860e-03, 9.9954e-01, 6.5278e-01],\n",
+       "         [1.5720e-03, 3.4240e-01, 9.8957e-01],\n",
+       "         [9.9629e-01, 3.3764e-01, 3.4630e-01],\n",
+       "         [9.3410e-03, 3.4059e-01, 6.6076e-01],\n",
+       "         [9.9993e-01, 6.5754e-01, 1.9600e-04],\n",
+       "         [4.7140e-03, 6.9225e-01, 3.4508e-01],\n",
+       "         [9.8893e-01, 6.6955e-01, 6.6091e-01],\n",
+       "         [3.3666e-01, 9.9502e-01, 1.4700e-04],\n",
+       "         [3.1948e-01, 9.9440e-01, 3.3301e-01],\n",
+       "         [3.4375e-01, 2.9278e-02, 6.6325e-01],\n",
+       "         [3.3291e-01, 3.2844e-01, 9.8932e-01],\n",
+       "         [3.2360e-01, 3.5171e-01, 3.3943e-01],\n",
+       "         [3.2243e-01, 3.3939e-01, 6.6961e-01],\n",
+       "         [3.3457e-01, 6.7072e-01, 9.9313e-01],\n",
+       "         [3.4607e-01, 6.5817e-01, 3.3440e-01],\n",
+       "         [3.4433e-01, 6.6961e-01, 6.7335e-01],\n",
+       "         [6.8091e-01, 9.9228e-01, 2.0310e-03],\n",
+       "         [6.6933e-01, 5.4890e-03, 3.3881e-01],\n",
+       "         [6.7000e-01, 9.9714e-01, 6.5166e-01],\n",
+       "         [6.6816e-01, 3.1639e-01, 9.9623e-01],\n",
+       "         [6.6920e-01, 3.3440e-01, 3.2128e-01],\n",
+       "         [6.7513e-01, 3.3324e-01, 6.7626e-01],\n",
+       "         [6.4743e-01, 6.5551e-01, 9.9501e-01],\n",
+       "         [6.7395e-01, 6.6333e-01, 3.2915e-01],\n",
+       "         [6.6407e-01, 6.7044e-01, 6.7311e-01],\n",
+       "         [9.9937e-01, 1.5280e-01, 1.6188e-01],\n",
+       "         [9.8534e-01, 1.6818e-01, 4.8469e-01],\n",
+       "         [9.9490e-01, 1.5352e-01, 8.2297e-01],\n",
+       "         [9.9878e-01, 4.9626e-01, 1.5909e-01],\n",
+       "         [9.9433e-01, 5.0090e-01, 5.1118e-01],\n",
+       "         [9.8346e-01, 5.0409e-01, 8.4404e-01],\n",
+       "         [9.7864e-01, 8.2658e-01, 1.6211e-01],\n",
+       "         [4.6760e-03, 8.1529e-01, 5.0061e-01],\n",
+       "         [5.7320e-03, 8.1913e-01, 8.3802e-01],\n",
+       "         [3.4415e-01, 1.8079e-01, 1.7886e-01],\n",
+       "         [3.5898e-01, 1.6424e-01, 4.9430e-01],\n",
+       "         [3.2298e-01, 1.5092e-01, 8.2085e-01],\n",
+       "         [3.1217e-01, 5.0474e-01, 1.5592e-01],\n",
+       "         [3.3188e-01, 5.0162e-01, 5.0273e-01],\n",
+       "         [3.4417e-01, 4.8906e-01, 8.2149e-01],\n",
+       "         [3.2573e-01, 8.2679e-01, 1.7796e-01],\n",
+       "         [3.5701e-01, 8.4234e-01, 4.9825e-01],\n",
+       "         [3.3547e-01, 8.4445e-01, 8.1719e-01],\n",
+       "         [6.7534e-01, 1.5154e-01, 1.5216e-01],\n",
+       "         [6.6919e-01, 1.6766e-01, 5.0290e-01],\n",
+       "         [6.8222e-01, 1.7791e-01, 8.2511e-01],\n",
+       "         [6.6884e-01, 5.0351e-01, 1.6370e-01],\n",
+       "         [6.5816e-01, 4.9164e-01, 5.0023e-01],\n",
+       "         [6.7682e-01, 5.0029e-01, 8.3706e-01],\n",
+       "         [6.5419e-01, 8.3977e-01, 1.8008e-01],\n",
+       "         [6.4563e-01, 8.1842e-01, 4.9773e-01],\n",
+       "         [6.6049e-01, 8.4283e-01, 8.2772e-01],\n",
+       "         [1.5955e-01, 9.8473e-01, 1.6565e-01],\n",
+       "         [1.7511e-01, 9.8687e-01, 5.0398e-01],\n",
+       "         [1.6777e-01, 9.8665e-01, 8.2410e-01],\n",
+       "         [1.4428e-01, 3.3899e-01, 1.7697e-01],\n",
+       "         [1.6374e-01, 3.4594e-01, 5.0575e-01],\n",
+       "         [1.4702e-01, 3.3920e-01, 8.3203e-01],\n",
+       "         [1.6570e-01, 6.6008e-01, 1.7097e-01],\n",
+       "         [1.6167e-01, 6.7040e-01, 5.2098e-01],\n",
+       "         [1.5403e-01, 6.5813e-01, 8.2990e-01],\n",
+       "         [5.0408e-01, 1.4162e-02, 1.7293e-01],\n",
+       "         [5.2003e-01, 4.9100e-03, 5.0066e-01],\n",
+       "         [5.0272e-01, 2.1127e-02, 8.2948e-01],\n",
+       "         [4.9261e-01, 3.4657e-01, 1.6117e-01],\n",
+       "         [5.0572e-01, 3.2500e-01, 5.1147e-01],\n",
+       "         [4.8274e-01, 3.0837e-01, 8.3192e-01],\n",
+       "         [4.8263e-01, 6.7486e-01, 1.6718e-01],\n",
+       "         [5.0145e-01, 6.6365e-01, 5.0892e-01],\n",
+       "         [4.9795e-01, 6.8452e-01, 8.2549e-01],\n",
+       "         [8.2999e-01, 9.9344e-01, 1.7305e-01],\n",
+       "         [8.2539e-01, 9.8901e-01, 5.0311e-01],\n",
+       "         [8.4646e-01, 8.1600e-04, 8.2843e-01],\n",
+       "         [8.4071e-01, 3.1688e-01, 1.6089e-01],\n",
+       "         [8.2948e-01, 3.3842e-01, 4.9434e-01],\n",
+       "         [8.3571e-01, 3.3019e-01, 8.3055e-01],\n",
+       "         [8.3109e-01, 6.5910e-01, 1.7131e-01],\n",
+       "         [8.0698e-01, 6.6579e-01, 5.1274e-01],\n",
+       "         [8.3373e-01, 6.7427e-01, 8.3443e-01],\n",
+       "         [1.6433e-01, 1.6361e-01, 9.9668e-01],\n",
+       "         [1.8062e-01, 1.7457e-01, 3.4169e-01],\n",
+       "         [1.6492e-01, 1.7264e-01, 6.5071e-01],\n",
+       "         [1.7447e-01, 5.0035e-01, 9.9062e-01],\n",
+       "         [1.6301e-01, 5.1862e-01, 3.5785e-01],\n",
+       "         [1.5166e-01, 5.0187e-01, 6.7502e-01],\n",
+       "         [1.7105e-01, 8.3375e-01, 6.3730e-03],\n",
+       "         [1.9458e-01, 8.2731e-01, 3.4052e-01],\n",
+       "         [1.6183e-01, 8.3334e-01, 6.7885e-01],\n",
+       "         [5.0510e-01, 1.7601e-01, 2.8660e-03],\n",
+       "         [5.1288e-01, 1.7028e-01, 3.3753e-01],\n",
+       "         [5.2357e-01, 1.7098e-01, 6.6266e-01],\n",
+       "         [4.9352e-01, 5.0132e-01, 9.9745e-01],\n",
+       "         [4.9040e-01, 4.9813e-01, 3.3980e-01],\n",
+       "         [5.0355e-01, 5.1290e-01, 6.7713e-01],\n",
+       "         [5.0030e-01, 8.2876e-01, 7.7860e-03],\n",
+       "         [5.1234e-01, 8.3157e-01, 3.3580e-01],\n",
+       "         [4.9850e-01, 8.4694e-01, 6.6235e-01],\n",
+       "         [8.4987e-01, 1.4414e-01, 2.8420e-03],\n",
+       "         [8.3989e-01, 1.7320e-01, 3.2958e-01],\n",
+       "         [8.3715e-01, 1.6773e-01, 6.6364e-01],\n",
+       "         [8.1826e-01, 4.9139e-01, 9.9657e-01],\n",
+       "         [8.2342e-01, 4.9526e-01, 3.3035e-01],\n",
+       "         [8.4335e-01, 4.9038e-01, 6.6325e-01],\n",
+       "         [8.4744e-01, 8.3644e-01, 9.8641e-01],\n",
+       "         [8.3764e-01, 8.2921e-01, 3.4132e-01],\n",
+       "         [8.2658e-01, 8.3450e-01, 6.6057e-01]]), numbers=tensor([28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,\n",
+       "         28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,\n",
+       "         28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,\n",
+       "         28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,\n",
+       "         28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,\n",
+       "         28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],\n",
+       "        dtype=torch.int32)),\n",
+       " {'energy': tensor(-64656.0625),\n",
+       "  'forces': tensor([[-1.9282e-01, -1.8793e+00, -6.6374e-01],\n",
+       "          [-8.2543e-03, -2.0313e-01,  3.6808e-01],\n",
+       "          [-5.5372e-01, -1.4736e+00,  1.2997e+00],\n",
+       "          [ 4.5678e-01,  5.1175e-01, -1.0934e+00],\n",
+       "          [-1.6499e+00, -1.6259e+00,  4.5255e-01],\n",
+       "          [-1.6698e-01,  6.8080e-01,  6.7749e-01],\n",
+       "          [ 3.6802e-02, -3.1423e+00, -2.0166e+00],\n",
+       "          [-1.0730e-01, -3.5780e-01,  1.1357e+00],\n",
+       "          [-1.9132e-01,  5.1381e-01,  3.4296e-01],\n",
+       "          [ 2.0090e+00,  1.5143e+00, -3.5578e-01],\n",
+       "          [-1.7128e-01, -2.7808e+00, -1.4215e+00],\n",
+       "          [-9.3987e-01, -1.6757e-02,  7.9322e-01],\n",
+       "          [ 3.7190e-01, -9.0627e-01, -5.2933e-01],\n",
+       "          [ 5.6458e-01, -9.6833e-01, -7.0043e-01],\n",
+       "          [-4.5756e-01, -6.5868e-02, -3.7038e-01],\n",
+       "          [-1.2044e+00,  6.3979e-01,  7.5036e-01],\n",
+       "          [-1.5743e+00,  6.4479e-02, -6.7272e-01],\n",
+       "          [-9.8223e-01, -9.5903e-02, -8.7198e-01],\n",
+       "          [ 4.9518e-01, -2.7982e-01, -4.6208e-01],\n",
+       "          [ 3.3000e-01,  1.7643e-01,  2.0947e+00],\n",
+       "          [ 3.3517e-01,  1.4522e+00,  3.6359e-01],\n",
+       "          [-4.4930e-01, -3.1648e-01,  2.1246e-01],\n",
+       "          [-5.8361e-01,  1.0337e+00, -1.0099e+00],\n",
+       "          [ 1.4334e+00,  1.4563e+00,  4.8775e-01],\n",
+       "          [-1.2193e+00, -1.8368e-01,  1.7678e-01],\n",
+       "          [-1.8822e-02, -3.3724e-01,  5.0373e-01],\n",
+       "          [ 9.7925e-01,  3.4629e-01,  2.7126e-01],\n",
+       "          [ 1.3972e+00,  1.0313e-01,  2.1936e+00],\n",
+       "          [ 1.4154e+00,  1.0657e+00,  5.6893e-01],\n",
+       "          [-5.3909e-01,  6.2667e-01,  7.9585e-01],\n",
+       "          [-8.0468e-02,  9.3723e-01, -1.7657e+00],\n",
+       "          [ 6.4826e-01,  1.3950e-03, -1.1809e+00],\n",
+       "          [ 1.7236e+00,  5.0571e-01,  2.0909e-01],\n",
+       "          [-6.3469e-01,  3.2798e+00,  1.3690e+00],\n",
+       "          [-2.8363e-01,  1.3372e+00, -3.8005e-01],\n",
+       "          [-1.0848e+00, -5.7622e-01, -6.1141e-01],\n",
+       "          [-1.8884e+00,  5.1697e-01, -1.0889e-01],\n",
+       "          [-5.3894e-01,  2.1740e+00,  2.2013e+00],\n",
+       "          [ 1.5727e+00, -9.5217e-01,  9.6934e-01],\n",
+       "          [ 3.8191e-01,  3.4829e-01,  1.2664e+00],\n",
+       "          [-1.1411e+00,  1.2328e+00,  1.2866e+00],\n",
+       "          [ 1.1776e+00,  7.2366e-01, -1.5056e+00],\n",
+       "          [-1.3455e+00, -4.8714e-01,  4.1776e-01],\n",
+       "          [ 2.7808e-01, -1.4488e-01,  1.2792e+00],\n",
+       "          [-2.0664e-01,  1.4243e+00,  1.2686e+00],\n",
+       "          [ 1.3897e+00,  7.7333e-01, -8.4011e-01],\n",
+       "          [-7.0459e-01, -2.1634e+00,  1.0630e+00],\n",
+       "          [-9.9009e-01, -6.2214e-01, -9.4072e-03],\n",
+       "          [ 3.3802e-01,  3.1611e-01,  1.3336e-01],\n",
+       "          [-1.2308e+00, -2.7998e-01, -9.0719e-01],\n",
+       "          [ 1.5169e+00, -6.4886e-01, -1.4431e+00],\n",
+       "          [ 2.3966e+00,  1.3065e+00,  3.9503e-01],\n",
+       "          [ 4.8711e-01,  2.6996e-03,  5.6954e-01],\n",
+       "          [ 3.0038e-02,  9.8048e-01,  9.6736e-02],\n",
+       "          [-2.8896e-01,  6.9839e-01,  1.1865e-01],\n",
+       "          [-7.0303e-01,  1.5889e+00,  1.0517e+00],\n",
+       "          [ 1.4835e+00, -7.5193e-01, -4.8107e-01],\n",
+       "          [ 4.3507e-01, -7.6680e-01, -7.6512e-01],\n",
+       "          [ 1.6324e+00, -9.0497e-01, -1.7391e-01],\n",
+       "          [-7.7163e-01,  8.8480e-01, -1.0546e-01],\n",
+       "          [ 1.5508e+00, -1.4519e-01, -6.3183e-01],\n",
+       "          [ 1.4062e+00,  4.8017e-01,  2.4209e-01],\n",
+       "          [-8.2076e-01, -1.1055e+00, -3.7652e-01],\n",
+       "          [-1.7866e+00, -1.0725e-01, -7.5774e-01],\n",
+       "          [ 6.6219e-01, -1.1061e+00,  6.6820e-01],\n",
+       "          [ 4.5689e-01, -3.1297e-01,  5.2079e-01],\n",
+       "          [-2.3750e-01,  1.6904e+00, -7.2430e-01],\n",
+       "          [ 1.5449e+00,  1.4885e+00, -5.6164e-01],\n",
+       "          [ 1.6403e+00, -1.3929e+00, -1.3473e-01],\n",
+       "          [-5.0026e-01, -7.1965e-01, -6.3690e-01],\n",
+       "          [ 1.8875e-01, -8.0416e-01,  1.0578e+00],\n",
+       "          [ 7.4767e-01, -2.7263e-01,  1.0396e-01],\n",
+       "          [ 1.0797e+00,  6.2834e-01, -1.0441e+00],\n",
+       "          [-9.1592e-01, -1.0053e+00, -1.6651e-01],\n",
+       "          [-2.4538e-01,  1.1315e+00, -2.5051e-01],\n",
+       "          [-2.6349e-01, -3.9915e-01,  5.2209e-01],\n",
+       "          [ 8.3324e-01,  2.9588e-02,  4.1156e-01],\n",
+       "          [ 1.3736e-01,  5.2689e-01, -7.6983e-01],\n",
+       "          [ 1.8699e+00, -5.6415e-01, -1.2089e+00],\n",
+       "          [-8.2056e-01, -5.2394e-01, -1.0657e-01],\n",
+       "          [-1.3969e-01, -2.1350e-01,  2.1012e-01],\n",
+       "          [-8.5827e-01, -2.9145e-01, -8.8987e-02],\n",
+       "          [-2.7861e-01, -6.4112e-01,  2.7514e-01],\n",
+       "          [-7.0377e-01, -1.6119e-01, -1.6974e-02],\n",
+       "          [-4.9227e-01, -5.5502e-01, -1.6419e+00],\n",
+       "          [ 1.3265e+00,  5.1135e-01, -2.0431e-01],\n",
+       "          [-6.3025e-01, -4.0777e-01, -7.4116e-01],\n",
+       "          [-2.7982e+00, -8.6561e-01,  7.2870e-01],\n",
+       "          [ 4.4176e-01, -6.1487e-01, -1.5266e+00],\n",
+       "          [-8.2469e-01, -1.5254e+00,  2.2129e-01],\n",
+       "          [-4.1837e-01,  4.5957e-01, -9.3009e-01],\n",
+       "          [-1.3448e+00, -3.8741e-01,  5.7946e-01],\n",
+       "          [-3.5803e-02, -4.9431e-01, -3.3611e-01],\n",
+       "          [ 1.3890e+00, -2.3396e-01, -5.8913e-01],\n",
+       "          [ 4.6561e-01, -1.6739e+00, -5.8580e-01],\n",
+       "          [-5.4732e-02,  1.2076e+00, -6.2845e-01],\n",
+       "          [-1.9202e+00,  2.6483e-01, -4.7163e-01],\n",
+       "          [ 2.3382e-01, -1.9371e-01,  8.8642e-01],\n",
+       "          [-5.4136e-02,  7.5257e-01, -7.5428e-01],\n",
+       "          [-1.2954e+00, -8.2409e-01, -2.3798e-01],\n",
+       "          [ 2.2413e-01, -5.5878e-02, -5.6709e-01],\n",
+       "          [ 1.0508e+00,  4.7083e-01,  1.0494e+00],\n",
+       "          [ 1.1418e+00,  3.9075e-01,  2.2798e-01],\n",
+       "          [-1.6860e+00,  8.3186e-01,  7.9992e-01],\n",
+       "          [-1.1271e+00,  7.7508e-02,  9.2828e-01],\n",
+       "          [-1.0157e+00,  5.2795e-01, -1.9179e-01],\n",
+       "          [ 4.6428e-01, -1.5829e-01,  7.1079e-01]]),\n",
+       "  'stresses': tensor([[41.4064,  5.9450, -4.7715],\n",
+       "          [ 5.9450, 41.1876,  1.0425],\n",
+       "          [-4.7715,  1.0425, 51.0653]])})"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "d[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "nfflr",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.9"
+  },
+  "orig_nbformat": 4
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

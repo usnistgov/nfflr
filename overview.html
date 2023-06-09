@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Overview &#8212; NFFLr 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Atoms" href="atoms.html" />
+    <link rel="prev" title="Quickstart" href="quickstart.html" />
+<link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
+  <script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+  <script async type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-66610693-1&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c">
+</script>
+
+
+<script type="text/javascript" src="https://pages.nist.gov/leaveNotice/js/jquery.leaveNotice-nist.min.js"></script>
+<script>
+$(document).ready(function(){
+  // Mark external (non-nist.gov) A tags with class "external"
+  //If the adress start with https and ends with nist.gov
+  var re_nist = new RegExp('^https?:\/\/((^\/)*\.)*nist\\.gov(\/|$)');
+  //Regex to find address that start with https
+  var re_absolute_address = new RegExp('^((https?:)?\/\/)');
+  $("a").each(function(){
+    var url=$(this).attr('href');
+    if(re_nist.test(url) || !re_absolute_address.test(url)){
+      $(this).addClass('local');
+    }else{
+      //This a href appears to be external, so tag it
+      $(this).addClass('external');
+    }
+  });
+  // Add leaveNotice to external A elements
+  $('a.external').leaveNotice();
+});
+</script>
+<link rel="stylesheet" type="text/css" href="https://pages.nist.gov/leaveNotice/css/jquery.leaveNotice.css" />
+
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h1>
+<section id="modeling-interface">
+<h2>modeling interface<a class="headerlink" href="#modeling-interface" title="Permalink to this heading">¶</a></h2>
+<p>Models should have a consistent interface, regardless of the backend!</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NFFLrModel</span><span class="p">:</span>
+    <span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Depending on the model and the prediction task, both the input representation and output format may vary.</p>
+<section id="input-representation">
+<h3>input representation<a class="headerlink" href="#input-representation" title="Permalink to this heading">¶</a></h3>
+<p>For efficient training, models should also be able to operate on preprocessed structures,
+e.g. a graph neural network could implement <code class="docutils literal notranslate"><span class="pre">forward(x:</span> <span class="pre">dgl.DGLGraph)</span></code> to allow asynchronous
+construction of graph batches in a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dgl.DGLGraph</span></code></p></li>
+<li><p>PyG input format</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Atoms</span></code> with ghost atom padding</p></li>
+<li><p>some other custom input representation</p></li>
+</ul>
+</section>
+<section id="output-representation">
+<h3>output representation<a class="headerlink" href="#output-representation" title="Permalink to this heading">¶</a></h3>
+<p>Depending on the task, a model may return predictions in different formats.</p>
+<ul class="simple">
+<li><p>Single-target tasks like scalar or vector regression or classification naturally return a single tensor <code class="docutils literal notranslate"><span class="pre">forward(x:</span> <span class="pre">Atoms)</span> <span class="pre">-&gt;</span> <span class="pre">torch.Tensor</span></code>.</p></li>
+<li><p>A force-field should return a <code class="docutils literal notranslate"><span class="pre">dict[str,</span> <span class="pre">torch.Tensor]</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;total_energy&quot;:</span> <span class="pre">torch.Tensor,</span> <span class="pre">&quot;forces&quot;:</span> <span class="pre">torch.Tensor,</span> <span class="pre">&quot;stress&quot;:</span> <span class="pre">torch.Tensor}</span></code>, where <code class="docutils literal notranslate"><span class="pre">total_energy</span></code> is a scalar, <code class="docutils literal notranslate"><span class="pre">forces</span></code> is an <code class="docutils literal notranslate"><span class="pre">(n_atoms,</span> <span class="pre">n_spatial_dimensions)</span></code> tensor, and <code class="docutils literal notranslate"><span class="pre">stress</span></code> is a <code class="docutils literal notranslate"><span class="pre">(n_spatial_dimensions,</span> <span class="pre">n_spatial_dimensions)</span></code> tensor</p></li>
+<li><p>A custom multi-target task might also return a <code class="docutils literal notranslate"><span class="pre">dict</span></code> of</p></li>
+</ul>
+</section>
+</section>
+<section id="training-scripts">
+<h2>Training scripts<a class="headerlink" href="#training-scripts" title="Permalink to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">nfflr</span></code> provides a command line utility <code class="docutils literal notranslate"><span class="pre">nff</span></code> (defined in <code class="docutils literal notranslate"><span class="pre">nfflr.train.py</span></code>) to simplify common training workflows.
+These use <code class="docutils literal notranslate"><span class="pre">py_config_runner</span></code> for flexible task, model, and optimization configuration.
+Currently two commands are supported <code class="docutils literal notranslate"><span class="pre">nff</span> <span class="pre">train</span></code> for full training runs and <code class="docutils literal notranslate"><span class="pre">nff</span> <span class="pre">lr</span></code> for running a <a class="reference external" href="https://pytorch.org/ignite/master/generated/ignite.handlers.lr_finder.FastaiLRFinder.html">learning rate finder experiment</a>.
+This training utility uses <code class="docutils literal notranslate"><span class="pre">ignite</span></code>’s auto-distributed functionality to transparently support data-parallel distributed training.</p>
+<section id="training-command">
+<h3>training command<a class="headerlink" href="#training-command" title="Permalink to this heading">¶</a></h3>
+<p>To launch a full training run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nff<span class="w"> </span>train<span class="w"> </span>/path/to/config.py
+</pre></div>
+</div>
+<p>The configuration file should define the task, model, and optimizer settings:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># config.py</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">ignite.distributed</span> <span class="k">as</span> <span class="nn">idist</span>
+
+<span class="kn">from</span> <span class="nn">nfflr.models.gnn</span> <span class="kn">import</span> <span class="n">alignn_ff</span>
+<span class="kn">from</span> <span class="nn">nfflr.data.dataset</span> <span class="kn">import</span> <span class="n">AtomsDataset</span>
+<span class="kn">from</span> <span class="nn">nfflr.data.graph</span> <span class="kn">import</span> <span class="n">periodic_radius_graph</span>
+
+<span class="c1"># set up dataset and task</span>
+<span class="n">experiment_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="n">random_seed</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">num_workers</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">progress</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">output_dir</span> <span class="o">=</span> <span class="n">experiment_dir</span>
+
+<span class="c1"># set up optimizer</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="s2">&quot;adamw&quot;</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">idist</span><span class="o">.</span><span class="n">get_world_size</span><span class="p">()</span>  <span class="c1"># total batch size</span>
+<span class="n">weight_decay</span> <span class="o">=</span> <span class="mf">1e-5</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">3e-4</span>
+<span class="n">warmup_steps</span> <span class="o">=</span> <span class="mi">2000</span>
+
+<span class="c1"># data source and task specification</span>
+<span class="c1"># source can be json file, jarvis dataset name, or folder</span>
+<span class="c1"># task can be &quot;energy_and_forces&quot; or a key in the dataset</span>
+<span class="n">cutoff</span> <span class="o">=</span> <span class="mf">8.0</span>
+<span class="n">tfm</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">periodic_radius_graph</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">cutoff</span><span class="p">)</span>
+
+
+<span class="n">data_source</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/wrk/bld/alignn-ff-chips/experiments/mpf-gap0.05-3/mpf-gap0.05-3-subset.jsonl&quot;</span><span class="p">)</span>
+<span class="n">target</span> <span class="o">=</span> <span class="s2">&quot;total_energy&quot;</span>
+<span class="c1"># target = &quot;energy_and_forces&quot;</span>
+<span class="n">energy_units</span> <span class="o">=</span> <span class="s2">&quot;eV&quot;</span>
+<span class="n">n_train</span> <span class="o">=</span> <span class="mf">0.8</span>
+<span class="n">n_val</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">AtomsDataset</span><span class="p">(</span>
+    <span class="n">data_source</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">,</span>
+    <span class="n">energy_units</span><span class="o">=</span><span class="n">energy_units</span><span class="p">,</span>
+    <span class="n">n_train</span><span class="o">=</span><span class="n">n_train</span><span class="p">,</span>
+    <span class="n">n_val</span><span class="o">=</span><span class="n">n_val</span><span class="p">,</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">tfm</span><span class="p">,</span>
+    <span class="n">diskcache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># set up model</span>
+<span class="n">model_cfg</span> <span class="o">=</span> <span class="n">alignn_ff</span><span class="o">.</span><span class="n">ALIGNNConfig</span><span class="p">(</span>
+    <span class="n">cutoff</span><span class="o">=</span><span class="n">cutoff</span><span class="p">,</span>
+    <span class="n">cutoff_onset</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span>
+    <span class="n">alignn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">gcn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">atom_features</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span><span class="p">,</span>
+    <span class="n">compute_forces</span><span class="o">=</span><span class="n">target</span> <span class="o">==</span> <span class="s2">&quot;energy_and_forces&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">alignn_ff</span><span class="o">.</span><span class="n">ALIGNN</span><span class="p">(</span><span class="n">model_cfg</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">NFFLr</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#modeling-interface">modeling interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#input-representation">input representation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#output-representation">output representation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#training-scripts">Training scripts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#training-command">training command</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="atoms.html">Atoms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="quickstart.html" title="previous chapter">Quickstart</a></li>
+      <li>Next: <a href="atoms.html" title="next chapter">Atoms</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Brian DeCost.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/overview.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
