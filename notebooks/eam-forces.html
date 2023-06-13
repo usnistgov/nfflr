@@ -79,7 +79,7 @@ $(document).ready(function(){
 <div class="highlight"><pre>
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100  762k  100  762k    0     0   181k      0  0:00:04  0:00:04 --:--:--  181k
+100  762k  100  762k    0     0   809k      0 --:--:-- --:--:-- --:--:--  811k
 </pre></div></div>
 </div>
 <p>Gradient checking is best done in 64-bit floating point precision:</p>
@@ -168,6 +168,272 @@ force components match? : True
 </pre></div></div>
 </div>
 </section>
+<section id="Tersoff-potential">
+<h1>Tersoff potential<a class="headerlink" href="#Tersoff-potential" title="Permalink to this heading">¶</a></h1>
+<p>This section performs the same diagnostic using the Tersoff potential, as implemented by LAMMPS. This demonstrates that forces computed by autograd with respect to relative position vectors reduce to the correct atomic forces.</p>
+<p>The parameters used correspond to <a class="reference external" href="https://www.ctcms.nist.gov/potentials/entry/1988--Tersoff-J--Si-b/">https://www.ctcms.nist.gov/potentials/entry/1988–Tersoff-J–Si-b/</a>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>curl<span class="w"> </span>https://www.ctcms.nist.gov/potentials/Download/1988--Tersoff-J--Si-b/1/1988_Si<span class="se">\(</span>B<span class="se">\)</span>.tersoff<span class="w"> </span>-o<span class="w"> </span>Si.tersoff
+<span class="o">!</span>cat<span class="w"> </span>Si.tersoff
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   532  100   532    0     0   1299      0 --:--:-- --:--:-- --:--:--  1310
+# Parameters for the Tersoff Si(B) potential. CITATION: J. Tersoff, Phys. Rev. B 37, 6991 (1988)
+
+# Parameter values verified by Lucas Hale.
+# Identical values in Si.tersoff of August 22, 2018 LAMMPS distribution.
+# Identical values in openKIM model MO_245095684871_001 parameter file.
+
+# Values are in LAMMPS &#34;metal&#34; units.
+
+# e1 e2 e3 m   gamma lambda3 c      d      costheta0 n      beta    lambda2 B      R   D   lambda1 A
+  Si Si Si 3.0 1.0   1.3258  4.8381 2.0417 0.0       22.956 0.33675 1.3258  95.373 3.0 0.2 3.2394  3264.7
+</pre></div></div>
+</div>
+<p>The ASE LAMMPS calculator seems to still have issues parsing thermo data from lammps log files; we can work around that in the short term by monkey-patching <code class="docutils literal notranslate"><span class="pre">read_lammps_log</span></code> following the <a class="reference external" href="https://gitlab.com/ase/ase/-/issues/1096">discussion here</a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.lammpsrun</span> <span class="kn">import</span> <span class="n">LAMMPS</span>
+
+<span class="kn">from</span> <span class="nn">ase.parallel</span> <span class="kn">import</span> <span class="n">paropen</span>
+<span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="nb">compile</span> <span class="k">as</span> <span class="n">re_compile</span><span class="p">,</span> <span class="n">IGNORECASE</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.lammps</span> <span class="kn">import</span> <span class="n">CALCULATION_END_MARK</span>
+
+<span class="k">def</span> <span class="nf">read_lammps_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lammps_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thermo_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monkey patched calc.read_lammps_log based on https://gitlab.com/ase/ase/-/issues/1096</span>
+
+<span class="sd">    Method which reads a LAMMPS output log file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">thermo_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">thermo_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">thermo_args</span>
+
+    <span class="k">if</span> <span class="n">lammps_log</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lammps_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;.log&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lammps_log</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">fileobj</span> <span class="o">=</span> <span class="n">paropen</span><span class="p">(</span><span class="n">lammps_log</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+        <span class="n">close_log_file</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Expect lammps_in to be a file-like object</span>
+        <span class="n">fileobj</span> <span class="o">=</span> <span class="n">lammps_log</span>
+        <span class="n">close_log_file</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># read_log depends on that the first (three) thermo_style custom args</span>
+    <span class="c1"># can be capitalized and matched against the log output. I.e.</span>
+    <span class="c1"># don&#39;t use e.g. &#39;ke&#39; or &#39;cpu&#39; which are labeled KinEng and CPU.</span>
+    <span class="c1"># mark_re = r&quot;^\s*&quot; + r&quot;\s+&quot;.join(</span>
+    <span class="c1">#     [x.capitalize() for x in thermo_args[0:3]]</span>
+    <span class="c1"># )</span>
+    <span class="c1"># _custom_thermo_mark = re_compile(mark_re)</span>
+    <span class="n">mark_re</span> <span class="o">=</span> <span class="s2">&quot;^\s*&quot;</span> <span class="o">+</span> <span class="s2">&quot;\s*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">thermo_args</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="p">)</span>
+    <span class="n">_custom_thermo_mark</span> <span class="o">=</span> <span class="n">re_compile</span><span class="p">(</span><span class="n">mark_re</span><span class="p">)</span>
+
+    <span class="c1"># !TODO: regex-magic necessary?</span>
+    <span class="c1"># Match something which can be converted to a float</span>
+    <span class="n">f_re</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;([+-]?(?:(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?|nan|inf))&quot;</span>
+    <span class="n">n_args</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">thermo_args</span><span class="p">)</span>
+    <span class="c1"># Create a re matching exactly N white space separated floatish things</span>
+    <span class="n">_custom_thermo_re</span> <span class="o">=</span> <span class="n">re_compile</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s2">&quot;^\s*&quot;</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f_re</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_args</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;\s*$&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">IGNORECASE</span>
+    <span class="p">)</span>
+
+    <span class="n">thermo_content</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="n">CALCULATION_END_MARK</span><span class="p">:</span>
+        <span class="c1"># check error</span>
+        <span class="k">if</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">close_log_file</span><span class="p">:</span>
+                <span class="n">fileobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;LAMMPS exits with error message: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># get thermo output</span>
+        <span class="k">if</span> <span class="n">_custom_thermo_mark</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+            <span class="n">bool_match</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">while</span> <span class="n">bool_match</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                <span class="n">bool_match</span> <span class="o">=</span> <span class="n">_custom_thermo_re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">bool_match</span><span class="p">:</span>
+                    <span class="c1"># create a dictionary between each of the</span>
+                    <span class="c1"># thermo_style args and it&#39;s corresponding value</span>
+                    <span class="n">thermo_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="nb">dict</span><span class="p">(</span>
+                            <span class="nb">zip</span><span class="p">(</span>
+                                <span class="n">thermo_args</span><span class="p">,</span>
+                                <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">bool_match</span><span class="o">.</span><span class="n">groups</span><span class="p">()),</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">close_log_file</span><span class="p">:</span>
+        <span class="n">fileobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">thermo_content</span> <span class="o">=</span> <span class="n">thermo_content</span>
+    <span class="c1"># return thermo_content</span>
+
+
+<span class="c1"># monkey patch the LAMMPS log parser</span>
+<span class="n">LAMMPS</span><span class="o">.</span><span class="n">read_lammps_log</span> <span class="o">=</span> <span class="n">read_lammps_log</span>
+</pre></div>
+</div>
+</div>
+<section id="Small-silicon-system">
+<h2>Small silicon system<a class="headerlink" href="#Small-silicon-system" title="Permalink to this heading">¶</a></h2>
+<p>Now, set up a small Si system and a LAMMPS calculator to serve as the reference Tersoff potential implementation:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up a small Si example crystal</span>
+<span class="n">si_ase</span> <span class="o">=</span> <span class="n">bulk</span><span class="p">(</span><span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;diamond&quot;</span><span class="p">,</span> <span class="mf">5.43</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">si_ase</span><span class="o">.</span><span class="n">rattle</span><span class="p">(</span><span class="n">stdev</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">36</span><span class="p">)</span>
+<span class="n">si_ase</span><span class="o">.</span><span class="n">wrap</span><span class="p">()</span>
+
+<span class="c1"># configure LAMMPS Tersoff potential</span>
+<span class="n">calc</span> <span class="o">=</span> <span class="n">LAMMPS</span><span class="p">()</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;command&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;/opt/homebrew/bin/lmp_serial&quot;</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Si.tersoff&quot;</span><span class="p">]</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;binary_dump&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="p">{</span><span class="s2">&quot;pair_style&quot;</span><span class="p">:</span> <span class="s2">&quot;tersoff&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_coeff&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;* * Si.tersoff Si&quot;</span><span class="p">]}</span>
+    <span class="p">)</span>
+<span class="n">si_ase</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">calc</span><span class="p">)</span>
+
+<span class="c1"># calculate Tersoff energy and forces with LAMMPS</span>
+<span class="n">e_lammps</span> <span class="o">=</span> <span class="n">si_ase</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
+<span class="n">f_lammps</span> <span class="o">=</span> <span class="n">si_ase</span><span class="o">.</span><span class="n">get_forces</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e_lammps</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f_lammps</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+e_lammps=-592.3985671491665
+f_lammps[:5]=array([[-0.20522987, -0.26851818,  0.14179856],
+       [ 0.06219078,  0.05221548,  0.0728464 ],
+       [ 0.03842853, -0.02849059,  0.04544221],
+       [-0.21198316,  0.12308603, -0.00683117],
+       [ 0.5269759 , -0.12608296,  0.29867076]])
+</pre></div></div>
+</div>
+<p>And</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.models.classical.tersoff</span> <span class="kn">import</span> <span class="n">TersoffConfig</span><span class="p">,</span> <span class="n">Tersoff</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">periodic_radius_graph</span><span class="p">(</span><span class="n">Atoms</span><span class="p">(</span><span class="n">si_ase</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">tersoff</span> <span class="o">=</span> <span class="n">Tersoff</span><span class="p">()</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">tersoff</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="n">e_tersoff</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;total_energy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+<span class="n">f_tersoff</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e_tersoff</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f_tersoff</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+e_tersoff=tensor(-592.3986)
+f_tersoff[:5]=tensor([[-0.2052, -0.2685,  0.1418],
+        [ 0.0622,  0.0522,  0.0728],
+        [ 0.0384, -0.0285,  0.0454],
+        [-0.2120,  0.1231, -0.0068],
+        [ 0.5270, -0.1261,  0.2987]])
+</pre></div></div>
+</div>
+<p>The total energies match to within numerical precision:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">e_tersoff</span><span class="p">,</span> <span class="n">e_lammps</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True
+</pre></div></div>
+</div>
+<p>And so do the forces (using the numerical precision settings used by <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.autograd.gradcheck.html">torch.autograd.gradcheck</a>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">f_lammps</span><span class="p">,</span> <span class="n">f_tersoff</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True
+</pre></div></div>
+</div>
+<p>The largest force component discrepancy is about <span class="math notranslate nohighlight">\(7 \times 10^{-7} \; eV/\mathrm{\AA}\)</span></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">f_lammps</span> <span class="o">-</span> <span class="n">f_tersoff</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+6.749736085540081e-07
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
 
 
           </div>
@@ -194,7 +460,11 @@ force components match? : True
 <li class="toctree-l2"><a class="reference internal" href="../quickstart.html">quickstart</a></li>
 <li class="toctree-l2"><a class="reference internal" href="property-regression.html">Property regression example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="property-regression.html#using-the-ignite-based-NFFLr-trainer">using the ignite-based NFFLr trainer</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Checking autograd forces</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Tersoff-potential">Tersoff potential</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Small-silicon-system">Small silicon system</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
