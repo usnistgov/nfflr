@@ -193,13 +193,18 @@ class ALIGNN(nn.Module):
         output = torch.squeeze(self.readout(g, atomwise_energy))
 
         if config.compute_forces:
-            forces = autograd_forces(
-                output, g.edata["r"], g, energy_units=config.energy_units
+            forces, stress = autograd_forces(
+                output,
+                g.edata["r"],
+                g,
+                energy_units=config.energy_units,
+                compute_stress=True,
             )
 
             return dict(
                 total_energy=output,
                 forces=forces,
+                stress=stress,
             )
 
         return output

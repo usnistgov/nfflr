@@ -169,9 +169,12 @@ class Tersoff(nn.Module):
 
         total_energy = energy.sum()
 
-        forces = autograd_forces(total_energy, g.edata["r"], g, energy_units="eV")
+        forces, stress = autograd_forces(
+            total_energy, g.edata["r"], g, energy_units="eV", compute_stress=True
+        )
 
         return dict(
             total_energy=total_energy,
             forces=forces,
+            stress=stress,
         )

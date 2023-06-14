@@ -18,6 +18,7 @@ def autograd_forces(
     g: dgl.DGLGraph,
     energy_units="eV/atom",
     reduce=True,
+    compute_stress=False,
 ):
     # potentially we only need to build the computational graph
     # for the forces at training time, so that we can compute
@@ -40,6 +41,14 @@ def autograd_forces(
     if not reduce:
         return pairwise_forces
 
+    if compute_stress:
+        # without cell volume, can only compute un-normalized stresses
+        # these are the per-bond stress contributions:
+        # TODO: double check sign convention wrt edge direction...
+        stresses = torch.vmap(torch.outer)(-pairwise_forces, displacement_vectors)
+        g.edata["stresses"] = stresses
+        stress = dgl.readout.sum_edges(g, "stresses")
+
     # reduce over bonds to get forces on each atom
     g.edata["pairwise_forces"] = pairwise_forces
     g.update_all(fn.copy_e("pairwise_forces", "m"), fn.sum("m", "forces_ji"))
@@ -59,6 +68,9 @@ def autograd_forces(
         )
 
         forces = forces * n_nodes[:, None]
+
+    if compute_stress:
+        return forces, stress
 
     return forces
 

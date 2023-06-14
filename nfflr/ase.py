@@ -5,7 +5,7 @@ from nfflr.data.atoms import Atoms
 
 
 class NFLLrCalculator(Calculator):
-    implemented_properties = ["energy", "forces"]
+    implemented_properties = ["energy", "forces", "stress"]
 
     def __init__(self, model: torch.nn.Module, **kwargs):
         super().__init__(**kwargs)
@@ -21,3 +21,6 @@ class NFLLrCalculator(Calculator):
 
         self.results["energy"] = outputs["total_energy"].detach().item()
         self.results["forces"] = outputs["forces"].detach().numpy()
+        self.results["stress"] = (
+            outputs["stress"].detach().numpy().squeeze() / atoms.get_volume()
+        )
