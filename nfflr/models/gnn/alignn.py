@@ -6,7 +6,7 @@ from plum import dispatch
 
 import logging
 from dataclasses import dataclass
-from typing import Tuple, Union, Optional, Literal
+from typing import Tuple, Union, Optional, Literal, Callable
 
 import dgl
 import torch
@@ -14,15 +14,17 @@ from torch import nn
 
 from dgl.nn import AvgPooling, SumPooling
 
+from nfflr.nn.cutoff import xplor_cutoff as smooth_cutoff
+
 from nfflr.models.utils import (
-    smooth_cutoff,
     autograd_forces,
     RBFExpansion,
     MLPLayer,
     ALIGNNConv,
     EdgeGatedGraphConv,
 )
-from nfflr.data.graph import compute_bond_cosines, periodic_radius_graph
+from nfflr.data.graph import compute_bond_cosines
+from nfflr.nn.transform import PeriodicRadiusGraph
 from nfflr.data.atoms import _get_attribute_lookup, Atoms
 
 
@@ -30,8 +32,8 @@ from nfflr.data.atoms import _get_attribute_lookup, Atoms
 class ALIGNNConfig:
     """Hyperparameter schema for nfflr.models.gnn.alignn."""
 
-    cutoff: float = 8.0
-    cutoff_onset: Optional[float] = 7.5
+    transform: Callable = PeriodicRadiusGraph(cutoff=8.0)
+    cutoff: Optional[tuple[float]] = (7.5, 8.0)
     alignn_layers: int = 4
     gcn_layers: int = 4
     norm: Literal["batchnorm", "layernorm"] = "batchnorm"
@@ -57,6 +59,7 @@ class ALIGNN(nn.Module):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
         self.config = config
+        self.transform = config.transform
         logging.debug(f"{config=}")
 
         if config.atom_features == "embedding":
@@ -134,7 +137,7 @@ class ALIGNN(nn.Module):
     @dispatch
     def forward(self, x: Atoms):
         print("construct graph")
-        return self.forward(periodic_radius_graph(x, r=self.config.cutoff))
+        return self.forward(self.transform(x))
 
     @dispatch
     def forward(self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]):
@@ -166,9 +169,9 @@ class ALIGNN(nn.Module):
         bondlength = torch.norm(g.edata["r"], dim=1)
         y = self.edge_embedding(bondlength)
 
-        if config.cutoff_onset is not None:
+        if config.cutoff is not None:
             # save cutoff function value for application in EdgeGatedGraphconv
-            r_onset, r_cut = config.cutoff_onset, config.cutoff
+            r_onset, r_cut = config.cutoff
             fcut = smooth_cutoff(bondlength, r_onset=r_onset, r_cutoff=r_cut)
             g.edata["cutoff_value"] = fcut
 
