@@ -136,8 +136,8 @@ class ALIGNN(nn.Module):
 
     @dispatch
     def forward(self, x: Atoms):
-        print("construct graph")
-        return self.forward(self.transform(x))
+        device = next(self.parameters()).device
+        return self.forward(self.transform(x).to(device))
 
     @dispatch
     def forward(self, g: Union[Tuple[dgl.DGLGraph, dgl.DGLGraph], dgl.DGLGraph]):

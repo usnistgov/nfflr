@@ -9,11 +9,16 @@ import dgl
 import numpy as np
 import pandas as pd
 import torch
-from jarvis.db.figshare import data as jdata
-from jarvis.core.atoms import Atoms as jAtoms
 from numpy.random import default_rng
+import matplotlib.pyplot as plt
 
-from nfflr.data.atoms import Atoms, jarvis_load_atoms
+from jarvis.core.atoms import Atoms as jAtoms
+# make sure jarvis-tools doesn't override matplotlib backend
+mpl_backend = plt.get_backend()
+from jarvis.db.figshare import data as jdata  # noqa:E402
+plt.switch_backend(mpl_backend)
+
+from nfflr.data.atoms import Atoms, jarvis_load_atoms  # noqa:E402
 
 
 def _load_dataset_directory(directory: Path) -> pd.DataFrame:
