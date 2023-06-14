@@ -32,4 +32,4 @@ class XPLOR(torch.nn.Module):
         self.r_cutoff = r_cutoff
 
     def forward(self, r):
-        xplor_cutoff(r, self.r_onset, self.r_cutoff)
+        return xplor_cutoff(r, self.r_onset, self.r_cutoff)

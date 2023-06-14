@@ -14,8 +14,6 @@ from torch import nn
 
 from dgl.nn import AvgPooling, SumPooling
 
-from nfflr.nn.cutoff import xplor_cutoff as smooth_cutoff
-
 from nfflr.models.utils import (
     autograd_forces,
     RBFExpansion,
@@ -25,6 +23,7 @@ from nfflr.models.utils import (
 )
 from nfflr.data.graph import compute_bond_cosines
 from nfflr.nn.transform import PeriodicRadiusGraph
+from nfflr.nn.cutoff import XPLOR
 from nfflr.data.atoms import _get_attribute_lookup, Atoms
 
 
@@ -33,7 +32,8 @@ class ALIGNNConfig:
     """Hyperparameter schema for nfflr.models.gnn.alignn."""
 
     transform: Callable = PeriodicRadiusGraph(cutoff=8.0)
-    cutoff: Optional[tuple[float]] = (7.5, 8.0)
+    # cutoff: Optional[tuple[float]] = (7.5, 8.0)
+    cutoff: torch.nn.Module = XPLOR(7.5, 8.0)
     alignn_layers: int = 4
     gcn_layers: int = 4
     norm: Literal["batchnorm", "layernorm"] = "batchnorm"
@@ -171,9 +171,7 @@ class ALIGNN(nn.Module):
 
         if config.cutoff is not None:
             # save cutoff function value for application in EdgeGatedGraphconv
-            r_onset, r_cut = config.cutoff
-            fcut = smooth_cutoff(bondlength, r_onset=r_onset, r_cutoff=r_cut)
-            g.edata["cutoff_value"] = fcut
+            g.edata["cutoff_value"] = self.config.cutoff(bondlength)
 
         # initial triplet features
         if len(self.alignn_layers) > 0:
