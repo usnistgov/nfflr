@@ -13,9 +13,11 @@ from numpy.random import default_rng
 import matplotlib.pyplot as plt
 
 from jarvis.core.atoms import Atoms as jAtoms
+
 # make sure jarvis-tools doesn't override matplotlib backend
 mpl_backend = plt.get_backend()
 from jarvis.db.figshare import data as jdata  # noqa:E402
+
 plt.switch_backend(mpl_backend)
 
 from nfflr.data.atoms import Atoms, jarvis_load_atoms  # noqa:E402
@@ -162,6 +164,19 @@ class AtomsDataset(torch.utils.data.Dataset):
         n_atoms = len(atoms)
         # print(f"{key=}, {n_atoms=}")
 
+        if self.target == "energy_and_forces":
+            target = self.get_energy_and_forces(idx, n_atoms=n_atoms)
+            # volume: abs(determinant(cell))
+            target["volume"] = atoms.lattice.det().abs().item()
+            target = {
+                k: torch.tensor(t, dtype=torch.get_default_dtype())
+                for k, t in target.items()
+            }
+        else:
+            target = torch.tensor(
+                self.df[self.target].iloc[idx], dtype=torch.get_default_dtype()
+            )
+
         if self.transform and self.diskcache is not None:
             cachefile = Path(self.diskcache.name) / f"jarvis-{key}-{idx}.pkl"
 
@@ -174,17 +189,6 @@ class AtomsDataset(torch.utils.data.Dataset):
                 torch.save(atoms, cachefile)
         elif self.transform:
             atoms = self.transform(atoms)
-
-        if self.target == "energy_and_forces":
-            target = self.get_energy_and_forces(idx, n_atoms=n_atoms)
-            target = {
-                k: torch.tensor(t, dtype=torch.get_default_dtype())
-                for k, t in target.items()
-            }
-        else:
-            target = torch.tensor(
-                self.df[self.target].iloc[idx], dtype=torch.get_default_dtype()
-            )
 
         return atoms, target
 
