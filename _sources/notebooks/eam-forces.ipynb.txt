@@ -40,7 +40,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
+   "execution_count": 1,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -70,7 +70,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
+   "execution_count": 2,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -99,7 +99,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
+   "execution_count": 3,
    "metadata": {},
    "outputs": [
     {
@@ -192,7 +192,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
+   "execution_count": 4,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -296,7 +296,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
+   "execution_count": 5,
    "metadata": {},
    "outputs": [
     {
@@ -346,7 +346,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 8,
+   "execution_count": 87,
    "metadata": {},
    "outputs": [
     {
@@ -358,7 +358,18 @@
       "        [ 0.0622,  0.0522,  0.0728],\n",
       "        [ 0.0384, -0.0285,  0.0454],\n",
       "        [-0.2120,  0.1231, -0.0068],\n",
-      "        [ 0.5270, -0.1261,  0.2987]])\n"
+      "        [ 0.5270, -0.1261,  0.2987]])\n",
+      "stress_tersoff=tensor([[[-6.5235e-04,  1.6092e-03,  4.2400e-04],\n",
+      "         [ 1.6092e-03, -6.5744e-04,  2.0972e-06],\n",
+      "         [ 4.2400e-04,  2.0972e-06, -6.4832e-04]]])\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/bld/.pyenv/versions/3.10.9/envs/nfflr/lib/python3.10/site-packages/dgl/backend/pytorch/tensor.py:445: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()\n",
+      "  assert input.numel() == input.storage().size(), (\n"
      ]
     }
    ],
@@ -369,9 +380,11 @@
     "out = tersoff(g)\n",
     "e_tersoff = out[\"total_energy\"].detach()\n",
     "f_tersoff = out[\"forces\"].detach()\n",
+    "stress_tersoff = out[\"stress\"].detach() / si_ase.get_volume()\n",
     "\n",
     "print(f\"{e_tersoff=}\")\n",
-    "print(f\"{f_tersoff[:5]=}\")\n"
+    "print(f\"{f_tersoff[:5]=}\")\n",
+    "print(f\"{stress_tersoff=}\")\n"
    ]
   },
   {
@@ -384,7 +397,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 9,
+   "execution_count": 88,
    "metadata": {},
    "outputs": [
     {
@@ -393,7 +406,7 @@
        "True"
       ]
      },
-     "execution_count": 9,
+     "execution_count": 88,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -412,7 +425,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 10,
+   "execution_count": 89,
    "metadata": {},
    "outputs": [
     {
@@ -421,7 +434,7 @@
        "True"
       ]
      },
-     "execution_count": 10,
+     "execution_count": 89,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -440,7 +453,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": 90,
    "metadata": {},
    "outputs": [
     {
@@ -449,13 +462,67 @@
        "6.749736085540081e-07"
       ]
      },
-     "execution_count": 11,
+     "execution_count": 90,
      "metadata": {},
      "output_type": "execute_result"
     }
    ],
    "source": [
     "(f_lammps - f_tersoff.numpy()).max()"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "And the stress tensor values also match:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 91,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([-6.52352915e-04, -6.57444097e-04, -6.48324331e-04,  2.09715783e-06,\n",
+       "        4.23995521e-04,  1.60922348e-03])"
+      ]
+     },
+     "execution_count": 91,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "si_ase.get_stress()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 92,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[[ True,  True,  True],\n",
+       "        [ True,  True,  True],\n",
+       "        [ True,  True,  True]]])"
+      ]
+     },
+     "execution_count": 92,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "np.isclose(\n",
+    "    stress_tersoff, \n",
+    "    ase.stress.voigt_6_to_full_3x3_stress(si_ase.get_stress())\n",
+    ")"
    ]
   },
   {
