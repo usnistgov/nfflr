@@ -25,10 +25,14 @@ class InstanceNorm(nn.Module):
     def forward(self, g: dgl.DGLGraph, x: torch.Tensor):
         g = g.local_var()
 
+        # compute per-instance channel-wise mean
         self.data(g)["_x"] = x
-        mu = self.readout(g, "_x")
-        self.data(g)["_sqdev"] = (x - self.broadcast(g, mu)) ** 2
+        mu = self.broadcast(g, self.readout(g, "_x"))
+
+        # compute per-instance channel-wise variance
+        self.data(g)["_sqdev"] = (x - mu) ** 2
         var = self.readout(g, "_sqdev")
         std = torch.sqrt(var + self.eps)
 
-        return x - self.broadcast(g, mu) / self.broadcast(g, std)
+        # apply normalization
+        return (x - mu) / self.broadcast(g, std)
