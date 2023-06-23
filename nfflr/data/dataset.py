@@ -76,8 +76,9 @@ def get_cachedir():
     prefix = "nfflr-"
 
     slurm_job = os.environ.get("SLURM_JOB_ID")
+    scratchspace = os.environ.get("SCRATCH", "/scratch")
     if slurm_job is not None:
-        scratchdir = f"/scratch/{slurm_job}"
+        scratchdir = f"{scratchspace}/{slurm_job}"
 
     cachedir = tempfile.TemporaryDirectory(dir=scratchdir, prefix=prefix)
 
