@@ -16,6 +16,7 @@ from nfflr.models.utils import (
     MLPLayer,
 )
 
+from nfflr.nn.norm import Norm
 from nfflr.nn.transform import PeriodicRadiusGraph
 from nfflr.nn.cutoff import XPLOR
 from nfflr.data.atoms import _get_attribute_lookup, Atoms
@@ -28,6 +29,7 @@ class TFMConfig:
     transform: Callable = PeriodicRadiusGraph(cutoff=8.0)
     cutoff: torch.nn.Module = XPLOR(7.5, 8.0)
     layers: int = 3
+    norm: Literal["layernorm", "instancenorm"] = "layernorm"
     atom_features: str = "embedding"
     edge_input_features: int = 80
     embedding_features: int = 64
@@ -71,18 +73,10 @@ class EdgeGatedGraphConv(nn.Module):
         self,
         input_features: int,
         output_features: int,
-        norm: Literal["layernorm", "batchnorm"] = "layernorm",
-        skip_edgenorm: bool = False,
+        norm: Literal["layernorm", "instancenorm", "batchnorm"] = "layernorm",
     ):
         """Edge gated graph convolution variant."""
         super().__init__()
-
-        if norm == "layernorm":
-            Norm = nn.LayerNorm
-        elif norm == "batchnorm":
-            Norm = nn.BatchNorm1d
-
-        self.skip_edgenorm = skip_edgenorm
 
         # CGCNN-Conv operates on augmented edge features
         # z_ij = cat(v_i, v_j, u_ij)
@@ -92,15 +86,11 @@ class EdgeGatedGraphConv(nn.Module):
         self.src_gate = nn.Linear(input_features, output_features)
         self.dst_gate = nn.Linear(input_features, output_features)
         self.edge_gate = nn.Linear(input_features, output_features)
-
-        if self.skip_edgenorm:
-            self.norm_edges = nn.Identity()
-        else:
-            self.norm_edges = Norm(output_features)
+        self.norm_edges = Norm(output_features, norm_type=norm, mode="edge")
 
         self.src_update = nn.Linear(input_features, output_features)
         self.dst_update = nn.Linear(input_features, output_features)
-        self.norm_nodes = Norm(output_features)
+        self.norm_nodes = Norm(output_features, norm_type=norm, mode="node")
 
     def forward(
         self,
@@ -129,7 +119,7 @@ class EdgeGatedGraphConv(nn.Module):
         m = g.edata.pop("e_nodes") + self.edge_gate(edge_feats)
         # Dwivedi et al apply the nonlinearity and edge residual
         # before the attention process
-        y = edge_feats + F.silu(self.norm_edges(m))
+        y = edge_feats + F.silu(self.norm_edges(g, m))
 
         # if edge attributes have a cutoff function value
         # multiply the edge gate values with the cutoff value
@@ -147,7 +137,7 @@ class EdgeGatedGraphConv(nn.Module):
         x = self.src_update(node_feats) + g.ndata.pop("h")
 
         # node and edge updates
-        x = node_feats + F.silu(self.norm_nodes(x))
+        x = node_feats + F.silu(self.norm_nodes(g, x))
 
         return x, y
 

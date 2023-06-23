@@ -4,6 +4,31 @@ from torch import nn
 from typing import Literal
 
 
+class Norm(nn.Module):
+    def __init__(
+        self,
+        num_features: int,
+        norm_type: Literal["batchnorm", "layernorm", "instancenorm"] = "layernorm",
+        mode: Literal["node", "edge"] = "node",
+    ):
+        super().__init__()
+        self.norm_type = norm_type
+        self.mode = mode
+
+        if norm_type == "batchnorm":
+            self.norm = nn.BatchNorm1d(num_features)
+        elif norm_type == "layernorm":
+            self.norm = nn.LayerNorm(num_features)
+        elif norm_type == "instancenorm":
+            self.norm = InstanceNorm(mode=mode)
+
+    def forward(self, g: dgl.DGLGraph, x: torch.Tensor):
+        if self.norm_type in ("batchnorm", "layernorm"):
+            return self.norm(x)
+        elif self.norm_type == "instancenorm":
+            return self.norm(g, x)
+
+
 class InstanceNorm(nn.Module):
     def __init__(self, mode: Literal["node", "edge"] = "node", eps: float = 1e-6):
         super().__init__()
