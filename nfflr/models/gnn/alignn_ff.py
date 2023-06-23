@@ -143,10 +143,8 @@ class ALIGNN(nn.Module):
             g.edata["r"].requires_grad_(True)
 
         # initial node features: atom feature network...
-        atomic_number = g.ndata.pop("atomic_number").int().squeeze()
+        atomic_number = g.ndata.pop("atomic_number").int()
         x = self.atom_embedding(atomic_number)
-        if x.ndim == 1:
-            x = x.unsqueeze(0)
 
         # initial bond features
         bondlength = torch.norm(g.edata["r"], dim=1)
