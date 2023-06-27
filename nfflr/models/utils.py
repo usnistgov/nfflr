@@ -11,6 +11,12 @@ from torch.nn import functional as F
 import dgl
 import dgl.function as fn
 
+from packaging import version
+if version.parse(torch.__version__) < version.parse("2.0"):
+    from functorch import vmap
+else:
+    from torch import vmap
+
 
 def autograd_forces(
     total_energy: torch.tensor,
@@ -45,7 +51,7 @@ def autograd_forces(
         # without cell volume, can only compute un-normalized stresses
         # these are the per-bond stress contributions:
         # TODO: double check sign convention wrt edge direction...
-        stresses = torch.vmap(torch.outer)(-pairwise_forces, displacement_vectors)
+        stresses = vmap(torch.outer)(-pairwise_forces, displacement_vectors)
         g.edata["stresses"] = stresses
         stress = dgl.readout.sum_edges(g, "stresses")
 

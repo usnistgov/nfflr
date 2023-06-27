@@ -272,20 +272,20 @@ def run_train(local_rank: int, config):
                 Events.COMPLETED, lambda engine: session.report(engine.state.metrics)
             )
 
-        # parity plotting
-        if config["dataset"].target == "energy_and_forces":
-            train_evaluator.add_event_handler(
-                Events.COMPLETED,
-                parity_plots,
-                directory=config["output_dir"],
-                name="train",
-            )
-            val_evaluator.add_event_handler(
-                Events.COMPLETED,
-                parity_plots,
-                directory=config["output_dir"],
-                name="validation",
-            )
+        # # parity plotting
+        # if config["dataset"].target == "energy_and_forces":
+        #     train_evaluator.add_event_handler(
+        #         Events.COMPLETED,
+        #         parity_plots,
+        #         directory=config["output_dir"],
+        #         name="train",
+        #     )
+        #     val_evaluator.add_event_handler(
+        #         Events.COMPLETED,
+        #         parity_plots,
+        #         directory=config["output_dir"],
+        #         name="validation",
+        #     )
 
     print("starting training loop")
     trainer.run(train_loader, max_epochs=config["epochs"])
