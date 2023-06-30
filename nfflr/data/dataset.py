@@ -122,9 +122,9 @@ class AtomsDataset(torch.utils.data.Dataset):
                 *df[id_tag].apply(partial(str.split, sep="_"))
             )
 
-        if isinstance(df.atoms[0], dict):
+        if isinstance(df.atoms.iloc[0], dict):
             self.atoms = df.atoms.apply(lambda x: Atoms(jAtoms.from_dict(x)))
-        elif isinstance(df.atoms[0], Atoms):
+        elif isinstance(df.atoms.iloc[0], Atoms):
             self.atoms = df.atoms
 
         self.transform = transform
