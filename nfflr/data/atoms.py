@@ -123,9 +123,12 @@ class Atoms:
 
     @property
     def batch_num_atoms(self):
-        if self.lattice.ndim == 3:
+        if self.batched():
             return self._batch_num_atoms
         return [self.positions.shape[0]]
+
+    def batched(self) -> bool:
+        return self.lattice.ndim == 3
 
     def __repr__(self):
         kws = [f"{key}={value!r}" for key, value in self.__dict__.items()]
@@ -140,11 +143,18 @@ class Atoms:
                 "__len__ not defined for batched atoms. use batch_num_atoms instead."
             )
 
-    def to(self, device):
-        self.lattice = self.lattice.to(device)
-        self.positions = self.positions.to(device)
-        self.numbers = self.numbers.to(device)
+    def to(self, device, non_blocking: bool = False):
+        self.lattice = self.lattice.to(device, non_blocking=non_blocking)
+        self.positions = self.positions.to(device, non_blocking=non_blocking)
+        self.numbers = self.numbers.to(device, non_blocking=non_blocking)
         return self
+
+
+def spglib_cell(x: Atoms):
+    """Unpack Atoms to spglib tuple format."""
+    if x.batched():
+        return [spglib_cell(at) for at in unbatch(x)]
+    return (x.lattice, x.positions, x.numbers)
 
 
 @dispatch

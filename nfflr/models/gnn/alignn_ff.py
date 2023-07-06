@@ -27,7 +27,7 @@ from nfflr.data.atoms import _get_attribute_lookup, Atoms
 
 
 @dataclass
-class ALIGNNConfig:
+class ALIGNNFFConfig:
     """Hyperparameter schema for nfflr.models.gnn.alignn"""
 
     transform: Callable = PeriodicRadiusGraph(cutoff=8.0)
@@ -45,14 +45,14 @@ class ALIGNNConfig:
     reference_energies: Optional[torch.Tensor] = None
 
 
-class ALIGNN(nn.Module):
+class ALIGNNFF(nn.Module):
     """Atomistic Line graph network.
 
     Chain alternating gated graph convolution updates on crystal graph
     and atomistic line graph.
     """
 
-    def __init__(self, config: ALIGNNConfig = ALIGNNConfig()):
+    def __init__(self, config: ALIGNNFFConfig = ALIGNNFFConfig()):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
         self.config = config

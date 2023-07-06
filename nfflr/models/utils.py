@@ -12,6 +12,7 @@ import dgl
 import dgl.function as fn
 
 from packaging import version
+
 if version.parse(torch.__version__) < version.parse("2.0"):
     from functorch import vmap
 else:
@@ -27,8 +28,7 @@ def autograd_forces(
     compute_stress=False,
 ):
     # potentially we only need to build the computational graph
-    # for the forces at training time, so that we can compute
-    # the gradient of the force (and stress) loss?
+    # for the forces at training time, so that we can compute    # the gradient of the force (and stress) loss?
     create_graph = True
 
     # energy gradient contribution of each bond
@@ -79,6 +79,21 @@ def autograd_forces(
         return forces, stress
 
     return forces
+
+
+class ChebyshevExpansion(nn.Module):
+    """Expand features in (-1, 1) interval with Chebyshev basis."""
+
+    def __init__(self, basis_size: int):
+        super().__init__()
+        self.n = torch.arange(basis_size)
+
+    def forward(self, x):
+        """Trigonometric definition of Chebyshev polynomial basis for |x| \lq 1.
+
+        Tn(cos(theta)) = cos(n theta)
+        """
+        return torch.cos(self.n[:, None] * torch.acos(x))
 
 
 class RBFExpansion(nn.Module):

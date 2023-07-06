@@ -143,7 +143,7 @@ def setup_trainer(rank, model, optimizer, scheduler, config):
         device=device,
     )
 
-    if config["progress"] and rank == 0:
+    if config.get("progress", True) and rank == 0:
         pbar = ProgressBar()
         pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
@@ -178,7 +178,7 @@ def setup_trainer(rank, model, optimizer, scheduler, config):
     return trainer
 
 
-def setup_evaluators(rank, config, model, metrics, transfer_outputs):
+def setup_evaluators(rank, model, config, metrics, transfer_outputs):
     device = idist.device()
     # create_supervised_evaluator
     train_evaluator = setup_evaluator_with_grad(
@@ -216,7 +216,8 @@ def run_train(local_rank: int, config):
     trainer = setup_trainer(rank, model, optimizer, scheduler, config)
 
     # evaluation
-    metrics = {"loss": Loss(setup_criterion(config))}
+    metrics = config.get("metrics", {})
+    metrics.update({"loss": Loss(setup_criterion(config))})
 
     if config["dataset"].target == "energy_and_forces":
         metrics.update(
@@ -227,7 +228,7 @@ def run_train(local_rank: int, config):
         )
 
     train_evaluator, val_evaluator = setup_evaluators(
-        rank, config, model, metrics, transfer_outputs
+        rank, model, config, metrics, transfer_outputs
     )
 
     eos_train = EpochOutputStore(output_transform=transfer_outputs_eos)
@@ -272,21 +273,6 @@ def run_train(local_rank: int, config):
                 Events.COMPLETED, lambda engine: session.report(engine.state.metrics)
             )
 
-        # # parity plotting
-        # if config["dataset"].target == "energy_and_forces":
-        #     train_evaluator.add_event_handler(
-        #         Events.COMPLETED,
-        #         parity_plots,
-        #         directory=config["output_dir"],
-        #         name="train",
-        #     )
-        #     val_evaluator.add_event_handler(
-        #         Events.COMPLETED,
-        #         parity_plots,
-        #         directory=config["output_dir"],
-        #         name="validation",
-        #     )
-
     print("starting training loop")
     trainer.run(train_loader, max_epochs=config["epochs"])
 
@@ -295,6 +281,7 @@ def run_train(local_rank: int, config):
 
 def run_lr(local_rank: int, config):
     rank = idist.get_rank()
+    print(f"hello from process {rank=}")
     config["checkpoint"] = False
     manual_seed(config["random_seed"] + local_rank)
 
@@ -335,7 +322,10 @@ def train(config_path: Path):
 def lr(config_path: Path):
     """NFF Learning rate finder entry point."""
     with idist.Parallel(**spawn_kwargs) as parallel:
+        print(spawn_kwargs)
+        print("loading config")
         config = ConfigObject(config_path)
+
         print(config)
         parallel.run(run_lr, config)
 

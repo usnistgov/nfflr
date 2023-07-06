@@ -16,8 +16,8 @@ import pykeops
 from pykeops.torch import LazyTensor
 
 from nfflr.models.abstract import AbstractModel
-from nfflr.atoms import Atoms
-from nfflr.graph import periodic_radius_graph, pad_ghost_region
+from nfflr.data.atoms import Atoms
+from nfflr.data.graph import periodic_radius_graph, pad_ghost_region
 from nfflr.models.utils import autograd_forces
 
 

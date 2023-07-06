@@ -63,7 +63,7 @@ def read_setfl(p: Path, comment_rows=3, dtype=torch.float):
     return EAMData(cutoff, rs, rhos, embedded, density, rphi)
 
 
-class TorchEAM(nn.Module):
+class EAM(nn.Module):
     """Pytorch implementation of (single-element) Embedded Atom Method.
 
     Currently slower than LAMMPS by about 3.3x (evaluated on 32k atoms)
@@ -143,3 +143,7 @@ class TorchEAM(nn.Module):
 
         forces = autograd_forces(potential_energy, r, g, energy_units="eV")
         return potential_energy, forces
+
+
+# alias
+TorchEAM = EAM

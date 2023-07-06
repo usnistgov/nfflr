@@ -1,7 +1,13 @@
-"""Graph neural network implementations."""
-# from alignn.models.alignn import ALIGNN, ALIGNNConfig
-# from alignn.models.cgcnn import CGCNN, CGCNNConfig
-# from alignn.models.dense_alignn import DenseALIGNN, DenseALIGNNConfig
-# from alignn.models.densegcn import DenseGCN, DenseGCNConfig
-# from alignn.models.gcn import SimpleGCN, SimpleGCNConfig
-# from alignn.models.icgcnn import ICGCNNConfig, iCGCNN
+"""NFFLR models"""
+
+# graph neural network implementations
+from .gnn.alignn import ALIGNN, ALIGNNConfig
+from .gnn.alignn_ff import ALIGNNFF, ALIGNNFFConfig
+
+# classical potential implementations
+from .classical.lj import LJParams, LennardJones
+from .classical.tersoff import TersoffConfig, Tersoff
+
+# TODO: fix conditional dependency on torchcubicspline
+# before automatically importing EAM
+# from .classical.eam import EAM

@@ -128,10 +128,15 @@ def setup_optimizer(params, config):
     return optimizer
 
 
-def setup_scheduler(config, optimizer, steps_per_epoch: int):
+def setup_scheduler(config, optimizer, steps_per_epoch: int | float):
     """Configure OneCycle scheduler."""
-    pct_start = config["warmup_steps"] / (config["epochs"] * steps_per_epoch)
-    pct_start = min(pct_start, 0.3)
+    warmup_steps = config.get("warmup_steps", 0.3)
+    if warmup_steps < 1:
+        # fractional specification
+        pct_start = warmup_steps
+    else:
+        pct_start = config["warmup_steps"] / (config["epochs"] * steps_per_epoch)
+
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
         optimizer,
         max_lr=config["learning_rate"],

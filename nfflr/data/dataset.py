@@ -85,6 +85,16 @@ def get_cachedir():
     return cachedir
 
 
+def collate_forcefield_targets(targets: Dict[str, torch.Tensor]):
+    """Specialized collate function for force field datasets."""
+    energy = torch.tensor([t["energy"] for t in targets])
+    n_atoms = torch.tensor([t["forces"].size(0) for t in targets])
+    forces = torch.cat([t["forces"] for t in targets], dim=0)
+    stresses = torch.stack([t["stresses"] for t in targets])
+
+    return dict(total_energy=energy, n_atoms=n_atoms, forces=forces, stresses=stresses)
+
+
 class AtomsDataset(torch.utils.data.Dataset):
     """Dataset of Atoms."""
 
@@ -93,6 +103,8 @@ class AtomsDataset(torch.utils.data.Dataset):
         df: Union[str, Path, pd.DataFrame],
         target: str = "formation_energy_peratom",
         transform: Optional[Callable] = None,
+        custom_collate_fn: Optional[Callable] = None,
+        custom_prepare_batch_fn: Optional[Callable] = None,
         train_val_seed: int = 42,
         id_tag: str = "jid",
         n_train: Union[float, int] = 0.8,
@@ -143,6 +155,9 @@ class AtomsDataset(torch.utils.data.Dataset):
         else:
             self.diskcache = None
 
+        self.collate = self.collate_default
+        self.prepare_batch = self.prepare_batch_default
+
         if self.target == "energy_and_forces":
             self.collate = self.collate_forcefield
             if "total_energy" in self.df.keys():
@@ -151,7 +166,12 @@ class AtomsDataset(torch.utils.data.Dataset):
                 self.energy_key = "energy"
         else:
             self.energy_key = self.target
-            self.collate = self.collate_default
+
+        if callable(custom_collate_fn):
+            self.collate = custom_collate_fn
+
+        if callable(custom_prepare_batch_fn):
+            self.prepare_batch = custom_prepare_batch_fn
 
     def __len__(self):
         """Get length."""
@@ -311,20 +331,13 @@ class AtomsDataset(torch.utils.data.Dataset):
         """
         graphs, targets = map(list, zip(*samples))
 
-        energy = torch.tensor([t["energy"] for t in targets])
-        n_atoms = torch.tensor([t["forces"].size(0) for t in targets])
-        forces = torch.cat([t["forces"] for t in targets], dim=0)
-        stresses = torch.stack([t["stresses"] for t in targets])
-
-        targets = dict(
-            total_energy=energy, n_atoms=n_atoms, forces=forces, stresses=stresses
-        )
+        targets = collate_forcefield_targets(targets)
 
         batched_graph = dgl.batch(graphs)
         return batched_graph, targets
 
     @staticmethod
-    def prepare_batch(
+    def prepare_batch_default(
         batch: Tuple[Any, Dict[str, torch.Tensor]],
         device=None,
         non_blocking=False,
