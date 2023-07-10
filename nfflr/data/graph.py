@@ -157,6 +157,7 @@ def tile_supercell_2(
     all_ranges = [
         torch.arange(x, y, dtype=Xfrac.dtype) for x, y in zip(nmin, nmax, strict=True)
     ]
+
     # cell_images = torch.cartesian_prod(*all_ranges)
     cell_images = torch.cartesian_prod(*all_ranges)
 
@@ -257,7 +258,7 @@ def periodic_radius_graph_kdtree(
     """
 
     # build radius graph in supercell
-    X_src, X_supercell, root_ids = tile_supercell_2(
+    X_src, X_supercell, root_ids, cell_images = tile_supercell_2(
         a.positions.double(), a.lattice.double(), r, bond_tol
     )
     primary = spatial.KDTree(X_src)
