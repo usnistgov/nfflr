@@ -181,7 +181,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         """Get AtomsDataset sample."""
 
         key = self.df[self.id_tag].iloc[idx]
-        atoms = self.atoms[idx]
+        atoms = self.atoms.iloc[idx]
         n_atoms = len(atoms)
         # print(f"{key=}, {n_atoms=}")
 
@@ -215,9 +215,9 @@ class AtomsDataset(torch.utils.data.Dataset):
 
     def get_energy_and_forces(self, idx, n_atoms) -> dict:
         target = {
-            "energy": self.df[self.energy_key][idx],
-            "forces": self.df["forces"][idx],
-            "stresses": self.df["stresses"][idx],
+            "energy": self.df[self.energy_key].iloc[idx],
+            "forces": self.df["forces"].iloc[idx],
+            "stresses": self.df["stresses"].iloc[idx],
         }
 
         # TODO: make sure datasets use standard units...
