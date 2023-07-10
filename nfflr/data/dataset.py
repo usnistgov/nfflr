@@ -107,6 +107,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         custom_prepare_batch_fn: Optional[Callable] = None,
         train_val_seed: int = 42,
         id_tag: str = "jid",
+        group_ids: bool = False,
         n_train: Union[float, int] = 0.8,
         n_val: Union[float, int] = 0.1,
         energy_units: Literal["eV", "eV/atom"] = "eV/atom",
@@ -122,17 +123,23 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         example_id = df[id_tag].iloc[0]
 
-        if isinstance(example_id, int):
-            df["group_id"] = df[id_tag]
-            df["step_id"] = df.index
-        elif "_" not in example_id:
+        # by default: don't try to process record ids
+        if not group_ids:
             df["group_id"] = df[id_tag]
             df["step_id"] = np.ones(df.shape[0])
         else:
-            # split key like "JVASP-6664_main-5"
-            df["group_id"], df["step_id"] = zip(
-                *df[id_tag].apply(partial(str.split, sep="_"))
-            )
+            # try to parse record ids to extract group and step ids
+            if isinstance(example_id, int):
+                df["group_id"] = df[id_tag]
+                df["step_id"] = df.index
+            elif "_" not in example_id:
+                df["group_id"] = df[id_tag]
+                df["step_id"] = np.ones(df.shape[0])
+            else:
+                # split key like "JVASP-6664_main-5"
+                df["group_id"], df["step_id"] = zip(
+                    *df[id_tag].apply(partial(str.split, sep="_"))
+                )
 
         if isinstance(df.atoms.iloc[0], dict):
             self.atoms = df.atoms.apply(lambda x: Atoms(jAtoms.from_dict(x)))
