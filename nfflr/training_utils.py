@@ -91,8 +91,7 @@ def select_target(name: str):
     return output_transform
 
 
-def group_decay(model):
-    """Omit weight decay from everything but `Linear` weights."""
+def default_select_decay(model):
     decay, no_decay = [], []
 
     for mname, m in model.named_modules():
@@ -101,6 +100,29 @@ def group_decay(model):
                 decay.append(p)
             else:
                 no_decay.append(p)
+
+    return decay, no_decay
+
+
+def named_select_decay(model, exclude_biases=True):
+    no_decay_names = model.no_weight_decay()
+
+    decay, no_decay = [], []
+    for name, p in model.named_parameters():
+        if name in no_decay_names or "bias" in name:
+            no_decay.append(p)
+        else:
+            decay.append(p)
+
+    return decay, no_decay
+
+
+def group_decay(model):
+    """Omit weight decay from everything but `Linear` weights."""
+    if hasattr(model, "no_weight_decay"):
+        decay, no_decay = named_select_decay(model)
+    else:
+        decay, no_decay = default_select_decay(model)
 
     return [
         {"params": decay},
