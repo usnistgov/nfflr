@@ -1,18 +1,17 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Quickstart &#8212; NFFLr 0.1.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
     <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -62,9 +61,9 @@ $(document).ready(function(){
           <div class="body" role="main">
             
   <section id="Quickstart">
-<h1>Quickstart<a class="headerlink" href="#Quickstart" title="Permalink to this heading">¶</a></h1>
+<h1>Quickstart<a class="headerlink" href="#Quickstart" title="Link to this heading">¶</a></h1>
 <section id="Atoms-Data">
-<h2><code class="docutils literal notranslate"><span class="pre">Atoms</span></code> Data<a class="headerlink" href="#Atoms-Data" title="Permalink to this heading">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">Atoms</span></code> Data<a class="headerlink" href="#Atoms-Data" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Atoms</span></code> is the primary data structure for atomistic modeling in <code class="docutils literal notranslate"><span class="pre">NFFLr</span></code>. This represents an atomistic system in the same way as <a class="reference external" href="https://spglib.readthedocs.io/en/latest/python-spglib.html#crystal-structure-cell">spglib</a>:</p>
 <ul class="simple">
 <li><p>a <span class="math notranslate nohighlight">\(3 \times 3\)</span> <code class="docutils literal notranslate"><span class="pre">lattice</span></code> matrix</p></li>
@@ -125,9 +124,9 @@ Atoms(lattice=tensor([[4.1000, 0.0000, 0.0000],
 </div>
 </section>
 <section id="Models">
-<h2>Models<a class="headerlink" href="#Models" title="Permalink to this heading">¶</a></h2>
+<h2>Models<a class="headerlink" href="#Models" title="Link to this heading">¶</a></h2>
 <section id="Common-model-interface">
-<h3>Common model interface<a class="headerlink" href="#Common-model-interface" title="Permalink to this heading">¶</a></h3>
+<h3>Common model interface<a class="headerlink" href="#Common-model-interface" title="Link to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">NFFLr</span></code> models are PyTorch modules for modeling properties of atomistic systems.</p>
 <p>Different modeling approaches use a variety of input representations; <code class="docutils literal notranslate"><span class="pre">NFFLr</span></code> aims to simplify exploratory research by providing a common modeling interface, where all models internally transform <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> inputs to their native input representation, <em>e.g.</em> the <a class="reference external" href="https://docs.dgl.ai/api/python/dgl.DGLGraph.html">DGLGraph</a> structure expected by <code class="docutils literal notranslate"><span class="pre">ALIGNN</span></code>.</p>
 <div class="nbinput docutils container">
@@ -182,7 +181,7 @@ tensor(0.3651)
 </div>
 </section>
 <section id="Force-field-models">
-<h3>Force field models<a class="headerlink" href="#Force-field-models" title="Permalink to this heading">¶</a></h3>
+<h3>Force field models<a class="headerlink" href="#Force-field-models" title="Link to this heading">¶</a></h3>
 <p>Enabling the <code class="docutils literal notranslate"><span class="pre">compute_forces</span></code> model configuration field will cause the model to compute both a scalar property prediction and its (negative) gradient with respect to the (cartesian) atomic coordinates - <em>i.e.</em> the force components on each atom.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
@@ -219,7 +218,7 @@ construct graph
 </div>
 </section>
 <section id="input-representations">
-<h3>input representations<a class="headerlink" href="#input-representations" title="Permalink to this heading">¶</a></h3>
+<h3>input representations<a class="headerlink" href="#input-representations" title="Link to this heading">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">NFFLr</span></code> also allows to directly provide inputs to models in the native input representation expected by the model. This facilitates efficient precomputation and caching during training. For example, <code class="docutils literal notranslate"><span class="pre">ALIGNN</span></code> requires <code class="docutils literal notranslate"><span class="pre">DGLGraph</span></code> inputs with node features <code class="docutils literal notranslate"><span class="pre">atomic_number</span></code> and edge features <code class="docutils literal notranslate"><span class="pre">r</span></code> (the bond vectors pointing from atoms to their neighbors).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
@@ -264,9 +263,9 @@ Graph(num_nodes=2, num_edges=52,
 </section>
 </section>
 <section id="Training-utilities">
-<h2>Training utilities<a class="headerlink" href="#Training-utilities" title="Permalink to this heading">¶</a></h2>
+<h2>Training utilities<a class="headerlink" href="#Training-utilities" title="Link to this heading">¶</a></h2>
 <section id="AtomsDataset">
-<h3><code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code><a class="headerlink" href="#AtomsDataset" title="Permalink to this heading">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code><a class="headerlink" href="#AtomsDataset" title="Link to this heading">¶</a></h3>
 <p>NFFLr makes it easy to load data and transform it into various formats.</p>
 <p>The primary ways of interacting with data are <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> and <code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code>, which is a <a class="reference external" href="https://pytorch.org/docs/stable/data.html">PyTorch DataSet</a> that returns <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> instances. The most convenient way to get started is with a <a class="reference external" href="https://jarvis-tools.readthedocs.io/en/master/databases.html">named Jarvis dataset</a>:</p>
 <div class="nbinput docutils container">
@@ -437,7 +436,7 @@ tensor([[136.4000,  27.8000,  17.5000,   0.0000,  -5.5000,   0.0000],
 </section>
 </section>
 <section id="Force-field-datasets">
-<h2>Force field datasets<a class="headerlink" href="#Force-field-datasets" title="Permalink to this heading">¶</a></h2>
+<h2>Force field datasets<a class="headerlink" href="#Force-field-datasets" title="Link to this heading">¶</a></h2>
 <p>Force field datasets like <code class="docutils literal notranslate"><span class="pre">mlearn</span></code>, <code class="docutils literal notranslate"><span class="pre">alignn_ff_db</span></code>, and <code class="docutils literal notranslate"><span class="pre">m3gnet</span></code> have a special target key <code class="docutils literal notranslate"><span class="pre">target=&quot;energy_and_forces&quot;</span></code> that configure <code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code> to return a dictionary of target values containing the total energy of the atomic configuration, the forces, and the stresses if they are available.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
@@ -914,7 +913,7 @@ Loading completed.
       &copy;2023, Brian DeCost.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |

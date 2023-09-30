@@ -1,18 +1,17 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Checking autograd forces against analytical forces for Embedded Atom model &#8212; NFFLr 0.1.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/documentation_options.js?v=01f34227"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -61,7 +60,7 @@ $(document).ready(function(){
           <div class="body" role="main">
             
   <section id="Checking-autograd-forces-against-analytical-forces-for-Embedded-Atom-model">
-<h1>Checking autograd forces against analytical forces for Embedded Atom model<a class="headerlink" href="#Checking-autograd-forces-against-analytical-forces-for-Embedded-Atom-model" title="Permalink to this heading">¶</a></h1>
+<h1>Checking autograd forces against analytical forces for Embedded Atom model<a class="headerlink" href="#Checking-autograd-forces-against-analytical-forces-for-Embedded-Atom-model" title="Link to this heading">¶</a></h1>
 <p>This notebook compares the forces computed with automatic differentiation (with respect to bond vectors, not atom coordinates) against the analytical forces for the <a class="reference external" href="https://www.ctcms.nist.gov/potentials/entry/1999--Mishin-Y-Farkas-D-Mehl-M-J-Papaconstantopoulos-D-A--Al/">Al99 Embedded Atom potential</a>, as implemented by <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/atoms.html">ASE</a>.</p>
 <p>First, fetch the EAM potential data from interatomic potentials repository:</p>
 <div class="nbinput docutils container">
@@ -169,7 +168,7 @@ force components match? : True
 </div>
 </section>
 <section id="Tersoff-potential">
-<h1>Tersoff potential<a class="headerlink" href="#Tersoff-potential" title="Permalink to this heading">¶</a></h1>
+<h1>Tersoff potential<a class="headerlink" href="#Tersoff-potential" title="Link to this heading">¶</a></h1>
 <p>This section performs the same diagnostic using the Tersoff potential, as implemented by LAMMPS. This demonstrates that forces computed by autograd with respect to relative position vectors reduce to the correct atomic forces.</p>
 <p>The parameters used correspond to <a class="reference external" href="https://www.ctcms.nist.gov/potentials/entry/1988--Tersoff-J--Si-b/">https://www.ctcms.nist.gov/potentials/entry/1988–Tersoff-J–Si-b/</a>:</p>
 <div class="nbinput docutils container">
@@ -297,7 +296,7 @@ force components match? : True
 </div>
 </div>
 <section id="Small-silicon-system">
-<h2>Small silicon system<a class="headerlink" href="#Small-silicon-system" title="Permalink to this heading">¶</a></h2>
+<h2>Small silicon system<a class="headerlink" href="#Small-silicon-system" title="Link to this heading">¶</a></h2>
 <p>Now, set up a small Si system and a LAMMPS calculator to serve as the reference Tersoff potential implementation:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -560,7 +559,7 @@ array([[[ True,  True,  True],
       &copy;2023, Brian DeCost.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |
