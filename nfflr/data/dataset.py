@@ -79,6 +79,8 @@ def get_cachedir():
     scratchspace = os.environ.get("SCRATCH", "/scratch")
     if slurm_job is not None:
         scratchdir = f"{scratchspace}/{slurm_job}"
+        if not os.path.isdir(scratchdir):
+            os.makedirs(scratchdir, exist_ok=True)
 
     cachedir = tempfile.TemporaryDirectory(dir=scratchdir, prefix=prefix)
 
@@ -358,7 +360,11 @@ class AtomsDataset(torch.utils.data.Dataset):
                 k: v.to(device, non_blocking=non_blocking) for k, v in targets.items()
             }
 
-        batch = (atoms.to(device, non_blocking=non_blocking), targets)
+        if isinstance(atoms, list):
+            g, lg = atoms
+            batch = ((g.to(device, non_blocking=non_blocking), lg.to(device, non_blocking=non_blocking)), targets)
+        else:
+            batch = (atoms.to(device, non_blocking=non_blocking), targets)
 
         return batch
 
@@ -378,7 +384,24 @@ class AtomsDataset(torch.utils.data.Dataset):
         return dgl.batch(graphs), torch.tensor(targets)
 
     @staticmethod
-    def collate_line_graph(
+    def collate_default_line_graph(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
+        """Dataloader helper to batch graphs cross `samples`.
+
+        Forces get collated into a graph batch
+        by concatenating along the atoms dimension
+
+        energy and stress are global targets (properties of the whole graph)
+        total energy is a scalar, stess is a rank 2 tensor
+
+
+        """
+        inputs, targets = map(list, zip(*samples))
+        graphs, line_graphs = map(list, zip(*inputs))
+        return (dgl.batch(graphs), dgl.batch(line_graphs)), torch.tensor(targets)
+
+
+    @staticmethod
+    def collate_line_graph_ff(
         samples: List[Tuple[dgl.DGLGraph, dgl.DGLGraph, torch.Tensor]]
     ):
         """Dataloader helper to batch graphs cross `samples`."""
