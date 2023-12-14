@@ -1,24 +1,16 @@
-from plum import dispatch
-
 from pathlib import Path
-from typing import Tuple, Union, Optional, Literal
 from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 
-import dgl
 import dgl.function as fn
-from dgl.nn import AvgPooling, SumPooling
 
 import torch
 from torch import nn
 
 from torchcubicspline import natural_cubic_spline_coeffs, NaturalCubicSpline
 
-from nfflr.models.abstract import AbstractModel
-from nfflr.data.atoms import Atoms
-from nfflr.data.graph import periodic_radius_graph
 from nfflr.models.utils import autograd_forces
 
 
@@ -43,11 +35,14 @@ def read_setfl(p: Path, comment_rows=3, dtype=torch.float):
         Nrho, drho, Nr, dr, cutoff = line.strip().split()
         Nrho, Nr = int(Nrho), int(Nr)
         drho, dr, cutoff = float(drho), float(dr), float(cutoff)
+        # print(f"{Nrho=}, {Nr=}, {drho=}, {dr=}, {cutoff=}")
 
     rs = torch.tensor(dr * np.arange(Nr), dtype=dtype)
     rhos = torch.tensor(drho * np.arange(Nrho), dtype=dtype)
 
-    data = pd.read_csv(p, skiprows=3 + comment_rows, header=None).values.flatten()
+    data = pd.read_csv(
+        p, skiprows=3 + comment_rows, header=None, sep="\s+"
+    ).values.flatten()
 
     # https://github.com/askhl/ase/blob/master/ase/calculators/eam.py#L311
     # ase "embedded_data"
