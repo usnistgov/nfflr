@@ -1,6 +1,7 @@
 """Standalone dataset for training force field models."""
 import os
 import tempfile
+import warnings
 from pathlib import Path
 from functools import partial
 from typing import Any, Dict, List, Literal, Tuple, Union, Optional, Callable
@@ -224,8 +225,9 @@ class AtomsDataset(torch.utils.data.Dataset):
         target = {
             "energy": self.df[self.energy_key].iloc[idx],
             "forces": self.df["forces"].iloc[idx],
-            "stresses": self.df["stresses"].iloc[idx],
         }
+        if "stresses" in self.df:
+            target["stresses"] = self.df["stresses"].iloc[idx]
 
         # TODO: make sure datasets use standard units...
         # data store should have total energies in eV
@@ -276,14 +278,14 @@ class AtomsDataset(torch.utils.data.Dataset):
         if isinstance(n_train, float) and isinstance(n_val, float):
             # n_train and n_val specified as fractions of dataset
             if n_train + n_val > 0.9:
-                raise ValueError("training and validation set exceed 90% of data")
+                warnings.warn("training and validation set exceed 90% of data")
             n_val = int(n_val * N)
             n_train = int(n_train * N)
 
         if isinstance(n_train, int) and isinstance(n_val, int):
             # n_train and n_val specified directly as calculation group counts
             if n_train + n_val > 0.9 * N:
-                raise ValueError("training and validation set exceed 90% of data")
+                warnings.warn("training and validation set exceed 90% of data")
 
         # configurable train/val seed
         train_val_rng = default_rng(self.train_val_seed)
