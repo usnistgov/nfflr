@@ -60,8 +60,17 @@ def deepmd_load_frameset(path, zs):
     return at, energy, force.unbind(0)
 
 
-def deepmd_hea_dataset(datadir: Path):
+def deepmd_hea_dataset(datadir: Path | str):
+    """Load deepmd numpy format dataset."""
+    # only supports HEA dataset for now...
+    # training data are under rand1, set00{0..8}
+    # validation data are under rand1, set009
+    # test data are under rand2
+
     # train/val data
+
+    if isinstance(datadir, str):
+        datadir = Path(datadir)
 
     data = []
     for set_dir in (datadir / "rand1").glob("*/set*"):
@@ -81,18 +90,3 @@ def deepmd_hea_dataset(datadir: Path):
         n_train=0.9,
         n_val=0.1,
     )
-
-
-def deepmd_dataset(path: Path, split: str = "train"):
-    """Load deepmd numpy format dataset."""
-    # only supports HEA dataset for now...
-    # training data are under rand1, set00{0..8}
-    # validation data are under rand1, set009
-    # test data are under rand2
-
-    if isinstance(path, str):
-        path = Path(path)
-
-    print(list((path / "rand1").glob("*")))
-
-    return
