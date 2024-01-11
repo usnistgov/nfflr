@@ -14,8 +14,8 @@ from torch import nn
 
 from dgl.nn import AvgPooling, SumPooling
 
-from nfflr.models.utils import (
-    autograd_forces,
+from nfflr.models.utils import autograd_forces
+from nfflr.nn.layers import (
     RBFExpansion,
     MLPLayer,
     ALIGNNConv,
@@ -48,7 +48,7 @@ class ALIGNNConfig:
     reference_energies: Optional[torch.Tensor] = None
 
 
-class ALIGNN(nn.Module):
+class ALIGNN(torch.nn.Module):
     """Atomistic Line graph network.
 
     Chain alternating gated graph convolution updates on crystal graph
@@ -63,20 +63,20 @@ class ALIGNN(nn.Module):
         logging.debug(f"{config=}")
 
         if config.atom_features == "embedding":
-            self.atom_embedding = nn.Embedding(108, config.hidden_features)
+            self.atom_embedding = torch.nn.Embedding(108, config.hidden_features)
         else:
             f = _get_attribute_lookup(atom_features=config.atom_features)
-            self.atom_embedding = nn.Sequential(
+            self.atom_embedding = torch.nn.Sequential(
                 f, MLPLayer(f.embedding_dim, config.hidden_features, norm=config.norm)
             )
 
         self.reference_energy = None
         if config.reference_energies is not None:
-            self.reference_energy = nn.Embedding(
+            self.reference_energy = torch.nn.Embedding(
                 108, embedding_dim=1, _weight=config.reference_energies.view(-1, 1)
             )
 
-        self.edge_embedding = nn.Sequential(
+        self.edge_embedding = torch.nn.Sequential(
             RBFExpansion(
                 vmin=0,
                 vmax=8.0,
@@ -89,7 +89,7 @@ class ALIGNN(nn.Module):
                 config.embedding_features, config.hidden_features, norm=config.norm
             ),
         )
-        self.angle_embedding = nn.Sequential(
+        self.angle_embedding = torch.nn.Sequential(
             RBFExpansion(
                 vmin=-1,
                 vmax=1.0,
@@ -105,7 +105,7 @@ class ALIGNN(nn.Module):
             ),
         )
 
-        self.alignn_layers = nn.ModuleList(
+        self.alignn_layers = torch.nn.ModuleList(
             [
                 ALIGNNConv(
                     config.hidden_features, config.hidden_features, norm=config.norm
@@ -113,7 +113,7 @@ class ALIGNN(nn.Module):
                 for idx in range(config.alignn_layers)
             ]
         )
-        self.gcn_layers = nn.ModuleList(
+        self.gcn_layers = torch.nn.ModuleList(
             [
                 EdgeGatedGraphConv(
                     config.hidden_features, config.hidden_features, norm=config.norm

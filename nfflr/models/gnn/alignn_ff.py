@@ -12,8 +12,8 @@ from dgl.nn import AvgPooling, SumPooling
 import torch
 from torch import nn
 
-from nfflr.models.utils import (
-    autograd_forces,
+from nfflr.models.utils import autograd_forces
+from nfflr.nn.layers import (
     RBFExpansion,
     MLPLayer,
     SparseALIGNNConv,

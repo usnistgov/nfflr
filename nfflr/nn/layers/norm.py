@@ -21,12 +21,13 @@ class Norm(nn.Module):
             self.norm = nn.LayerNorm(num_features)
         elif norm_type == "instancenorm":
             self.norm = InstanceNorm(mode=mode)
+            self.forward = self._forward_graph_instancenorm
 
-    def forward(self, g: dgl.DGLGraph, x: torch.Tensor):
-        if self.norm_type in ("batchnorm", "layernorm"):
-            return self.norm(x)
-        elif self.norm_type == "instancenorm":
-            return self.norm(g, x)
+    def forward(self, x: torch.Tensor):
+        return self.norm(x)
+
+    def _forward_graph_instancenorm(self, g: dgl.DGLGraph, x: torch.Tensor):
+        return self.norm(g, x)
 
 
 class InstanceNorm(nn.Module):

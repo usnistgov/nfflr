@@ -10,13 +10,9 @@ import torch
 from torch.nn import functional as F
 from torch import nn
 
-from nfflr.models.utils import (
-    autograd_forces,
-    RBFExpansion,
-    MLPLayer,
-)
+from nfflr.models.utils import autograd_forces
+from nfflr.nn.layers import RBFExpansion, MLPLayer, Norm, EdgeGatedGraphConv
 
-from nfflr.nn.norm import Norm
 from nfflr.nn.transform import PeriodicRadiusGraph
 from nfflr.nn.cutoff import XPLOR
 from nfflr.data.atoms import _get_attribute_lookup, Atoms
@@ -58,88 +54,88 @@ class FeedForward(nn.Module):
         return self.layer(x)
 
 
-class EdgeGatedGraphConv(nn.Module):
-    """Edge gated graph convolution from arxiv:1711.07553.
+# class EdgeGatedGraphConv(nn.Module):
+#     """Edge gated graph convolution from arxiv:1711.07553.
 
-    see also https://www.jmlr.org/papers/v24/22-0567.html
+#     see also https://www.jmlr.org/papers/v24/22-0567.html
 
 
-    This is similar to CGCNN, but edge features only go into
-    the soft attention / edge gating function, and the primary
-    node update function is W cat(u, v) + b
-    """
+#     This is similar to CGCNN, but edge features only go into
+#     the soft attention / edge gating function, and the primary
+#     node update function is W cat(u, v) + b
+#     """
 
-    def __init__(
-        self,
-        input_features: int,
-        output_features: int,
-        norm: Literal["layernorm", "instancenorm", "batchnorm"] = "layernorm",
-    ):
-        """Edge gated graph convolution variant."""
-        super().__init__()
+#     def __init__(
+#         self,
+#         input_features: int,
+#         output_features: int,
+#         norm: Literal["layernorm", "instancenorm", "batchnorm"] = "layernorm",
+#     ):
+#         """Edge gated graph convolution variant."""
+#         super().__init__()
 
-        # CGCNN-Conv operates on augmented edge features
-        # z_ij = cat(v_i, v_j, u_ij)
-        # m_ij = σ(z_ij W_f + b_f) ⊙ g_s(z_ij W_s + b_s)
-        # coalesce parameters for W_f and W_s
-        # but -- split them up along feature dimension
-        self.src_gate = nn.Linear(input_features, output_features)
-        self.dst_gate = nn.Linear(input_features, output_features)
-        self.edge_gate = nn.Linear(input_features, output_features)
-        self.norm_edges = Norm(output_features, norm_type=norm, mode="edge")
+#         # CGCNN-Conv operates on augmented edge features
+#         # z_ij = cat(v_i, v_j, u_ij)
+#         # m_ij = σ(z_ij W_f + b_f) ⊙ g_s(z_ij W_s + b_s)
+#         # coalesce parameters for W_f and W_s
+#         # but -- split them up along feature dimension
+#         self.src_gate = nn.Linear(input_features, output_features)
+#         self.dst_gate = nn.Linear(input_features, output_features)
+#         self.edge_gate = nn.Linear(input_features, output_features)
+#         self.norm_edges = Norm(output_features, norm_type=norm, mode="edge")
 
-        self.src_update = nn.Linear(input_features, output_features)
-        self.dst_update = nn.Linear(input_features, output_features)
-        self.norm_nodes = Norm(output_features, norm_type=norm, mode="node")
+#         self.src_update = nn.Linear(input_features, output_features)
+#         self.dst_update = nn.Linear(input_features, output_features)
+#         self.norm_nodes = Norm(output_features, norm_type=norm, mode="node")
 
-    def forward(
-        self,
-        g: dgl.DGLGraph,
-        node_feats: torch.Tensor,
-        edge_feats: torch.Tensor,
-    ) -> torch.Tensor:
-        """Edge-gated graph convolution.
+#     def forward(
+#         self,
+#         g: dgl.DGLGraph,
+#         node_feats: torch.Tensor,
+#         edge_feats: torch.Tensor,
+#     ) -> torch.Tensor:
+#         """Edge-gated graph convolution.
 
-        h_i^l+1 = ReLU(U h_i + sum_{j->i} eta_{ij} ⊙ V h_j)
-        """
-        g = g.local_var()
+#         h_i^l+1 = ReLU(U h_i + sum_{j->i} eta_{ij} ⊙ V h_j)
+#         """
+#         g = g.local_var()
 
-        # instead of concatenating (u || v || e) and applying one weight matrix
-        # split the weight matrix into three, apply, then sum
-        # see https://docs.dgl.ai/guide/message-efficient.html
-        # but split them on feature dimensions to update u, v, e separately
-        # m = BatchNorm(Linear(cat(u, v, e)))
+#         # instead of concatenating (u || v || e) and applying one weight matrix
+#         # split the weight matrix into three, apply, then sum
+#         # see https://docs.dgl.ai/guide/message-efficient.html
+#         # but split them on feature dimensions to update u, v, e separately
+#         # m = BatchNorm(Linear(cat(u, v, e)))
 
-        # compute edge updates, equivalent to:
-        # Softplus(Linear(u || v || e))
-        g.ndata["e_src"] = self.src_gate(node_feats)
-        g.ndata["e_dst"] = self.dst_gate(node_feats)
-        g.apply_edges(fn.u_add_v("e_src", "e_dst", "e_nodes"))
+#         # compute edge updates, equivalent to:
+#         # Softplus(Linear(u || v || e))
+#         g.ndata["e_src"] = self.src_gate(node_feats)
+#         g.ndata["e_dst"] = self.dst_gate(node_feats)
+#         g.apply_edges(fn.u_add_v("e_src", "e_dst", "e_nodes"))
 
-        m = g.edata.pop("e_nodes") + self.edge_gate(edge_feats)
-        # Dwivedi et al apply the nonlinearity and edge residual
-        # before the attention process
-        y = edge_feats + F.silu(self.norm_edges(g, m))
+#         m = g.edata.pop("e_nodes") + self.edge_gate(edge_feats)
+#         # Dwivedi et al apply the nonlinearity and edge residual
+#         # before the attention process
+#         y = edge_feats + F.silu(self.norm_edges(g, m))
 
-        # if edge attributes have a cutoff function value
-        # multiply the edge gate values with the cutoff value
-        cutoff_value = g.edata.get("cutoff_value")
-        if cutoff_value is not None:
-            g.edata["sigma"] = torch.sigmoid(y) * cutoff_value.unsqueeze(1)
-        else:
-            g.edata["sigma"] = torch.sigmoid(y)
+#         # if edge attributes have a cutoff function value
+#         # multiply the edge gate values with the cutoff value
+#         cutoff_value = g.edata.get("cutoff_value")
+#         if cutoff_value is not None:
+#             g.edata["sigma"] = torch.sigmoid(y) * cutoff_value.unsqueeze(1)
+#         else:
+#             g.edata["sigma"] = torch.sigmoid(y)
 
-        # compute pair interaction modulated by edge gates
-        g.ndata["Bh"] = self.dst_update(node_feats)
-        g.update_all(fn.u_mul_e("Bh", "sigma", "m"), fn.sum("m", "sum_sigma_h"))
-        g.update_all(fn.copy_e("sigma", "m"), fn.sum("m", "sum_sigma"))
-        g.ndata["h"] = g.ndata["sum_sigma_h"] / (g.ndata["sum_sigma"] + 1e-6)
-        x = self.src_update(node_feats) + g.ndata.pop("h")
+#         # compute pair interaction modulated by edge gates
+#         g.ndata["Bh"] = self.dst_update(node_feats)
+#         g.update_all(fn.u_mul_e("Bh", "sigma", "m"), fn.sum("m", "sum_sigma_h"))
+#         g.update_all(fn.copy_e("sigma", "m"), fn.sum("m", "sum_sigma"))
+#         g.ndata["h"] = g.ndata["sum_sigma_h"] / (g.ndata["sum_sigma"] + 1e-6)
+#         x = self.src_update(node_feats) + g.ndata.pop("h")
 
-        # node and edge updates
-        x = node_feats + F.silu(self.norm_nodes(g, x))
+#         # node and edge updates
+#         x = node_feats + F.silu(self.norm_nodes(g, x))
 
-        return x, y
+#         return x, y
 
 
 class TFM(nn.Module):
