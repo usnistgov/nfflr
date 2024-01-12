@@ -3,6 +3,7 @@
 # graph neural network implementations
 from .gnn.alignn import ALIGNN, ALIGNNConfig
 from .gnn.alignn_ff import ALIGNNFF, ALIGNNFFConfig
+from .gnn.schnet import SchNet, SchNetConfig
 
 # classical potential implementations
 

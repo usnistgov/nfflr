@@ -1,7 +1,30 @@
 import torch
-from typing import Literal
+from typing import Literal, Optional
 
 from nfflr.nn.layers.norm import Norm
+
+
+class FeedForward(torch.nn.Module):
+    """Two-layer feedforward network."""
+
+    def __init__(
+        self, d_in: int, d_hidden: Optional[int] = None, d_out: Optional[int] = None
+    ):
+        super().__init__()
+        if d_hidden is None:
+            d_hidden = 4 * d_in
+
+        if d_out is None:
+            d_out = d_in
+
+        self.layers = torch.nn.Sequential(
+            torch.nn.Linear(d_in, d_hidden),
+            torch.nn.SiLU(),
+            torch.nn.Linear(d_hidden, d_out),
+        )
+
+    def forward(self, x: torch.Tensor):
+        return self.layers(x)
 
 
 class MLPLayer(torch.nn.Module):

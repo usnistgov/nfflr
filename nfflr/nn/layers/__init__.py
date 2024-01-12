@@ -1,5 +1,5 @@
 """Shared model-building components."""
-from .common import MLPLayer
+from .common import MLPLayer, FeedForward
 from .norm import Norm, InstanceNorm
 from .basis import RBFExpansion, ChebyshevExpansion
 from .conv import EdgeGatedGraphConv
