@@ -6,12 +6,13 @@ from plum import dispatch
 from typing import Tuple, Union, Optional, Literal, Callable
 from dataclasses import dataclass
 
-import dgl
-from dgl.nn import AvgPooling, SumPooling
-
 import torch
 from torch import nn
 
+import dgl
+from dgl.nn import AvgPooling, SumPooling
+
+import nfflr
 from nfflr.models.utils import autograd_forces
 from nfflr.nn.layers import (
     RBFExpansion,
@@ -19,12 +20,11 @@ from nfflr.nn.layers import (
     SparseALIGNNConv,
     EdgeGatedGraphConv,
     AttributeEmbedding,
+    PeriodicRadiusGraph,
+    XPLOR,
 )
 
-import nfflr
 from nfflr.data.graph import compute_bond_cosines
-from nfflr.nn.transform import PeriodicRadiusGraph
-from nfflr.nn.cutoff import XPLOR
 
 
 @dataclass

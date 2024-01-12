@@ -16,16 +16,16 @@ from dgl.nn import AvgPooling, SumPooling
 
 import nfflr
 from nfflr.models.utils import autograd_forces
-from nfflr.nn.layers import (
+from nfflr.nn import (
     RBFExpansion,
     MLPLayer,
     ALIGNNConv,
     EdgeGatedGraphConv,
     AttributeEmbedding,
+    PeriodicRadiusGraph,
+    XPLOR,
 )
 from nfflr.data.graph import compute_bond_cosines
-from nfflr.nn.transform import PeriodicRadiusGraph
-from nfflr.nn.cutoff import XPLOR
 
 
 @dataclass

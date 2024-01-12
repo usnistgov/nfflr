@@ -12,10 +12,14 @@ import dgl
 import dgl.function as fn
 from dgl.nn import AvgPooling, SumPooling
 
-from nfflr.nn.layers.norm import Norm
-from nfflr.nn.layers import FeedForward
+from nfflr.nn import (
+    Norm,
+    FeedForward,
+    RBFExpansion,
+    AttributeEmbedding,
+    PeriodicTableEmbedding,
+)
 from nfflr.models.utils import autograd_forces
-from nfflr.nn.layers import RBFExpansion, AttributeEmbedding, PeriodicTableEmbedding
 
 
 class DepthwiseConv(torch.nn.Module):

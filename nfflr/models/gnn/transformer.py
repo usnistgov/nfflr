@@ -2,26 +2,25 @@ from plum import dispatch
 from typing import Optional, Literal, Callable
 from dataclasses import dataclass
 
+import torch
+from torch.nn import functional as F
+from torch import nn
+
 import dgl
 import dgl.function as fn
 from dgl.nn import AvgPooling, SumPooling
 from dgl.nn.functional import edge_softmax
 
-import torch
-from torch.nn import functional as F
-from torch import nn
-
+import nfflr
 from nfflr.models.utils import autograd_forces
-from nfflr.nn.layers import (
+from nfflr.nn import (
     RBFExpansion,
     ChebyshevExpansion,
     MLPLayer,
     AttributeEmbedding,
+    PeriodicRadiusGraph,
+    XPLOR,
 )
-
-import nfflr
-from nfflr.nn.transform import PeriodicRadiusGraph
-from nfflr.nn.cutoff import XPLOR
 
 
 def edge_attention_graph(g: dgl.DGLGraph, shared=False):
