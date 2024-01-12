@@ -16,11 +16,12 @@ from nfflr.nn.layers import (
     RBFExpansion,
     ChebyshevExpansion,
     MLPLayer,
+    AttributeEmbedding,
 )
 
+import nfflr
 from nfflr.nn.transform import PeriodicRadiusGraph
 from nfflr.nn.cutoff import XPLOR
-from nfflr.data.atoms import _get_attribute_lookup, Atoms
 
 
 def edge_attention_graph(g: dgl.DGLGraph, shared=False):
@@ -158,11 +159,10 @@ class TFM(nn.Module):
         self.transform = config.transform
 
         if config.atom_features == "embedding":
-            self.atom_embedding = nn.Embedding(108, config.d_model)
+            self.atom_embedding = torch.nn.Embedding(108, config.d_model)
         else:
-            f = _get_attribute_lookup(atom_features=config.atom_features)
-            self.atom_embedding = nn.Sequential(
-                f, MLPLayer(f.embedding_dim, config.d_model)
+            self.atom_embedding = AttributeEmbedding(
+                config.atom_features, config.d_model
             )
 
         self.bond_encoder = RBFExpansion(vmin=0, vmax=8.0, bins=config.d_model)
@@ -191,10 +191,10 @@ class TFM(nn.Module):
     @dispatch
     def forward(self, x):
         print("convert")
-        return self.forward(Atoms(x))
+        return self.forward(nfflr.Atoms(x))
 
     @dispatch
-    def forward(self, x: Atoms):
+    def forward(self, x: nfflr.Atoms):
         device = next(self.parameters()).device
         return self.forward(self.transform(x).to(device))
 

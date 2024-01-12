@@ -14,17 +14,18 @@ from torch import nn
 
 from dgl.nn import AvgPooling, SumPooling
 
+import nfflr
 from nfflr.models.utils import autograd_forces
 from nfflr.nn.layers import (
     RBFExpansion,
     MLPLayer,
     ALIGNNConv,
     EdgeGatedGraphConv,
+    AttributeEmbedding,
 )
 from nfflr.data.graph import compute_bond_cosines
 from nfflr.nn.transform import PeriodicRadiusGraph
 from nfflr.nn.cutoff import XPLOR
-from nfflr.data.atoms import _get_attribute_lookup, Atoms
 
 
 @dataclass
@@ -65,9 +66,8 @@ class ALIGNN(torch.nn.Module):
         if config.atom_features == "embedding":
             self.atom_embedding = torch.nn.Embedding(108, config.hidden_features)
         else:
-            f = _get_attribute_lookup(atom_features=config.atom_features)
-            self.atom_embedding = torch.nn.Sequential(
-                f, MLPLayer(f.embedding_dim, config.hidden_features, norm=config.norm)
+            self.atom_embedding = AttributeEmbedding(
+                config.atom_features, d_model=config.hidden_features
             )
 
         self.reference_energy = None
@@ -132,10 +132,10 @@ class ALIGNN(torch.nn.Module):
     @dispatch
     def forward(self, x):
         print("convert")
-        return self.forward(Atoms(x))
+        return self.forward(nfflr.Atoms(x))
 
     @dispatch
-    def forward(self, x: Atoms):
+    def forward(self, x: nfflr.Atoms):
         device = next(self.parameters()).device
         return self.forward(self.transform(x).to(device))
 

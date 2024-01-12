@@ -7,47 +7,10 @@ import torch
 from torch import nn
 from typing import TypeAlias, Optional, List
 import jarvis.core.atoms
-from jarvis.core.specie import chem_data, get_node_attributes
 
 from plum import dispatch
 
 Z_dtype = torch.int
-
-
-def _get_attribute_lookup(atom_features: str = "cgcnn"):
-    """Build a lookup array indexed by atomic number.
-
-    atom_features can be
-    cgcnn: standard one-hot encoded CGCNN atom embeddings
-    basic: similar feature set, real values instead
-    cfid: 438 chemical features
-    """
-    max_z = max(v["Z"] for v in chem_data.values())
-
-    # get feature shape (referencing Carbon)
-    template = get_node_attributes("C", atom_features)
-    features = torch.zeros((1 + max_z, len(template)))
-
-    for element, v in chem_data.items():
-        z = v["Z"]
-        x = get_node_attributes(element, atom_features)
-
-        if x is not None:
-            features[z, :] = torch.tensor(x)
-
-    # replace missing features with NaN
-    features[(features == -9999).any(dim=1)] = torch.nan
-
-    # create fixed feature embedding indexed by atomic number
-    n_elements, embedding_dim = features.shape
-    features = nn.Embedding(
-        num_embeddings=n_elements,
-        embedding_dim=embedding_dim,
-        _weight=features,
-    )
-    features.weight.requires_grad = False
-
-    return features
 
 
 def jarvis_load_atoms(path: Path):
