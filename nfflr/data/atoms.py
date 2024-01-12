@@ -1,14 +1,13 @@
 from pathlib import Path
 from collections.abc import Iterable
+from typing import TypeAlias, Optional, List
 
 import ase
 import dgl
 import torch
-from torch import nn
-from typing import TypeAlias, Optional, List
-import jarvis.core.atoms
-
 from plum import dispatch
+
+import jarvis.core.atoms
 
 Z_dtype = torch.int
 
@@ -115,7 +114,9 @@ class Atoms:
 
 def to_ase(at: Atoms):
     """Convert nfflr.Atoms to ase.Atoms."""
-    return ase.Atoms(cell=at.lattice, scaled_positions=at.positions, numbers=at.numbers)
+    return ase.Atoms(
+        cell=at.lattice, scaled_positions=at.positions, numbers=at.numbers, pbc=True
+    )
 
 
 def spglib_cell(x: Atoms):
