@@ -14,7 +14,7 @@ authors = [
 ]
 dependencies = [
     "ase",
-    "ray",
+    "ray[tune]",
     "numpy",
     "scipy",
     "torch",

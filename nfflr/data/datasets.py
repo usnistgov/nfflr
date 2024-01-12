@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import torch
 import jarvis
@@ -60,7 +61,9 @@ def deepmd_load_frameset(path, zs):
     return at, energy, force.unbind(0)
 
 
-def deepmd_hea_dataset(datadir: Path | str):
+def deepmd_hea_dataset(
+    datadir: Path | str, transform: Optional[torch.nn.Module] = None
+):
     """Load deepmd numpy format dataset."""
     # only supports HEA dataset for now...
     # training data are under rand1, set00{0..8}
@@ -89,4 +92,5 @@ def deepmd_hea_dataset(datadir: Path | str):
         group_ids=True,
         n_train=0.9,
         n_val=0.1,
+        transform=transform,
     )

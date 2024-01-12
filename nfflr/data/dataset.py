@@ -4,7 +4,7 @@ import tempfile
 import warnings
 from pathlib import Path
 from functools import partial
-from typing import Any, Dict, List, Literal, Tuple, Union, Optional, Callable
+from typing import Any, Dict, List, Literal, Tuple, Union, Optional, Callable, Sequence
 
 import dgl
 import numpy as np
@@ -86,14 +86,15 @@ def get_cachedir():
     return cachedir
 
 
-def collate_forcefield_targets(targets: Dict[str, torch.Tensor]):
+def collate_forcefield_targets(targets: Sequence[Dict[str, torch.Tensor]]):
     """Specialized collate function for force field datasets."""
     energy = torch.tensor([t["energy"] for t in targets])
     n_atoms = torch.tensor([t["forces"].size(0) for t in targets])
     forces = torch.cat([t["forces"] for t in targets], dim=0)
-    stresses = torch.stack([t["stresses"] for t in targets])
-
-    return dict(total_energy=energy, n_atoms=n_atoms, forces=forces, stresses=stresses)
+    result = dict(total_energy=energy, n_atoms=n_atoms, forces=forces)
+    if "stresses" in targets[0]:
+        result["stresses"] = torch.stack([t["stresses"] for t in targets])
+    return result
 
 
 class AtomsDataset(torch.utils.data.Dataset):
@@ -193,14 +194,17 @@ class AtomsDataset(torch.utils.data.Dataset):
         n_atoms = len(atoms)
         # print(f"{key=}, {n_atoms=}")
 
+        def to_tensor(x):
+            if isinstance(x, torch.Tensor):
+                return x.clone().detach()
+            return torch.tensor(x, dtype=torch.get_default_dtype())
+
         if self.target == "energy_and_forces":
             target = self.get_energy_and_forces(idx, n_atoms=n_atoms)
             # volume: abs(determinant(cell))
             target["volume"] = atoms.lattice.det().abs().item()
-            target = {
-                k: torch.tensor(t, dtype=torch.get_default_dtype())
-                for k, t in target.items()
-            }
+            target = {k: to_tensor(t) for k, t in target.items()}
+
         else:
             target = torch.tensor(
                 self.df[self.target].iloc[idx], dtype=torch.get_default_dtype()

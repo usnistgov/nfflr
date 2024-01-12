@@ -158,9 +158,10 @@ class SchNet(torch.nn.Module):
 
         self.fc = torch.nn.Linear(config.d_model, config.output_features)
 
-    def forward(self, g: nfflr.Atoms):
+    def forward(self, g: nfflr.Atoms | dgl.DGLGraph):
         config = self.config
-        g = self.transform(g)
+        if isinstance(g, nfflr.Atoms):
+            g = self.transform(g)
 
         # to compute forces, take gradient wrt g.edata["r"]
         # need to add bond vectors to autograd graph
