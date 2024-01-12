@@ -15,7 +15,6 @@ from torch import nn
 from dgl.nn import AvgPooling, SumPooling
 
 import nfflr
-from nfflr.models.utils import autograd_forces
 from nfflr.nn import (
     RBFExpansion,
     MLPLayer,
@@ -194,7 +193,7 @@ class ALIGNN(torch.nn.Module):
         output = torch.squeeze(self.fc(h))
 
         if config.compute_forces:
-            forces, stress = autograd_forces(
+            forces, stress = nfflr.autograd_forces(
                 output,
                 g.edata["r"],
                 g,

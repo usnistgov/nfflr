@@ -113,6 +113,11 @@ class Atoms:
         return self
 
 
+def to_ase(at: Atoms):
+    """Convert nfflr.Atoms to ase.Atoms."""
+    return ase.Atoms(cell=at.lattice, scaled_positions=at.positions, numbers=at.numbers)
+
+
 def spglib_cell(x: Atoms):
     """Unpack Atoms to spglib tuple format."""
     if x.batched():

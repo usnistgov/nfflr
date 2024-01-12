@@ -2,7 +2,7 @@ import dgl
 import torch
 from typing import Optional, Literal
 
-from nfflr.nn.layers import EdgeGatedGraphConv
+from nfflr.nn import EdgeGatedGraphConv
 
 
 class ALIGNNConv(torch.nn.Module):

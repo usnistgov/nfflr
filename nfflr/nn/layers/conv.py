@@ -6,7 +6,8 @@ from torch.nn import functional as F
 import dgl
 import dgl.function as fn
 
-from nfflr.nn.layers import Norm
+# import nfflr
+from nfflr.nn import Norm
 
 
 class EdgeGatedGraphConv(torch.nn.Module):

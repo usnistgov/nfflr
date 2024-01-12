@@ -7,7 +7,7 @@ from torch import nn
 import dgl
 import dgl.function as fn
 
-from nfflr.models.utils import autograd_forces
+import nfflr
 
 
 @dataclass
@@ -169,7 +169,7 @@ class Tersoff(nn.Module):
 
         total_energy = energy.sum()
 
-        forces, stress = autograd_forces(
+        forces, stress = nfflr.autograd_forces(
             total_energy, g.edata["r"], g, energy_units="eV", compute_stress=True
         )
 

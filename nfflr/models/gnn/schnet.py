@@ -4,22 +4,20 @@ from typing import Optional, Literal, Callable
 
 import torch
 
-import nfflr
-from nfflr.nn.cutoff import XPLOR
-from nfflr.nn.transform import PeriodicRadiusGraph
-
 import dgl
 import dgl.function as fn
 from dgl.nn import AvgPooling, SumPooling
 
+import nfflr
 from nfflr.nn import (
     Norm,
     FeedForward,
     RBFExpansion,
     AttributeEmbedding,
     PeriodicTableEmbedding,
+    PeriodicRadiusGraph,
+    XPLOR,
 )
-from nfflr.models.utils import autograd_forces
 
 
 class DepthwiseConv(torch.nn.Module):
@@ -182,7 +180,7 @@ class SchNet(torch.nn.Module):
         output = torch.squeeze(self.readout(g, x))
 
         if config.compute_forces:
-            forces, stress = autograd_forces(
+            forces, stress = nfflr.autograd_forces(
                 output,
                 g.edata["r"],
                 g,

@@ -12,7 +12,6 @@ from dgl.nn import AvgPooling, SumPooling
 from dgl.nn.functional import edge_softmax
 
 import nfflr
-from nfflr.models.utils import autograd_forces
 from nfflr.nn import (
     RBFExpansion,
     ChebyshevExpansion,
@@ -246,7 +245,7 @@ class TFM(nn.Module):
         output = torch.squeeze(self.readout(g, atomwise_energy))
 
         if config.compute_forces:
-            forces, stress = autograd_forces(
+            forces, stress = nfflr.autograd_forces(
                 output,
                 g.edata["r"],
                 g,

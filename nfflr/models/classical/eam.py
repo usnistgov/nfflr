@@ -11,7 +11,7 @@ from torch import nn
 
 from torchcubicspline import natural_cubic_spline_coeffs, NaturalCubicSpline
 
-from nfflr.models.utils import autograd_forces
+import nfflr
 
 
 @dataclass
@@ -136,7 +136,7 @@ class EAM(nn.Module):
         }
         potential_energy = F.sum() + pair_repulsion.sum()
 
-        forces = autograd_forces(potential_energy, r, g, energy_units="eV")
+        forces = nfflr.autograd_forces(potential_energy, r, g, energy_units="eV")
         return potential_energy, forces
 
 

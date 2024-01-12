@@ -1,10 +1,10 @@
 import torch
 from ase.calculators.calculator import Calculator, all_changes
 
-from nfflr.data.atoms import Atoms
+import nfflr
 
 
-class NFLLrCalculator(Calculator):
+class NFFLrCalculator(Calculator):
     implemented_properties = ["energy", "forces", "stress"]
 
     def __init__(self, model: torch.nn.Module, **kwargs):
@@ -17,7 +17,7 @@ class NFLLrCalculator(Calculator):
             properties = self.implemented_properties
             self.calculate(atoms, properties, system_changes)
 
-        outputs = self.model(Atoms(atoms))
+        outputs = self.model(nfflr.Atoms(atoms))
 
         self.results["energy"] = outputs["total_energy"].detach().item()
         self.results["forces"] = outputs["forces"].detach().numpy()

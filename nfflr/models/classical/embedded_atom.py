@@ -13,7 +13,7 @@ from torch.nn.functional import softplus
 import orthnet
 
 import nfflr
-from nfflr.models.utils import autograd_forces, RBFExpansion
+from nfflr.nn import RBFExpansion
 
 
 class GaussianSpline(torch.nn.Module):
@@ -209,7 +209,7 @@ class EmbeddedAtomPotential(torch.nn.Module):
 
         # potential_energy = F.sum() + pair_repulsion.sum()
 
-        forces = autograd_forces(potential_energy, r, g, energy_units="eV")
+        forces = nfflr.autograd_forces(potential_energy, r, g, energy_units="eV")
         return {"total_energy": potential_energy, "forces": forces}
 
 
@@ -277,7 +277,7 @@ class SimpleEmbeddedAtomPotential(torch.nn.Module):
         )
         # potential_energy = F.sum() + pair_repulsion.sum()
 
-        forces = autograd_forces(potential_energy, r, g, energy_units="eV")
+        forces = nfflr.autograd_forces(potential_energy, r, g, energy_units="eV")
         return {"total_energy": potential_energy, "forces": forces}
 
         return
