@@ -1,14 +1,24 @@
 """Version number."""
 __version__ = "0.1.0"
 
-# top-level API
+# nfflr: top-level API
+# Atoms
 from .data.atoms import Atoms, spglib_cell, batch, unbatch, to_ase
+
+# AtomsDataset
 from .data.dataset import AtomsDataset, collate_forcefield_targets
+
+# utilities
 from .models.utils import autograd_forces
+
+# modeling primitives
+from . import nn
+
+# models - classical and neural network
+from . import models
+
+# datasets
+from . import data
 
 # ASE interface
 from .ase import NFFLrCalculator
-
-from . import nn
-from . import data
-from . import models
