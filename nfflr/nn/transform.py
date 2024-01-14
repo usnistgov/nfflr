@@ -8,12 +8,15 @@ from nfflr.data.graph import (
 
 
 class PeriodicRadiusGraph(torch.nn.Module):
+    """Periodic radius graph transform."""
+
     def __init__(self, cutoff: float = 5.0, dtype=torch.float):
         super().__init__()
         self.cutoff = cutoff
         self.dtype = dtype
 
     def forward(self, x):
+        """Compute periodic radius graph."""
         return periodic_radius_graph(x, r=self.cutoff, dtype=self.dtype)
 
 

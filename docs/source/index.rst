@@ -9,7 +9,10 @@ NFFLr documentation
 
 Neural Force Field Learning toolkit (NFFLr) is an experimental library intended to support rapid iteration in research on machine learning for atomistic systems.
 
+
+```{margin} Project history
 The initial codebase is a fork of `ALIGNN <https://github.com/usnistgov/alignn>`_, with modified configuration and modeling interfaces to enable usability and performance improvements.
+```
 
 Core concepts
 -------------
@@ -50,7 +53,7 @@ High-level training utilities that can be used regardless of the model backend.
 
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :glob:
 
    quickstart
@@ -59,6 +62,11 @@ High-level training utilities that can be used regardless of the model backend.
    examples
 
 
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   reference/index
 
 Correspondence
 --------------

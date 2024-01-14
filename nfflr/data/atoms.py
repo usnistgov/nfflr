@@ -1,3 +1,5 @@
+__all__ = ()
+
 from pathlib import Path
 from collections.abc import Iterable
 from typing import TypeAlias, Optional, List

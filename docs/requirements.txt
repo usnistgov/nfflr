@@ -2,5 +2,5 @@ sphinx
 nbsphinx
 ipykernel
 myst-parser
-sphinx-rtd-theme
+sphinx-book-theme
 -e .

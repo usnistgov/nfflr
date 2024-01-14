@@ -10,6 +10,7 @@ class FeedForward(torch.nn.Module):
     def __init__(
         self, d_in: int, d_hidden: Optional[int] = None, d_out: Optional[int] = None
     ):
+        """Doc for init"""
         super().__init__()
         if d_hidden is None:
             d_hidden = 4 * d_in
@@ -24,6 +25,7 @@ class FeedForward(torch.nn.Module):
         )
 
     def forward(self, x: torch.Tensor):
+        """Doc for forward."""
         return self.layers(x)
 
 

@@ -1,4 +1,12 @@
 """NFFLR models"""
+__all__ = (
+    "ALIGNNConfig",
+    "ALIGNN",
+    "SchNetConfig",
+    "SchNet",
+    "TersoffConfig",
+    "Tersoff",
+)
 
 # graph neural network implementations
 from .gnn.alignn import ALIGNN, ALIGNNConfig
