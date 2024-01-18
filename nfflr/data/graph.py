@@ -1,4 +1,6 @@
 """Module to generate DGLGraphs."""
+__all__ = ()
+
 from typing import Tuple, Literal, Dict
 
 import dgl

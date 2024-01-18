@@ -2,6 +2,7 @@
 
 A prototype crystal line graph network dgl implementation.
 """
+
 from plum import dispatch
 
 import logging

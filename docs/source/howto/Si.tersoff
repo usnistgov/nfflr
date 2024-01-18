@@ -1,0 +1,10 @@
+# Parameters for the Tersoff Si(B) potential. CITATION: J. Tersoff, Phys. Rev. B 37, 6991 (1988)
+
+# Parameter values verified by Lucas Hale.
+# Identical values in Si.tersoff of August 22, 2018 LAMMPS distribution.
+# Identical values in openKIM model MO_245095684871_001 parameter file.
+
+# Values are in LAMMPS "metal" units.
+
+# e1 e2 e3 m   gamma lambda3 c      d      costheta0 n      beta    lambda2 B      R   D   lambda1 A
+  Si Si Si 3.0 1.0   1.3258  4.8381 2.0417 0.0       22.956 0.33675 1.3258  95.373 3.0 0.2 3.2394  3264.7

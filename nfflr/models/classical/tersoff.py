@@ -1,3 +1,4 @@
+"""test"""
 from dataclasses import dataclass
 from typing import Literal, Callable
 
@@ -43,15 +44,15 @@ def wrap_zeta_message(fcut: Callable, g: Callable, params: TersoffConfig):
     lambda3 = params.lambda3
 
     def zeta_message(edges):
-        """Zeta_ij kernel for Tersoff potential
+        r"""Zeta_ij kernel for Tersoff potential
 
         ```math
-        \sum_{k \neq i, j} fcut(r_ik) g(cos_theta) exp(\lambda_3^m (r_{ij} - r_{ij})^m)
+        \sum_{k \neq i, j} fcut(r_{ik}) g(cos(\theta)) exp(\lambda_3^m (r_{ij} - r_{ij})^m)
         ```
 
         line graph edges: (k -> i) -> (i -> j)
 
-        message propagation updates the (i -> j) bond
+        message propagation updates the (i -> j) bond.
         """
 
         # relative position vectors for src and dst bonds
@@ -79,18 +80,26 @@ def wrap_zeta_message(fcut: Callable, g: Callable, params: TersoffConfig):
 class Tersoff(nn.Module):
     """Tersoff potential following LAMMPS implementation.
 
-    Tersoff, 1988, 10.1103/PhysRevB.38.9902
+    paper: Tersoff, 1988, 10.1103/PhysRevB.38.9902
 
     Refer to https://docs.lammps.org/pair_tersoff.html
+
     """
 
     def __init__(self, params: TersoffConfig = TersoffConfig()):
+        """test"""
         super().__init__()
         self.ps = params
         self.zeta_message = wrap_zeta_message(self.fcut, self.g, self.ps)
 
-    def fcut(self, r):
-        """Tersoff style smooth cutoff function."""
+    def fcut(self, r: torch.Tensor):
+        """Tersoff style smooth cutoff function.
+
+        Parameters
+        ----------
+        r:
+            bond length
+        """
         R, D = self.ps.R, self.ps.D
 
         smoothed = torch.where(
@@ -123,14 +132,24 @@ class Tersoff(nn.Module):
             - (c**2 / (d**2 + (angle_cosine - costheta0) ** 2))
         )
 
-    def angular_term(self, g):
-        """Tersoff zeta term, for each edge.
+    def angular_term(self, g: dgl.DGLGraph):
+        r"""Tersoff zeta term, for each edge.
 
-        ```math
-        \sum_{k \neq i, j} fcut(r_ik) g(cos_theta) exp(\lambda_3^m (r_{ij} - r_{ij})^m)
-        ```
+        .. math::
 
-        relies on relative bond vectors g.edata["r"].requires_grad_ == True
+            \sum_{k \neq i, j} \textrm{fcut}(r_{ik}) g(\cos(\theta)) \exp(\lambda_3^m (r_{ij} - r_{ij})^m)
+
+        .. note::
+
+            relies on relative bond vectors :code:`g.edata["r"].requires_grad_ == True`.
+
+
+        Parameters
+        ----------
+        g: dgl.DGLGraph
+            neighbor list graph
+
+
         """
         n = self.ps.n
         beta = self.ps.beta
@@ -153,6 +172,7 @@ class Tersoff(nn.Module):
         return b_ij
 
     def forward(self, g: dgl.DGLGraph):
+        """Evaluate Tersoff model for DGLGraph `g`."""
         g = g.local_var()
         g.edata["r"].requires_grad_(True)
 

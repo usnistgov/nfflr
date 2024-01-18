@@ -1,5 +1,16 @@
 # Overview
 
+## input representation
+For efficient training, models should also be able to operate on preprocessed structures,
+e.g. a graph neural network could implement `forward(x: dgl.DGLGraph)` to allow asynchronous
+construction of graph batches in a `DataLoader`.
+
+- [dgl.DGLGraph](#dgl.DGLGraph)
+- PyG input format
+- `Atoms` with ghost atom padding
+- some other custom input representation
+
+
 ## modeling interface
 
 Models should have a consistent interface, regardless of the backend!
@@ -11,15 +22,6 @@ NFFLrModel:
 
 Depending on the model and the prediction task, both the input representation and output format may vary.
 
-### input representation
-For efficient training, models should also be able to operate on preprocessed structures,
-e.g. a graph neural network could implement `forward(x: dgl.DGLGraph)` to allow asynchronous
-construction of graph batches in a `DataLoader`.
-
-- `dgl.DGLGraph`
-- PyG input format
-- `Atoms` with ghost atom padding
-- some other custom input representation
 
 
 ### output representation

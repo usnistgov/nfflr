@@ -1,6 +1,6 @@
 sphinx
-nbsphinx
-ipykernel
+myst-nb
+numpydoc
 myst-parser
 sphinx-book-theme
 -e .

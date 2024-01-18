@@ -1,4 +1,7 @@
 """Standalone dataset for training force field models."""
+
+__all__ = ()
+
 import os
 import tempfile
 import warnings
