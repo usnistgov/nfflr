@@ -44,12 +44,12 @@ jobs:
       - name: Install dependencies
         run: python3 -m pip install -r ./docs/requirements.txt
 
-      - run: sphinx-build -vv -T -b html -c docs/ docs/source docs/_build/html
+      - run: sphinx-build -vv -T -b html -c docs/source docs/source docs/build/html
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/_build/html
+          publish_dir: docs/build/html
           publish_branch: nist-pages
