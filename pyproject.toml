@@ -31,10 +31,11 @@ dependencies = [
     "jarvis-tools>=2021.07.19"
 ]
 
-# [project.urls]
-# homepage = "https://example.com"
-# documentation = "https://readthedocs.org"
-# repository = "https://github.com/me/spam.git"
+[project.urls]
+homepage = "https://pages.nist.gov/nfflr"
+documentation = "https://pages.nist.gov/nfflr"
+repository = "https://github.com/usnistgov/nfflr"
+issues = "https://github.com/usnistgov/nfflr/issues"
 # changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [project.scripts]

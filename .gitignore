@@ -1,3 +1,8 @@
+# docs artifacts
+docs/source/howto/Al99.eam.alloy
+docs/source/howto/Si.tersoff
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
