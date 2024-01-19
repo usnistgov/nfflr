@@ -22,6 +22,8 @@ from .layers.basis import RBFExpansion, ChebyshevExpansion
 from .layers.conv import EdgeGatedGraphConv
 from .layers.alignn import ALIGNNConv, SparseALIGNNConv
 from .layers.atomfeatures import (
+    AtomType,
+    AtomPairType,
     AttributeEmbedding,
     AtomicNumberEmbedding,
     PeriodicTableEmbedding,
