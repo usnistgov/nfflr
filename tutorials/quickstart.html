@@ -464,7 +464,7 @@ warning: could not load CGCNN features for 101
 Setting it to max atomic number available here, 103
 warning: could not load CGCNN features for 102
 Setting it to max atomic number available here, 103
-tensor(-0.1013)
+tensor(0.0559)
 </pre></div>
 </div>
 </div>
@@ -481,7 +481,7 @@ For example, calling <code class="docutils literal notranslate"><span class="pre
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>convert
-tensor(-0.1013)
+tensor(0.0559)
 </pre></div>
 </div>
 </div>
@@ -504,12 +504,12 @@ and its (negative) gradient with respect to the (cartesian) atomic coordinates -
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.0610, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[-5.6624e-07,  4.6194e-06, -1.6093e-06],
-         [ 0.0000e+00, -4.6790e-06,  1.1325e-06]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[-6.9836e+00,  2.9206e-06,  6.5565e-06],
-          [ 3.6359e-06, -6.9836e+00, -6.6906e-06],
-          [ 5.9605e-06, -7.7039e-06, -6.9836e+00]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.7908, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[-8.3745e-06,  1.6689e-06,  4.0680e-06],
+         [ 8.9407e-06, -6.2585e-07, -4.2617e-06]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[-2.9013e+01, -6.2585e-06,  5.8413e-06],
+          [-6.1989e-06, -2.9013e+01,  3.9935e-06],
+          [ 6.9737e-06,  3.7551e-06, -2.9013e+01]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
@@ -544,12 +544,12 @@ For example, <code class="docutils literal notranslate"><span class="pre">ALIGNN
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.0510, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[-3.6359e-06, -5.9605e-07, -3.0460e-08],
-         [ 3.6061e-06,  5.0664e-07,  1.7833e-07]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[-2.0682e+01,  7.4506e-06, -4.1723e-07],
-          [ 7.2122e-06, -2.0682e+01,  1.3709e-06],
-          [-4.1723e-07,  1.3709e-06, -2.0682e+01]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.8227, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[-1.4901e-08,  5.0664e-07, -7.5263e-07],
+         [ 6.7055e-07, -6.4075e-07,  9.0920e-07]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[ 1.2848e+01, -2.1532e-06, -3.7253e-08],
+          [-2.1532e-06,  1.2848e+01,  2.4587e-07],
+          [-3.7253e-08,  2.4587e-07,  1.2848e+01]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
@@ -734,6 +734,9 @@ Loading the zipfile...
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loading completed.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(-64656.0625),
