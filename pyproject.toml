@@ -43,7 +43,15 @@ nff = "nfflr.train:cli"
 nffd = "nfflr.distributed:main"
 
 [tool.setuptools]
-packages = ["nfflr"]
+packages = [
+    "nfflr",
+    "nfflr.data",
+    "nfflr.nn",
+    "nfflr.nn.layers",
+    "nfflr.models",
+    "nfflr.models.gnn",
+    "nfflr.models.classical",
+]
 
 [tool.isort]
 multi_line_output = 3
