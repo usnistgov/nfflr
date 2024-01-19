@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Quickstart &#8212; nfflr 0.1.0 documentation</title>
+    <title>Quickstart &#8212; nfflr 0.1.1 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=a1637f0b"></script>
+    <script src="../_static/documentation_options.js?v=1a9ffd16"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
@@ -163,7 +163,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.1.0 documentation</p>
+    <p class="title logo__title">nfflr 0.1.1 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -465,7 +465,7 @@ warning: could not load CGCNN features for 101
 Setting it to max atomic number available here, 103
 warning: could not load CGCNN features for 102
 Setting it to max atomic number available here, 103
-tensor(0.2377)
+tensor(0.7684)
 </pre></div>
 </div>
 </div>
@@ -482,7 +482,7 @@ For example, calling <code class="docutils literal notranslate"><span class="pre
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>convert
-tensor(0.2377)
+tensor(0.7684)
 </pre></div>
 </div>
 </div>
@@ -505,12 +505,12 @@ and its (negative) gradient with respect to the (cartesian) atomic coordinates -
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.5700, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[ 1.2219e-06,  5.9605e-08, -4.4703e-08],
-         [ 5.2154e-07, -1.6391e-07, -2.2724e-07]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[-3.3496e+01,  2.2650e-06, -1.4901e-06],
-          [ 1.9372e-06, -3.3496e+01, -7.7486e-07],
-          [-1.1921e-06, -9.8348e-07, -3.3496e+01]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(0.7489, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[ 1.6689e-06,  7.5996e-07, -2.9802e-08],
+         [-1.1325e-06, -7.0035e-07,  2.6822e-07]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[ 3.1564e+01, -7.1526e-07,  1.6689e-06],
+          [ 2.3842e-07,  3.1564e+01, -7.1526e-07],
+          [ 1.5497e-06, -3.5763e-07,  3.1564e+01]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
@@ -545,12 +545,12 @@ For example, <code class="docutils literal notranslate"><span class="pre">ALIGNN
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.4891, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[ 3.4571e-06,  2.9802e-06,  2.0280e-06],
-         [-2.5034e-06, -3.2783e-06, -2.0834e-06]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[ 2.8727e+01,  2.1458e-06,  1.3351e-05],
-          [ 1.6689e-06,  2.8727e+01, -4.7684e-06],
-          [ 1.3351e-05, -4.2915e-06,  2.8727e+01]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(0.7431, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[-9.5367e-07, -2.3842e-07, -8.1076e-06],
+         [ 2.3842e-07, -7.1526e-07,  8.5829e-06]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[-4.9169e+01, -1.0490e-05,  2.3842e-06],
+          [-1.0490e-05, -4.9169e+01, -3.8147e-06],
+          [ 2.3842e-06, -3.8147e-06, -4.9169e+01]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
