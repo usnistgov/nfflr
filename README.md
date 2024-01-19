@@ -2,8 +2,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/usnistgov/nfflr)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/usnistgov/nfflr)
-[![][https://img.shields.io/badge/docs-main-blue]][https://pages.nist.gov/nfflr]
-
+[![General badge](https://img.shields.io/badge/docs-main-blue.svg)](https://pages.nist.gov/nfflr)
 
 
 # Table of Contents
