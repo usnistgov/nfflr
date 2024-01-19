@@ -1,24 +1,56 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="./">
+
+<html lang="en" data-content_root="./" >
+
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>NFFLr documentation &#8212; NFFLr 0.1.0 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
-    <script src="_static/documentation_options.js?v=01f34227"></script>
+    <title>NFFLr documentation &#8212; nfflr 0.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="_static/documentation_options.js?v=a1637f0b"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Quickstart" href="quickstart.html" />
-<link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css">
-  <script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
-  <script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
-  <script async type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-66610693-1&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c">
+    <link rel="next" title="Overview" href="overview.html" />
+<!-- <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css"> -->
+
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+<script async type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-66610693-1&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c">
 </script>
 
 
@@ -46,198 +78,425 @@ $(document).ready(function(){
 <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/leaveNotice/css/jquery.leaveNotice.css" />
 
 
-  </head><body>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
   
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
 
-          <div class="body" role="main">
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">nfflr 0.1.0 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="tutorials/index.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/quickstart.html">Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/atoms.html">Atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="howto/index.html">How-to guides</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="howto/property-regression.html">Property regression example</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="howto/force-field-training.html">Property regression example</a></li>
+
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.Atoms.html">Atoms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr/issues/new?title=Issue%20on%20page%20%2Findex.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>NFFLr documentation</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
             
-  <section id="nfflr-documentation">
-<h1>NFFLr documentation<a class="headerlink" href="#nfflr-documentation" title="Link to this heading">¶</a></h1>
-<p>Neural Force Field Learning toolkit (NFFLr) is an experimental library intended to support rapid iteration in research on machine learning for atomistic systems.</p>
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#correspondence">Correspondence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#code-of-conduct">Code of conduct</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="nfflr-documentation">
+<h1>NFFLr documentation<a class="headerlink" href="#nfflr-documentation" title="Link to this heading">#</a></h1>
+<p>Neural Force Field Learning toolkit (NFFLr) is an experimental library intended to support rapid iteration in research on machine learning for atomistic systems.
+The main goal is to provide an easily extensible uniform interface for developing, training, and deploying atomistic machine learning models.</p>
+<aside class="margin sidebar">
+<p class="sidebar-title">Project history</p>
 <p>The initial codebase is a fork of <a class="reference external" href="https://github.com/usnistgov/alignn">ALIGNN</a>, with modified configuration and modeling interfaces to enable usability and performance improvements.</p>
-<section id="core-concepts">
-<h2>Core concepts<a class="headerlink" href="#core-concepts" title="Link to this heading">¶</a></h2>
-<section id="atomistic-systems">
-<h3>atomistic systems<a class="headerlink" href="#atomistic-systems" title="Link to this heading">¶</a></h3>
-<p>A general representation that is easy to work with,
-supports efficient batching,
-and can be easily converted to input formats of various machine learning models.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Atoms</span><span class="p">:</span>
-    <span class="n">cell</span>
-    <span class="n">positions</span>
-    <span class="n">numbers</span>
-</pre></div>
-</div>
-</section>
-<section id="modeling-interface">
-<h3>modeling interface<a class="headerlink" href="#modeling-interface" title="Link to this heading">¶</a></h3>
-<p>Models should have a consistent interface, regardless of the backend!</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">NFFLrModel</span><span class="p">:</span>
-    <span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="training-utilities">
-<h3>training utilities<a class="headerlink" href="#training-utilities" title="Link to this heading">¶</a></h3>
-<p>High-level training utilities that can be used regardless of the model backend.</p>
-<p><cite>AtomsDataset</cite> and conversion/collation utilities targeting different backends.</p>
+</aside>
+<ul class="simple">
+<li><p>discuss development on <a class="reference external" href="https://github.com/usnistgov/nfflr">GitHub</a></p></li>
+<li><p>read the <a class="reference external" href="https://pages.nist.gov/nfflr">documentation</a></p></li>
+<li><p>install with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nfflr</span></code></p></li>
+</ul>
+<p>The primary components of NFFLr are:</p>
+<ol class="arabic simple">
+<li><p>a <a class="reference internal" href="reference/generated/nfflr.Atoms.html#nfflr.Atoms" title="nfflr.Atoms"><span class="xref myst py py-class">general atomistic representation</span></a> that is easy to work with, supports efficient batching, and can be easily converted to input formats of various machine learning models.</p></li>
+<li><p>a <a class="reference internal" href="#reference/nfflr.models"><span class="xref myst">consistent modeling interface</span></a>, regardless of backend or material representation.</p></li>
+<li><p><strong>high-level training utilities</strong> that can be used regardless of the model and/or backend.</p></li>
+</ol>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#Atoms-Data"><code class="docutils literal notranslate"><span class="pre">Atoms</span></code> Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#Models">Models</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="quickstart.html#Common-model-interface">Common model interface</a></li>
-<li class="toctree-l3"><a class="reference internal" href="quickstart.html#Force-field-models">Force field models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="quickstart.html#input-representations">input representations</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#Training-utilities">Training utilities</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="quickstart.html#AtomsDataset"><code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#Force-field-datasets">Force field datasets</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#modeling-interface">modeling interface</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="overview.html#input-representation">input representation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="overview.html#output-representation">output representation</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#training-scripts">Training scripts</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="overview.html#training-command">training command</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="atoms.html">Atoms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html">quickstart</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="quickstart.html#Atoms-Data"><code class="docutils literal notranslate"><span class="pre">Atoms</span></code> Data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="quickstart.html#Models">Models</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="quickstart.html#Common-model-interface">Common model interface</a></li>
-<li class="toctree-l4"><a class="reference internal" href="quickstart.html#Force-field-models">Force field models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="quickstart.html#input-representations">input representations</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="quickstart.html#Training-utilities">Training utilities</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="quickstart.html#AtomsDataset"><code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="quickstart.html#Force-field-datasets">Force field datasets</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/property-regression.html">Property regression example</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/property-regression.html#low-level-interface">low level interface</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/property-regression.html#using-the-ignite-based-NFFLr-trainer">using the ignite-based NFFLr trainer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notebooks/eam-forces.html#Tersoff-potential">Tersoff potential</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="notebooks/eam-forces.html#Small-silicon-system">Small silicon system</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
 </div>
-</section>
-</section>
 <section id="correspondence">
-<h2>Correspondence<a class="headerlink" href="#correspondence" title="Link to this heading">¶</a></h2>
-<p>Please report bugs by <a class="reference external" href="https://github.com/usnistgov/nfflr/issues">filing an issue on GitHub</a> or email to <a class="reference external" href="mailto:brian&#46;decost&#37;&#52;&#48;nist&#46;gov">brian<span>&#46;</span>decost<span>&#64;</span>nist<span>&#46;</span>gov</a>.</p>
-</section>
-<section id="funding-support">
-<h2>Funding support<a class="headerlink" href="#funding-support" title="Link to this heading">¶</a></h2>
-<p>NIST-MGI <a class="reference external" href="https://www.nist.gov/mgi">https://www.nist.gov/mgi</a>.</p>
+<h2>Correspondence<a class="headerlink" href="#correspondence" title="Link to this heading">#</a></h2>
+<p>Please report bugs by filing an issue on <a class="github reference external" href="https://github.com/usnistgov/nfflr/issues">usnistgov/nfflr#issues</a> or email to brian.decost&#64;nist.gov.</p>
 </section>
 <section id="code-of-conduct">
-<h2>Code of conduct<a class="headerlink" href="#code-of-conduct" title="Link to this heading">¶</a></h2>
-<p>Please see our <a class="reference external" href="https://github.com/usnistgov/jarvis/blob/master/CODE_OF_CONDUCT.md">Code of conduct</a></p>
+<h2>Code of conduct<a class="headerlink" href="#code-of-conduct" title="Link to this heading">#</a></h2>
+<p>Please see our <a class="reference external" href="https://github.com/usnistgov/jarvis/blob/master/CODE_OF_CONDUCT.md">Code of conduct</a>.</p>
 </section>
 </section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="right-next"
+       href="overview.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Overview</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#correspondence">Correspondence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#code-of-conduct">Code of conduct</a></li>
 </ul>
-</section>
+  </nav></div>
 
-
+</div></div>
+              
+            
           </div>
-          
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="#">NFFLr</a></h1>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Brian DeCost
+</p>
 
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="atoms.html">Atoms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="quickstart.html" title="next chapter">Quickstart</a></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2023, Brian DeCost.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
-      |
-      <a href="_sources/index.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
+  </div>
+  
+  <div class="footer-item">
     
 
+  <p class="copyright">
     
+      © Copyright 2024, Brian DeCost.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
   </body>
 </html>

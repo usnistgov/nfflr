@@ -1,0 +1,56 @@
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/nbclient/client.py", line 1314, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+dataset = AtomsDataset(
+    "/Users/bld/projects/nfflr/examples/poscar-folder-bandgap", 
+    target="target", 
+    transform=transform,
+)
+dataset[0]
+------------------
+
+----- stdout -----
+dataset_name='/Users/bld/projects/nfflr/examples/poscar-folder-bandgap'
+------------------
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mUnboundLocalError[0m                         Traceback (most recent call last)
+Cell [0;32mIn[2], line 1[0m
+[0;32m----> 1[0m dataset [38;5;241m=[39m [43mAtomsDataset[49m[43m([49m
+[1;32m      2[0m [43m    [49m[38;5;124;43m"[39;49m[38;5;124;43m/Users/bld/projects/nfflr/examples/poscar-folder-bandgap[39;49m[38;5;124;43m"[39;49m[43m,[49m[43m [49m
+[1;32m      3[0m [43m    [49m[43mtarget[49m[38;5;241;43m=[39;49m[38;5;124;43m"[39;49m[38;5;124;43mtarget[39;49m[38;5;124;43m"[39;49m[43m,[49m[43m [49m
+[1;32m      4[0m [43m    [49m[43mtransform[49m[38;5;241;43m=[39;49m[43mtransform[49m[43m,[49m
+[1;32m      5[0m [43m)[49m
+[1;32m      6[0m dataset[[38;5;241m0[39m]
+
+File [0;32m~/work/nfflr/nfflr/nfflr/data/dataset.py:129[0m, in [0;36mAtomsDataset.__init__[0;34m(self, df, target, transform, custom_collate_fn, custom_prepare_batch_fn, train_val_seed, id_tag, group_ids, n_train, n_val, energy_units, diskcache)[0m
+[1;32m    123[0m [38;5;250m[39m[38;5;124;03m"""Pytorch Dataset for atomistic graphs.[39;00m
+[1;32m    124[0m 
+[1;32m    125[0m [38;5;124;03m`df`: pandas dataframe from e.g. jarvis.db.figshare.data[39;00m
+[1;32m    126[0m [38;5;124;03m"""[39;00m
+[1;32m    128[0m [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m [38;5;28misinstance[39m(df, pd[38;5;241m.[39mDataFrame):
+[0;32m--> 129[0m     df [38;5;241m=[39m [43m_load_dataset[49m[43m([49m[43mdf[49m[43m)[49m
+[1;32m    131[0m example_id [38;5;241m=[39m df[id_tag][38;5;241m.[39miloc[[38;5;241m0[39m]
+[1;32m    133[0m [38;5;66;03m# by default: don't try to process record ids[39;00m
+
+File [0;32m~/work/nfflr/nfflr/nfflr/data/dataset.py:73[0m, in [0;36m_load_dataset[0;34m(dataset_name, cache_dir)[0m
+[1;32m     70[0m [38;5;28;01melif[39;00m dataset_name[38;5;241m.[39mis_dir():
+[1;32m     71[0m     df [38;5;241m=[39m _load_dataset_directory(dataset_name)
+[0;32m---> 73[0m [38;5;28;01mreturn[39;00m [43mdf[49m
+
+[0;31mUnboundLocalError[0m: local variable 'df' referenced before assignment
+

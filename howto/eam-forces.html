@@ -1,0 +1,880 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Checking autograd forces against analytical forces for Embedded Atom model &#8212; nfflr 0.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=a1637f0b"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/eam-forces';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Property regression example" href="force-field-training.html" />
+    <link rel="prev" title="Property regression example" href="property-regression.html" />
+<!-- <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css"> -->
+
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+<script async type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-66610693-1&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c">
+</script>
+
+
+<script type="text/javascript" src="https://pages.nist.gov/leaveNotice/js/jquery.leaveNotice-nist.min.js"></script>
+<script>
+$(document).ready(function(){
+  // Mark external (non-nist.gov) A tags with class "external"
+  //If the adress start with https and ends with nist.gov
+  var re_nist = new RegExp('^https?:\/\/((^\/)*\.)*nist\\.gov(\/|$)');
+  //Regex to find address that start with https
+  var re_absolute_address = new RegExp('^((https?:)?\/\/)');
+  $("a").each(function(){
+    var url=$(this).attr('href');
+    if(re_nist.test(url) || !re_absolute_address.test(url)){
+      $(this).addClass('local');
+    }else{
+      //This a href appears to be external, so tag it
+      $(this).addClass('external');
+    }
+  });
+  // Add leaveNotice to external A elements
+  $('a.external').leaveNotice();
+});
+</script>
+<link rel="stylesheet" type="text/css" href="https://pages.nist.gov/leaveNotice/css/jquery.leaveNotice.css" />
+
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">nfflr 0.1.0 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/index.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/quickstart.html">Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/atoms.html">Atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">How-to guides</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="property-regression.html">Property regression example</a></li>
+
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="force-field-training.html">Property regression example</a></li>
+
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.Atoms.html">Atoms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr/issues/new?title=Issue%20on%20page%20%2Fhowto/eam-forces.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Checking autograd forces against analytical forces for Embedded Atom model</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tersoff-potential">Tersoff potential</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#small-silicon-system">Small silicon system</a></li>
+</ul>
+</li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="checking-autograd-forces-against-analytical-forces-for-embedded-atom-model">
+<h1>Checking autograd forces against analytical forces for Embedded Atom model<a class="headerlink" href="#checking-autograd-forces-against-analytical-forces-for-embedded-atom-model" title="Link to this heading">#</a></h1>
+<p>This notebook compares the forces computed with automatic differentiation (with respect to bond vectors, not atom coordinates) against the analytical forces for the <a class="reference external" href="https://www.ctcms.nist.gov/potentials/entry/1999--Mishin-Y-Farkas-D-Mehl-M-J-Papaconstantopoulos-D-A--Al/">Al99 Embedded Atom potential</a>, as implemented by <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/atoms.html">ASE</a>.</p>
+<p>First, fetch the EAM potential data from interatomic potentials repository:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>curl<span class="w"> </span>https://www.ctcms.nist.gov/potentials/Download/1999--Mishin-Y-Farkas-D-Mehl-M-J-Papaconstantopoulos-D-A--Al/2/Al99.eam.alloy<span class="w"> </span>-o<span class="w"> </span>Al99.eam.alloy
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100  762k  100  762k    0     0  3474k      0 --:--:-- --:--:-- --:--:-- 3480k
+</pre></div>
+</div>
+</div>
+</div>
+<p>Gradient checking is best done in 64-bit floating point precision:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">plum</span> <span class="kn">import</span> <span class="n">activate_autoreload</span>
+<span class="n">activate_autoreload</span><span class="p">()</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.eam</span> <span class="kn">import</span> <span class="n">EAM</span>
+<span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">bulk</span>
+
+<span class="kn">from</span> <span class="nn">nfflr.data</span> <span class="kn">import</span> <span class="n">graph</span>
+<span class="kn">from</span> <span class="nn">nfflr.data.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span> <span class="nn">nfflr.models.classical.eam</span> <span class="kn">import</span> <span class="n">TorchEAM</span>
+
+<span class="n">torch</span><span class="o">.</span><span class="n">set_default_dtype</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">12</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="kn">from</span> <span class="nn">nfflr.data</span> <span class="kn">import</span> <span class="n">graph</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="kn">from</span> <span class="nn">nfflr.data.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="ne">---&gt; </span><span class="mi">12</span> <span class="kn">from</span> <span class="nn">nfflr.models.classical.eam</span> <span class="kn">import</span> <span class="n">TorchEAM</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="n">torch</span><span class="o">.</span><span class="n">set_default_dtype</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">nfflr</span><span class="o">/</span><span class="n">nfflr</span><span class="o">/</span><span class="n">nfflr</span><span class="o">/</span><span class="n">models</span><span class="o">/</span><span class="n">classical</span><span class="o">/</span><span class="n">eam</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">12</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="kn">import</span> <span class="nn">torch</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="ne">---&gt; </span><span class="mi">12</span> <span class="kn">from</span> <span class="nn">torchcubicspline</span> <span class="kn">import</span> <span class="n">natural_cubic_spline_coeffs</span><span class="p">,</span> <span class="n">NaturalCubicSpline</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="kn">import</span> <span class="nn">nfflr</span>
+<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="nd">@dataclass</span>
+<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="k">class</span> <span class="nc">EAMData</span><span class="p">:</span>
+
+<span class="ne">ModuleNotFoundError</span>: No module named &#39;torchcubicspline&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>We set up a small FCC aluminum system and add a small amount of jitter to the atomic coordinates:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up a small bulk Aluminum calculation</span>
+<span class="n">a</span> <span class="o">=</span> <span class="mf">4.05</span>  
+<span class="n">al_ase</span> <span class="o">=</span> <span class="n">bulk</span><span class="p">(</span><span class="s2">&quot;Al&quot;</span><span class="p">,</span> <span class="s2">&quot;fcc&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">al_ase</span><span class="o">.</span><span class="n">rattle</span><span class="p">(</span><span class="n">stdev</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">al_ase</span><span class="o">.</span><span class="n">wrap</span><span class="p">()</span>
+<span class="n">ase_eam</span> <span class="o">=</span> <span class="n">EAM</span><span class="p">(</span><span class="n">potential</span><span class="o">=</span><span class="s2">&quot;Al99.eam.alloy&quot;</span><span class="p">)</span>
+<span class="n">al_ase</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">ase_eam</span><span class="p">)</span>
+
+<span class="c1"># set up pytorch version</span>
+<span class="n">al</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">al_ase</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">al_ase</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">(),</span> <span class="n">al_ase</span><span class="o">.</span><span class="n">numbers</span><span class="p">)</span>
+<span class="n">torch_eam</span> <span class="o">=</span> <span class="n">TorchEAM</span><span class="p">(</span><span class="s2">&quot;Al99.eam.alloy&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The ASE implementation computes the forces using the analytical gradients of the EAM spline components, while the pytorch implementation uses automatic differentiation to compute the gradient of the energy with respect to the bond displacement vectors. A <a class="reference external" href="https://github.com/usnistgov/nfflr/blob/2026152caa6beab2fa0dcf066288223726e78215/nfflr/models/utils.py#L43-L51">sum reduction </a> is used to aggregate these into the force components on individual atoms.</p>
+<p>Both the energies and the force components on all the atoms match to within floating point precision:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># construct radius graph matching ASE cutoff</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">periodic_radius_graph</span><span class="p">(</span><span class="n">al</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">torch_eam</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="c1"># evaluate energies and forces with pytorch implementation</span>
+<span class="n">e_dgl</span><span class="p">,</span> <span class="n">force_dgl</span> <span class="o">=</span> <span class="n">torch_eam</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="n">e_dgl</span><span class="p">,</span> <span class="n">force_dgl</span> <span class="o">=</span> <span class="n">e_dgl</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">force_dgl</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+
+<span class="c1"># evaluate energy and forces with ASE</span>
+<span class="n">e_ase</span> <span class="o">=</span> <span class="n">al_ase</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
+<span class="n">force_ase</span> <span class="o">=</span> <span class="n">al_ase</span><span class="o">.</span><span class="n">get_forces</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">al_ase</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e_dgl</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;potential energy matches: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">e_ase</span><span class="p">,</span><span class="w"> </span><span class="n">e_dgl</span><span class="o">.</span><span class="n">item</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;force components match? : </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">force_ase</span><span class="p">,</span><span class="w"> </span><span class="n">force_dgl</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/bld/.pyenv/versions/3.10.9/envs/nfflr/lib/python3.10/site-packages/dgl/backend/pytorch/tensor.py:445: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  assert input.numel() == input.storage().size(), (
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>al_ase.get_potential_energy()=-214.15885773313198
+e_dgl.detach().item()=-214.15885773313158
+potential energy matches: True
+force components match? : True
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="tersoff-potential">
+<h1>Tersoff potential<a class="headerlink" href="#tersoff-potential" title="Link to this heading">#</a></h1>
+<p>This section performs the same diagnostic using the Tersoff potential, as implemented by LAMMPS.
+This demonstrates that forces computed by autograd with respect to relative position vectors reduce to the correct atomic forces.</p>
+<p>The parameters used correspond to https://www.ctcms.nist.gov/potentials/entry/1988–Tersoff-J–Si-b/:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>curl<span class="w"> </span>https://www.ctcms.nist.gov/potentials/Download/1988--Tersoff-J--Si-b/1/1988_Si<span class="se">\(</span>B<span class="se">\)</span>.tersoff<span class="w"> </span>-o<span class="w"> </span>Si.tersoff
+<span class="o">!</span>cat<span class="w"> </span>Si.tersoff
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   532  100   532    0     0   1299      0 --:--:-- --:--:-- --:--:--  1310
+# Parameters for the Tersoff Si(B) potential. CITATION: J. Tersoff, Phys. Rev. B 37, 6991 (1988)
+
+# Parameter values verified by Lucas Hale.
+# Identical values in Si.tersoff of August 22, 2018 LAMMPS distribution.
+# Identical values in openKIM model MO_245095684871_001 parameter file.
+
+# Values are in LAMMPS &quot;metal&quot; units.
+
+# e1 e2 e3 m   gamma lambda3 c      d      costheta0 n      beta    lambda2 B      R   D   lambda1 A
+  Si Si Si 3.0 1.0   1.3258  4.8381 2.0417 0.0       22.956 0.33675 1.3258  95.373 3.0 0.2 3.2394  3264.7
+</pre></div>
+</div>
+</div>
+</div>
+<p>The ASE LAMMPS calculator seems to still have issues parsing thermo data from lammps log files;
+we can work around that in the short term by monkey-patching <code class="docutils literal notranslate"><span class="pre">read_lammps_log</span></code> following the <a class="reference external" href="https://gitlab.com/ase/ase/-/issues/1096">discussion here</a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.lammpsrun</span> <span class="kn">import</span> <span class="n">LAMMPS</span>
+
+<span class="kn">from</span> <span class="nn">ase.parallel</span> <span class="kn">import</span> <span class="n">paropen</span>
+<span class="kn">from</span> <span class="nn">re</span> <span class="kn">import</span> <span class="nb">compile</span> <span class="k">as</span> <span class="n">re_compile</span><span class="p">,</span> <span class="n">IGNORECASE</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.lammps</span> <span class="kn">import</span> <span class="n">CALCULATION_END_MARK</span>
+
+<span class="k">def</span> <span class="nf">read_lammps_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lammps_log</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thermo_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monkey patched calc.read_lammps_log based on https://gitlab.com/ase/ase/-/issues/1096</span>
+<span class="sd">    </span>
+<span class="sd">    Method which reads a LAMMPS output log file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">thermo_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">thermo_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">thermo_args</span>
+
+    <span class="k">if</span> <span class="n">lammps_log</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lammps_log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;.log&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lammps_log</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">fileobj</span> <span class="o">=</span> <span class="n">paropen</span><span class="p">(</span><span class="n">lammps_log</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+        <span class="n">close_log_file</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Expect lammps_in to be a file-like object</span>
+        <span class="n">fileobj</span> <span class="o">=</span> <span class="n">lammps_log</span>
+        <span class="n">close_log_file</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># read_log depends on that the first (three) thermo_style custom args</span>
+    <span class="c1"># can be capitalized and matched against the log output. I.e.</span>
+    <span class="c1"># don&#39;t use e.g. &#39;ke&#39; or &#39;cpu&#39; which are labeled KinEng and CPU.</span>
+    <span class="c1"># mark_re = r&quot;^\s*&quot; + r&quot;\s+&quot;.join(</span>
+    <span class="c1">#     [x.capitalize() for x in thermo_args[0:3]]</span>
+    <span class="c1"># )</span>
+    <span class="c1"># _custom_thermo_mark = re_compile(mark_re)</span>
+    <span class="n">mark_re</span> <span class="o">=</span> <span class="s2">&quot;^\s*&quot;</span> <span class="o">+</span> <span class="s2">&quot;\s*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">thermo_args</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]]</span>
+    <span class="p">)</span>
+    <span class="n">_custom_thermo_mark</span> <span class="o">=</span> <span class="n">re_compile</span><span class="p">(</span><span class="n">mark_re</span><span class="p">)</span>
+
+    <span class="c1"># !TODO: regex-magic necessary?</span>
+    <span class="c1"># Match something which can be converted to a float</span>
+    <span class="n">f_re</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;([+-]?(?:(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?|nan|inf))&quot;</span>
+    <span class="n">n_args</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">thermo_args</span><span class="p">)</span>
+    <span class="c1"># Create a re matching exactly N white space separated floatish things</span>
+    <span class="n">_custom_thermo_re</span> <span class="o">=</span> <span class="n">re_compile</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s2">&quot;^\s*&quot;</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f_re</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_args</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;\s*$&quot;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">IGNORECASE</span>
+    <span class="p">)</span>
+
+    <span class="n">thermo_content</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="n">CALCULATION_END_MARK</span><span class="p">:</span>
+        <span class="c1"># check error</span>
+        <span class="k">if</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">close_log_file</span><span class="p">:</span>
+                <span class="n">fileobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;LAMMPS exits with error message: </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># get thermo output</span>
+        <span class="k">if</span> <span class="n">_custom_thermo_mark</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+            <span class="n">bool_match</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">while</span> <span class="n">bool_match</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                <span class="n">bool_match</span> <span class="o">=</span> <span class="n">_custom_thermo_re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">bool_match</span><span class="p">:</span>
+                    <span class="c1"># create a dictionary between each of the</span>
+                    <span class="c1"># thermo_style args and it&#39;s corresponding value</span>
+                    <span class="n">thermo_content</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="nb">dict</span><span class="p">(</span>
+                            <span class="nb">zip</span><span class="p">(</span>
+                                <span class="n">thermo_args</span><span class="p">,</span>
+                                <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">bool_match</span><span class="o">.</span><span class="n">groups</span><span class="p">()),</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">close_log_file</span><span class="p">:</span>
+        <span class="n">fileobj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">thermo_content</span> <span class="o">=</span> <span class="n">thermo_content</span>
+    <span class="c1"># return thermo_content</span>
+
+    
+<span class="c1"># monkey patch the LAMMPS log parser</span>
+<span class="n">LAMMPS</span><span class="o">.</span><span class="n">read_lammps_log</span> <span class="o">=</span> <span class="n">read_lammps_log</span> 
+</pre></div>
+</div>
+</div>
+</div>
+<section id="small-silicon-system">
+<h2>Small silicon system<a class="headerlink" href="#small-silicon-system" title="Link to this heading">#</a></h2>
+<p>Now, set up a small Si system and a LAMMPS calculator to serve as the reference Tersoff potential implementation:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up a small Si example crystal</span>
+<span class="n">si_ase</span> <span class="o">=</span> <span class="n">bulk</span><span class="p">(</span><span class="s2">&quot;Si&quot;</span><span class="p">,</span> <span class="s2">&quot;diamond&quot;</span><span class="p">,</span> <span class="mf">5.43</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">si_ase</span><span class="o">.</span><span class="n">rattle</span><span class="p">(</span><span class="n">stdev</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">36</span><span class="p">)</span>
+<span class="n">si_ase</span><span class="o">.</span><span class="n">wrap</span><span class="p">()</span>
+
+<span class="c1"># configure LAMMPS Tersoff potential</span>
+<span class="n">calc</span> <span class="o">=</span> <span class="n">LAMMPS</span><span class="p">()</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;command&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;/opt/homebrew/bin/lmp_serial&quot;</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;files&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Si.tersoff&quot;</span><span class="p">]</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;binary_dump&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="p">{</span><span class="s2">&quot;pair_style&quot;</span><span class="p">:</span> <span class="s2">&quot;tersoff&quot;</span><span class="p">,</span> <span class="s2">&quot;pair_coeff&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;* * Si.tersoff Si&quot;</span><span class="p">]}</span>
+    <span class="p">)</span>
+<span class="n">si_ase</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">calc</span><span class="p">)</span>
+
+<span class="c1"># calculate Tersoff energy and forces with LAMMPS</span>
+<span class="n">e_lammps</span> <span class="o">=</span> <span class="n">si_ase</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
+<span class="n">f_lammps</span> <span class="o">=</span> <span class="n">si_ase</span><span class="o">.</span><span class="n">get_forces</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e_lammps</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f_lammps</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>e_lammps=-592.3985671491665
+f_lammps[:5]=array([[-0.20522987, -0.26851818,  0.14179856],
+       [ 0.06219078,  0.05221548,  0.0728464 ],
+       [ 0.03842853, -0.02849059,  0.04544221],
+       [-0.21198316,  0.12308603, -0.00683117],
+       [ 0.5269759 , -0.12608296,  0.29867076]])
+</pre></div>
+</div>
+</div>
+</div>
+<p>And</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.models.classical.tersoff</span> <span class="kn">import</span> <span class="n">TersoffConfig</span><span class="p">,</span> <span class="n">Tersoff</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">periodic_radius_graph</span><span class="p">(</span><span class="n">Atoms</span><span class="p">(</span><span class="n">si_ase</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">tersoff</span> <span class="o">=</span> <span class="n">Tersoff</span><span class="p">()</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">tersoff</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="n">e_tersoff</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;total_energy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+<span class="n">f_tersoff</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+<span class="n">stress_tersoff</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">/</span> <span class="n">si_ase</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e_tersoff</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f_tersoff</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">stress_tersoff</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>e_tersoff=tensor(-592.3986)
+f_tersoff[:5]=tensor([[-0.2052, -0.2685,  0.1418],
+        [ 0.0622,  0.0522,  0.0728],
+        [ 0.0384, -0.0285,  0.0454],
+        [-0.2120,  0.1231, -0.0068],
+        [ 0.5270, -0.1261,  0.2987]])
+stress_tersoff=tensor([[[-6.5235e-04,  1.6092e-03,  4.2400e-04],
+         [ 1.6092e-03, -6.5744e-04,  2.0972e-06],
+         [ 4.2400e-04,  2.0972e-06, -6.4832e-04]]])
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/bld/.pyenv/versions/3.10.9/envs/nfflr/lib/python3.10/site-packages/dgl/backend/pytorch/tensor.py:445: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  assert input.numel() == input.storage().size(), (
+</pre></div>
+</div>
+</div>
+</div>
+<p>The total energies match to within numerical precision:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">e_tersoff</span><span class="p">,</span> <span class="n">e_lammps</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True
+</pre></div>
+</div>
+</div>
+</div>
+<p>And so do the forces (using the numerical precision settings used by <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.autograd.gradcheck.html">torch.autograd.gradcheck</a>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">f_lammps</span><span class="p">,</span> <span class="n">f_tersoff</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True
+</pre></div>
+</div>
+</div>
+</div>
+<p>The largest force component discrepancy is about <span class="math notranslate nohighlight">\(7 \times 10^{-7} \; eV/\mathrm{\AA}\)</span></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">f_lammps</span> <span class="o">-</span> <span class="n">f_tersoff</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>6.749736085540081e-07
+</pre></div>
+</div>
+</div>
+</div>
+<p>And the stress tensor values also match:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">si_ase</span><span class="o">.</span><span class="n">get_stress</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([-6.52352915e-04, -6.57444097e-04, -6.48324331e-04,  2.09715783e-06,
+        4.23995521e-04,  1.60922348e-03])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span>
+    <span class="n">stress_tersoff</span><span class="p">,</span> 
+    <span class="n">ase</span><span class="o">.</span><span class="n">stress</span><span class="o">.</span><span class="n">voigt_6_to_full_3x3_stress</span><span class="p">(</span><span class="n">si_ase</span><span class="o">.</span><span class="n">get_stress</span><span class="p">())</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[[ True,  True,  True],
+        [ True,  True,  True],
+        [ True,  True,  True]]])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="property-regression.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Property regression example</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="force-field-training.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Property regression example</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tersoff-potential">Tersoff potential</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#small-silicon-system">Small silicon system</a></li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Brian DeCost
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Brian DeCost.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

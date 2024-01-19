@@ -1,0 +1,925 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Property regression example &#8212; nfflr 0.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=a1637f0b"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/force-field-training';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Reference" href="../reference/index.html" />
+    <link rel="prev" title="Checking autograd forces against analytical forces for Embedded Atom model" href="eam-forces.html" />
+<!-- <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css"> -->
+
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+<script async type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-66610693-1&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c">
+</script>
+
+
+<script type="text/javascript" src="https://pages.nist.gov/leaveNotice/js/jquery.leaveNotice-nist.min.js"></script>
+<script>
+$(document).ready(function(){
+  // Mark external (non-nist.gov) A tags with class "external"
+  //If the adress start with https and ends with nist.gov
+  var re_nist = new RegExp('^https?:\/\/((^\/)*\.)*nist\\.gov(\/|$)');
+  //Regex to find address that start with https
+  var re_absolute_address = new RegExp('^((https?:)?\/\/)');
+  $("a").each(function(){
+    var url=$(this).attr('href');
+    if(re_nist.test(url) || !re_absolute_address.test(url)){
+      $(this).addClass('local');
+    }else{
+      //This a href appears to be external, so tag it
+      $(this).addClass('external');
+    }
+  });
+  // Add leaveNotice to external A elements
+  $('a.external').leaveNotice();
+});
+</script>
+<link rel="stylesheet" type="text/css" href="https://pages.nist.gov/leaveNotice/css/jquery.leaveNotice.css" />
+
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">nfflr 0.1.0 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../tutorials/index.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/quickstart.html">Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/atoms.html">Atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">How-to guides</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="property-regression.html">Property regression example</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Property regression example</a></li>
+
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.Atoms.html">Atoms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr/issues/new?title=Issue%20on%20page%20%2Fhowto/force-field-training.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Property regression example</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Property regression example</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#low-level-interface">low level interface</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-ignite-based-nfflr-trainer">using the ignite-based NFFLr trainer</a></li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="property-regression-example">
+<h1>Property regression example<a class="headerlink" href="#property-regression-example" title="Link to this heading">#</a></h1>
+<section id="low-level-interface">
+<h2>low level interface<a class="headerlink" href="#low-level-interface" title="Link to this heading">#</a></h2>
+<p>To show how the components of NFFLr work together, let’s train a formation energy model using the <code class="docutils literal notranslate"><span class="pre">dft_3d</span></code> dataset.
+We can use the <code class="docutils literal notranslate"><span class="pre">periodic_radius_graph</span></code> transform to configure the <code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code> to automatically transform atomic configurations into <code class="docutils literal notranslate"><span class="pre">DGLGraph</span></code>s.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.data.dataset</span> <span class="kn">import</span> <span class="n">AtomsDataset</span>
+<span class="kn">from</span> <span class="nn">nfflr.nn.transform</span> <span class="kn">import</span> <span class="n">PeriodicRadiusGraph</span>
+
+<span class="n">transform</span> <span class="o">=</span> <span class="n">PeriodicRadiusGraph</span><span class="p">(</span><span class="n">cutoff</span><span class="o">=</span><span class="mf">8.0</span><span class="p">)</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">AtomsDataset</span><span class="p">(</span>
+    <span class="s2">&quot;mlearn&quot;</span><span class="p">,</span> 
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;energy_and_forces&quot;</span><span class="p">,</span> 
+    <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dataset_name=&#39;mlearn&#39;
+Obtaining mlearn dataset 1730...
+Reference:https://github.com/materialsvirtuallab/mlearn
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 0.00/2.57M [00:00&lt;?, ?iB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  2%|▏         | 60.4k/2.57M [00:00&lt;00:05, 443kiB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 10%|█         | 269k/2.57M [00:00&lt;00:02, 1.06MiB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 45%|████▍     | 1.16M/2.57M [00:00&lt;00:00, 3.45MiB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 2.57M/2.57M [00:00&lt;00:00, 5.20MiB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loading the zipfile...
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loading completed.
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=107, num_edges=20940,
+       ndata_schemes={&#39;Xfrac&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
+       edata_schemes={&#39;r&#39;: Scheme(shape=(3,), dtype=torch.float32)}),
+ {&#39;energy&#39;: tensor(-64656.0625),
+  &#39;forces&#39;: tensor([[-1.9282e-01, -1.8793e+00, -6.6374e-01],
+          [-8.2543e-03, -2.0313e-01,  3.6808e-01],
+          [-5.5372e-01, -1.4736e+00,  1.2997e+00],
+          [ 4.5678e-01,  5.1175e-01, -1.0934e+00],
+          [-1.6499e+00, -1.6259e+00,  4.5255e-01],
+          [-1.6698e-01,  6.8080e-01,  6.7749e-01],
+          [ 3.6802e-02, -3.1423e+00, -2.0166e+00],
+          [-1.0730e-01, -3.5780e-01,  1.1357e+00],
+          [-1.9132e-01,  5.1381e-01,  3.4296e-01],
+          [ 2.0090e+00,  1.5143e+00, -3.5578e-01],
+          [-1.7128e-01, -2.7808e+00, -1.4215e+00],
+          [-9.3987e-01, -1.6757e-02,  7.9322e-01],
+          [ 3.7190e-01, -9.0627e-01, -5.2933e-01],
+          [ 5.6458e-01, -9.6833e-01, -7.0043e-01],
+          [-4.5756e-01, -6.5868e-02, -3.7038e-01],
+          [-1.2044e+00,  6.3979e-01,  7.5036e-01],
+          [-1.5743e+00,  6.4479e-02, -6.7272e-01],
+          [-9.8223e-01, -9.5903e-02, -8.7198e-01],
+          [ 4.9518e-01, -2.7982e-01, -4.6208e-01],
+          [ 3.3000e-01,  1.7643e-01,  2.0947e+00],
+          [ 3.3517e-01,  1.4522e+00,  3.6359e-01],
+          [-4.4930e-01, -3.1648e-01,  2.1246e-01],
+          [-5.8361e-01,  1.0337e+00, -1.0099e+00],
+          [ 1.4334e+00,  1.4563e+00,  4.8775e-01],
+          [-1.2193e+00, -1.8368e-01,  1.7678e-01],
+          [-1.8822e-02, -3.3724e-01,  5.0373e-01],
+          [ 9.7925e-01,  3.4629e-01,  2.7126e-01],
+          [ 1.3972e+00,  1.0313e-01,  2.1936e+00],
+          [ 1.4154e+00,  1.0657e+00,  5.6893e-01],
+          [-5.3909e-01,  6.2667e-01,  7.9585e-01],
+          [-8.0468e-02,  9.3723e-01, -1.7657e+00],
+          [ 6.4826e-01,  1.3950e-03, -1.1809e+00],
+          [ 1.7236e+00,  5.0571e-01,  2.0909e-01],
+          [-6.3469e-01,  3.2798e+00,  1.3690e+00],
+          [-2.8363e-01,  1.3372e+00, -3.8005e-01],
+          [-1.0848e+00, -5.7622e-01, -6.1141e-01],
+          [-1.8884e+00,  5.1697e-01, -1.0889e-01],
+          [-5.3894e-01,  2.1740e+00,  2.2013e+00],
+          [ 1.5727e+00, -9.5217e-01,  9.6934e-01],
+          [ 3.8191e-01,  3.4829e-01,  1.2664e+00],
+          [-1.1411e+00,  1.2328e+00,  1.2866e+00],
+          [ 1.1776e+00,  7.2366e-01, -1.5056e+00],
+          [-1.3455e+00, -4.8714e-01,  4.1776e-01],
+          [ 2.7808e-01, -1.4488e-01,  1.2792e+00],
+          [-2.0664e-01,  1.4243e+00,  1.2686e+00],
+          [ 1.3897e+00,  7.7333e-01, -8.4011e-01],
+          [-7.0459e-01, -2.1634e+00,  1.0630e+00],
+          [-9.9009e-01, -6.2214e-01, -9.4072e-03],
+          [ 3.3802e-01,  3.1611e-01,  1.3336e-01],
+          [-1.2308e+00, -2.7998e-01, -9.0719e-01],
+          [ 1.5169e+00, -6.4886e-01, -1.4431e+00],
+          [ 2.3966e+00,  1.3065e+00,  3.9503e-01],
+          [ 4.8711e-01,  2.6996e-03,  5.6954e-01],
+          [ 3.0038e-02,  9.8048e-01,  9.6736e-02],
+          [-2.8896e-01,  6.9839e-01,  1.1865e-01],
+          [-7.0303e-01,  1.5889e+00,  1.0517e+00],
+          [ 1.4835e+00, -7.5193e-01, -4.8107e-01],
+          [ 4.3507e-01, -7.6680e-01, -7.6512e-01],
+          [ 1.6324e+00, -9.0497e-01, -1.7391e-01],
+          [-7.7163e-01,  8.8480e-01, -1.0546e-01],
+          [ 1.5508e+00, -1.4519e-01, -6.3183e-01],
+          [ 1.4062e+00,  4.8017e-01,  2.4209e-01],
+          [-8.2076e-01, -1.1055e+00, -3.7652e-01],
+          [-1.7866e+00, -1.0725e-01, -7.5774e-01],
+          [ 6.6219e-01, -1.1061e+00,  6.6820e-01],
+          [ 4.5689e-01, -3.1297e-01,  5.2079e-01],
+          [-2.3750e-01,  1.6904e+00, -7.2430e-01],
+          [ 1.5449e+00,  1.4885e+00, -5.6164e-01],
+          [ 1.6403e+00, -1.3929e+00, -1.3473e-01],
+          [-5.0026e-01, -7.1965e-01, -6.3690e-01],
+          [ 1.8875e-01, -8.0416e-01,  1.0578e+00],
+          [ 7.4767e-01, -2.7263e-01,  1.0396e-01],
+          [ 1.0797e+00,  6.2834e-01, -1.0441e+00],
+          [-9.1592e-01, -1.0053e+00, -1.6651e-01],
+          [-2.4538e-01,  1.1315e+00, -2.5051e-01],
+          [-2.6349e-01, -3.9915e-01,  5.2209e-01],
+          [ 8.3324e-01,  2.9588e-02,  4.1156e-01],
+          [ 1.3736e-01,  5.2689e-01, -7.6983e-01],
+          [ 1.8699e+00, -5.6415e-01, -1.2089e+00],
+          [-8.2056e-01, -5.2394e-01, -1.0657e-01],
+          [-1.3969e-01, -2.1350e-01,  2.1012e-01],
+          [-8.5827e-01, -2.9145e-01, -8.8987e-02],
+          [-2.7861e-01, -6.4112e-01,  2.7514e-01],
+          [-7.0377e-01, -1.6119e-01, -1.6974e-02],
+          [-4.9227e-01, -5.5502e-01, -1.6419e+00],
+          [ 1.3265e+00,  5.1135e-01, -2.0431e-01],
+          [-6.3025e-01, -4.0777e-01, -7.4116e-01],
+          [-2.7982e+00, -8.6561e-01,  7.2870e-01],
+          [ 4.4176e-01, -6.1487e-01, -1.5266e+00],
+          [-8.2469e-01, -1.5254e+00,  2.2129e-01],
+          [-4.1837e-01,  4.5957e-01, -9.3009e-01],
+          [-1.3448e+00, -3.8741e-01,  5.7946e-01],
+          [-3.5803e-02, -4.9431e-01, -3.3611e-01],
+          [ 1.3890e+00, -2.3396e-01, -5.8913e-01],
+          [ 4.6561e-01, -1.6739e+00, -5.8580e-01],
+          [-5.4732e-02,  1.2076e+00, -6.2845e-01],
+          [-1.9202e+00,  2.6483e-01, -4.7163e-01],
+          [ 2.3382e-01, -1.9371e-01,  8.8642e-01],
+          [-5.4136e-02,  7.5257e-01, -7.5428e-01],
+          [-1.2954e+00, -8.2409e-01, -2.3798e-01],
+          [ 2.2413e-01, -5.5878e-02, -5.6709e-01],
+          [ 1.0508e+00,  4.7083e-01,  1.0494e+00],
+          [ 1.1418e+00,  3.9075e-01,  2.2798e-01],
+          [-1.6860e+00,  8.3186e-01,  7.9992e-01],
+          [-1.1271e+00,  7.7508e-02,  9.2828e-01],
+          [-1.0157e+00,  5.2795e-01, -1.9179e-01],
+          [ 4.6428e-01, -1.5829e-01,  7.1079e-01]]),
+  &#39;stresses&#39;: tensor([[41.4064,  5.9450, -4.7715],
+          [ 5.9450, 41.1876,  1.0425],
+          [-4.7715,  1.0425, 51.0653]]),
+  &#39;volume&#39;: tensor(1165.6177)})
+</pre></div>
+</div>
+</div>
+</div>
+<p>Set up a medium-sized ALIGNN model:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.models.gnn</span> <span class="kn">import</span> <span class="n">alignn</span>
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">alignn</span><span class="o">.</span><span class="n">ALIGNNConfig</span><span class="p">(</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+    <span class="n">cutoff</span><span class="o">=</span><span class="p">(</span><span class="mf">7.5</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span>
+    <span class="n">alignn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+    <span class="n">gcn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+    <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;layernorm&quot;</span><span class="p">,</span> 
+    <span class="n">atom_features</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span><span class="p">,</span>
+    <span class="n">compute_forces</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">alignn</span><span class="o">.</span><span class="n">ALIGNN</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+<span class="n">atoms</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">model</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">14</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="n">model</span> <span class="o">=</span> <span class="n">alignn</span><span class="o">.</span><span class="n">ALIGNN</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="ne">---&gt; </span><span class="mi">14</span> <span class="n">model</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1518,</span> in <span class="ni">Module._wrapped_call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1516</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compiled_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
+<span class="g g-Whitespace">   </span><span class="mi">1517</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1518</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1527,</span> in <span class="ni">Module._call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1522</span> <span class="c1"># If we don&#39;t have any hooks, we want to skip the rest of the logic in</span>
+<span class="g g-Whitespace">   </span><span class="mi">1523</span> <span class="c1"># this function, and just call forward.</span>
+<span class="g g-Whitespace">   </span><span class="mi">1524</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backward_pre_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_pre_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1525</span>         <span class="ow">or</span> <span class="n">_global_backward_pre_hooks</span> <span class="ow">or</span> <span class="n">_global_backward_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1526</span>         <span class="ow">or</span> <span class="n">_global_forward_hooks</span> <span class="ow">or</span> <span class="n">_global_forward_pre_hooks</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1527</span>     <span class="k">return</span> <span class="n">forward_call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1529</span> <span class="k">try</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1530</span>     <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/plum/function.py:489,</span> in <span class="ni">_BoundFunction.__call__</span><span class="nt">(self, _, *args, **kw_args)</span>
+<span class="g g-Whitespace">    </span><span class="mi">488</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">489</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/plum/function.py:399,</span> in <span class="ni">Function.__call__</span><span class="nt">(self, *args, **kw_args)</span>
+<span class="g g-Whitespace">    </span><span class="mi">397</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">398</span>     <span class="n">method</span><span class="p">,</span> <span class="n">return_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_method_with_cache</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">399</span>     <span class="k">return</span> <span class="n">_convert</span><span class="p">(</span><span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">),</span> <span class="n">return_type</span><span class="p">)</span>
+
+<span class="nn">File ~/work/nfflr/nfflr/nfflr/models/gnn/alignn.py:174,</span> in <span class="ni">ALIGNN.forward</span><span class="nt">(self, g)</span>
+<span class="g g-Whitespace">    </span><span class="mi">170</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_embedding</span><span class="p">(</span><span class="n">bondlength</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">172</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">173</span>     <span class="c1"># save cutoff function value for application in EdgeGatedGraphconv</span>
+<span class="ne">--&gt; </span><span class="mi">174</span>     <span class="n">g</span><span class="o">.</span><span class="n">edata</span><span class="p">[</span><span class="s2">&quot;cutoff_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cutoff</span><span class="p">(</span><span class="n">bondlength</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">176</span> <span class="c1"># initial triplet features</span>
+<span class="g g-Whitespace">    </span><span class="mi">177</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alignn_layers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+<span class="ne">TypeError</span>: &#39;tuple&#39; object is not callable
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">SubsetRandomSampler</span>
+
+<span class="n">batchsize</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="n">train_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="n">batchsize</span><span class="p">,</span> 
+    <span class="n">collate_fn</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">collate</span><span class="p">,</span> 
+    <span class="n">sampler</span><span class="o">=</span><span class="n">SubsetRandomSampler</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]),</span>
+    <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">train_loader</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=41, num_edges=2188,
+       ndata_schemes={&#39;Xfrac&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
+       edata_schemes={&#39;r&#39;: Scheme(shape=(3,), dtype=torch.float32)}),
+ tensor([0., 0.]))
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we can set up a PyTorch optimizer and objective function and optimize the model parameters with an explicit training loop. See the [PyTorch quickstart tutorial for more context)[https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html].</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="n">training_loss</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        
+        <span class="n">training_loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 19/19 [02:06&lt;00:00,  6.65s/it]
+100%|██████████| 19/19 [01:09&lt;00:00,  3.65s/it]
+100%|██████████| 19/19 [01:14&lt;00:00,  3.91s/it]
+100%|██████████| 19/19 [01:14&lt;00:00,  3.91s/it]
+100%|██████████| 19/19 [01:24&lt;00:00,  4.42s/it]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">training_loss</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;training iteration&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;loss&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/8609d7ab6648b16506b6e0478e19b1e005c4f8d2979c7fff5f6632f359d94a89.png" src="../_images/8609d7ab6648b16506b6e0478e19b1e005c4f8d2979c7fff5f6632f359d94a89.png" />
+</div>
+</div>
+</section>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="using-the-ignite-based-nfflr-trainer">
+<h1>using the ignite-based NFFLr trainer<a class="headerlink" href="#using-the-ignite-based-nfflr-trainer" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">nfflr</span> <span class="kn">import</span> <span class="n">train</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">training_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;dataset&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
+    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+    <span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">,</span>
+    <span class="s2">&quot;criterion&quot;</span><span class="p">:</span> <span class="n">criterion</span><span class="p">,</span>
+    <span class="s2">&quot;random_seed&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>
+    <span class="s2">&quot;weight_decay&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="s2">&quot;epochs&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">&quot;warmup_steps&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;progress&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;output_dir&quot;</span><span class="p">:</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+<span class="p">}</span>
+<span class="n">train</span><span class="o">.</span><span class="n">run_train</span><span class="p">(</span><span class="n">rank</span><span class="p">,</span> <span class="n">training_config</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-06-08 07:31:34,434 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
+	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x293eda560&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x2c9fb2c50&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
+2023-06-08 07:31:34,434 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
+	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x293eda560&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x2c984f790&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>starting training loop
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                               
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 1  Avg loss: 0.11
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                              
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 1  Avg loss: 3.52
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                               
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 2  Avg loss: 6.07
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                          
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 2  Avg loss: 3.54
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                              
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 3  Avg loss: 14.54
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                              
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 3  Avg loss: 0.19
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                               
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 4  Avg loss: 0.23
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                          
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 4  Avg loss: 3.54
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                               
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 5  Avg loss: 0.09
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                          
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 5  Avg loss: 3.45
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3.4533848762512207
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>ls
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>atoms.ipynb               property-regression.ipynb test.ipynb
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="eam-forces.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Checking autograd forces against analytical forces for Embedded Atom model</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../reference/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Property regression example</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#low-level-interface">low level interface</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-ignite-based-nfflr-trainer">using the ignite-based NFFLr trainer</a></li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Brian DeCost
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Brian DeCost.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
