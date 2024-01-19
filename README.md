@@ -2,6 +2,8 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/usnistgov/nfflr)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/usnistgov/nfflr)
+![Static Badge](https://img.shields.io/badge/docs-main-blue?link=https://pages.nist.gov/nfflr)
+
 
 # Table of Contents
 * [Introduction](#intro)
@@ -13,42 +15,30 @@
 
 <a name="intro"></a>
 # NFFLr (Introduction)
-The Neural Force Field Learning library ([docs](https://pages.nist.gov/nfflr/index.html)) is intended to be a flexible toolkit for developing and deploying atomistic machine learning systems, with a particular focus on crystalline material property and energy models.
+The Neural Force Field Learning library ([docs](https://pages.nist.gov/nfflr)) is intended to be a flexible toolkit for developing and deploying atomistic machine learning systems, with a particular focus on crystalline material property and energy models.
 
 The initial codebase is a fork of [ALIGNN](https://github.com/usnistgov/alignn), with modified configuration and modeling interfaces for performance.
 
 <a name="install"></a>
 Installation
--------------------------
-Until NFFLr is registered on PyPI, it's best to install directly from github.
+------------
 
 We recommend using a per-project [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) or [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) environment.
 
-#### Method 1 (using setup.py):
-
-Now, let's install the package:
-```
-git clone https://github.com/usnistgov/nfflr
-cd nfflr
-python -m pip install -e .
-```
-For using GPUs/CUDA, install dgl-cu101 or dgl-cu111 based on the CUDA version available on your system, e.g.
+To ensure proper CUDA support, make sure to install the GPU versions of [PyTorch](https://pytorch.org/get-started/locally/) and [DGL](https://www.dgl.ai/pages/start.html). For example, to set up a conda environment on linux with with python 3.10 and CUDA 12.1:
 
 ```
-pip install dgl-cu111
-```
-
-#### Method 2 (using pypi):
-
-Alternatively, install NFFLr directly from github using `pip`:
-```
-python -m pip install https://github.com/usnistgov/nfflr
+conda create --name myproject python=3.10
+conda activate myproject
+conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+conda install -c dglteam/label/cu121 dgl
+python -m pip install nfflr
 ```
 
 <a name="example"></a>
 Examples
----------
-[Under construction here.](https://pages.nist.gov/nfflr/examples.html)
+--------
+[Under construction here.](https://pages.nist.gov/nfflr/tutorials)
 
 
 <a name="contrib"></a>
