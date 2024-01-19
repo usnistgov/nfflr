@@ -177,8 +177,8 @@ class ALIGNN(torch.nn.Module):
         if len(self.alignn_layers) > 0:
             if lg is None:
                 lg = g.line_graph(shared=True)
-                lg.apply_edges(compute_bond_cosines)
 
+            lg.apply_edges(compute_bond_cosines)
             z = self.angle_embedding(lg.edata.pop("h"))
 
         # ALIGNN updates: update node, edge, triplet features

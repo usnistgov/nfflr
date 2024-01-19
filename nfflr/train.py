@@ -307,6 +307,7 @@ def run_lr(local_rank: int, config):
         # print("Suggested LR", lr_finder.lr_suggestion())
         ax = lr_finder.plot(display_suggestion=False)
         ax.loglog()
+        ax.set_ylim(None, 5.0)
         ax.figure.savefig("lr.png")
 
 
