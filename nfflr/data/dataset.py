@@ -207,7 +207,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         if self.target == "energy_and_forces":
             target = self.get_energy_and_forces(idx, n_atoms=n_atoms)
             # volume: abs(determinant(cell))
-            target["volume"] = atoms.lattice.det().abs().item()
+            target["volume"] = atoms.cell.det().abs().item()
             target = {k: to_tensor(t) for k, t in target.items()}
 
         else:
@@ -371,7 +371,13 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         if isinstance(atoms, list):
             g, lg = atoms
-            batch = ((g.to(device, non_blocking=non_blocking), lg.to(device, non_blocking=non_blocking)), targets)
+            batch = (
+                (
+                    g.to(device, non_blocking=non_blocking),
+                    lg.to(device, non_blocking=non_blocking),
+                ),
+                targets,
+            )
         else:
             batch = (atoms.to(device, non_blocking=non_blocking), targets)
 
@@ -407,7 +413,6 @@ class AtomsDataset(torch.utils.data.Dataset):
         inputs, targets = map(list, zip(*samples))
         graphs, line_graphs = map(list, zip(*inputs))
         return (dgl.batch(graphs), dgl.batch(line_graphs)), torch.tensor(targets)
-
 
     @staticmethod
     def collate_line_graph_ff(

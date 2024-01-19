@@ -8,7 +8,10 @@ import torch
 import numpy as np
 from scipy import spatial
 
-from nfflr.data.atoms import Atoms
+import nfflr
+from jarvis.core.atoms import Atoms as jAtoms
+
+# from nfflr.data.atoms import Atoms
 
 
 def compute_bond_cosines(edges):
@@ -30,15 +33,15 @@ def compute_bond_cosines(edges):
 
 
 def tile_supercell(
-    a: Atoms, r: float = 5, bond_tol: float = 0.15
+    a: nfflr.Atoms, r: float = 5, bond_tol: float = 0.15
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Construct supercell coordinate array with indices to atoms in (000) image."""
     n = len(a)
     Xfrac = a.positions.clone().detach()
-    Xcart = Xfrac @ a.lattice
+    Xcart = Xfrac @ a.cell
 
     # cutoff -> calculate which periodic images to consider
-    recp = 2 * np.pi * torch.linalg.inv(a.lattice.T)
+    recp = 2 * np.pi * torch.linalg.inv(a.cell.T)
     recp_len = torch.sqrt(torch.sum(recp**2, dim=1))
     # recp_len = torch.tensor(a.lattice.reciprocal_lattice().abc)
 
@@ -56,7 +59,7 @@ def tile_supercell(
 
     # tile periodic images into X_dst
     # index id_dst into X_dst maps to atom id as id_dest % num_atoms
-    X_supercell = (cell_images @ a.lattice).unsqueeze(1) + Xcart
+    X_supercell = (cell_images @ a.cell).unsqueeze(1) + Xcart
     X_supercell = X_supercell.reshape(-1, 3)
 
     return X_supercell, root_ids
@@ -97,7 +100,7 @@ def reduce_supercell_graph(g: dgl.DGLGraph, root_ids: torch.Tensor) -> dgl.DGLGr
 
 
 def periodic_radius_graph_dgl(
-    a: Atoms, r: float = 5, bond_tol: float = 0.15
+    a: nfflr.Atoms, r: float = 5, bond_tol: float = 0.15
 ) -> dgl.DGLGraph:
     """Build periodic radius graph for crystal.
 
@@ -105,7 +108,7 @@ def periodic_radius_graph_dgl(
     """
     # X_supercell, root_ids = tile_supercell(a, r, bond_tol)
     _, X_supercell, root_ids = tile_supercell_2(
-        a.positions.double(), a.lattice.double(), r, bond_tol
+        a.positions.double(), a.cell.double(), r, bond_tol
     )
 
     # build radius graph in supercell
@@ -117,7 +120,7 @@ def periodic_radius_graph_dgl(
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
-    # fractional coordinates and lattice matrix and compute cartesian coordinates
+    # fractional coordinates and cell matrix and compute cartesian coordinates
     # and bond distances on demand?
     g.ndata["Xfrac"] = a.positions
 
@@ -127,23 +130,23 @@ def periodic_radius_graph_dgl(
 
     # # tile periodic images into X_dst
     # # index id_dst into X_dst maps to atom id as id_dest % num_atoms
-    # X_dst = (cell_images @ lattice_matrix)[:, None, :] + X_src
+    # X_dst = (cell_images @ cell_matrix)[:, None, :] + X_src
     # X_dst = X_dst.reshape(-1, 3)
 
 
 def tile_supercell_2(
-    Xfrac, lattice, r: float = 5, bond_tol: float = 0.15
+    Xfrac, cell, r: float = 5, bond_tol: float = 0.15
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Construct supercell coordinate array with indices to atoms in (000) image."""
 
     # X_src = torch.tensor(a.cart_coords, dtype=precision)
     # lattice_matrix = torch.tensor(a.lattice_mat, dtype=precision)
     n, _ = Xfrac.shape
-    Xcart = Xfrac @ lattice
+    Xcart = Xfrac @ cell
 
     # cutoff -> calculate which periodic images to consider
     # recp_len = np.array(a.lattice.reciprocal_lattice().abc)
-    recp = 2 * np.pi * torch.linalg.inv(lattice.T)
+    recp = 2 * np.pi * torch.linalg.inv(cell.T)
     recp_len = torch.sqrt(torch.sum(recp**2, dim=1))
 
     # maxr =  np.ceil((r + bond_tol) * recp_len / (2 * np.pi))
@@ -171,7 +174,7 @@ def tile_supercell_2(
     # index id_dst into X_dst maps to atom id as id_dest % num_atoms
 
     # X_dst = (cell_images @ lattice_matrix)[:, None, :] + X_src
-    X_supercell = (cell_images @ lattice).unsqueeze(1) + Xcart
+    X_supercell = (cell_images @ cell).unsqueeze(1) + Xcart
 
     # X_dst = X_dst.reshape(-1, 3)
     X_supercell = X_supercell.reshape(-1, 3)
@@ -179,12 +182,12 @@ def tile_supercell_2(
     return Xcart, X_supercell, root_ids, cell_images
 
 
-def pad_ghost_region(atoms: Atoms, cutoff: float = 5):
+def pad_ghost_region(atoms: nfflr.Atoms, cutoff: float = 5):
     """Pad ghost atoms using supercell tiling method."""
 
     # note: maybe don't need to do this in double precision?
     X_src, X_supercell, root_ids, offsets = tile_supercell_2(
-        atoms.positions, atoms.lattice, cutoff
+        atoms.positions, atoms.cell, cutoff
     )
 
     X_supercell = X_supercell.reshape(-1, 3)  # (n_cells * n_atoms, n_dim)
@@ -210,7 +213,7 @@ def pad_ghost_region(atoms: Atoms, cutoff: float = 5):
 
 
 def periodic_radius_graph(
-    a: Atoms, r: float = 5, bond_tol: float = 0.15, dtype=torch.float
+    a: nfflr.Atoms, r: float = 5, bond_tol: float = 0.15, dtype=torch.float
 ) -> dgl.DGLGraph:
     """Build periodic radius graph for crystal.
 
@@ -219,7 +222,7 @@ def periodic_radius_graph(
 
     # build radius graph in supercell
     X_src, X_supercell, root_ids, cell_images = tile_supercell_2(
-        a.positions.double(), a.lattice.double(), r, bond_tol
+        a.positions.double(), a.cell.double(), r, bond_tol
     )
 
     # pairwise distances between atoms in (0,0,0) cell
@@ -237,7 +240,7 @@ def periodic_radius_graph(
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
-    # fractional coordinates and lattice matrix and compute cartesian coordinates
+    # fractional coordinates and cell matrix and compute cartesian coordinates
     # and bond distances on demand?
     g.ndata["Xfrac"] = a.positions.to(dtype)
 
@@ -252,7 +255,7 @@ def periodic_radius_graph(
 
 
 def periodic_radius_graph_kdtree(
-    a: Atoms, r: float = 5, bond_tol: float = 0.15
+    a: nfflr.Atoms, r: float = 5, bond_tol: float = 0.15
 ) -> dgl.DGLGraph:
     """Build periodic radius graph for crystal.
 
@@ -261,7 +264,7 @@ def periodic_radius_graph_kdtree(
 
     # build radius graph in supercell
     X_src, X_supercell, root_ids, cell_images = tile_supercell_2(
-        a.positions.double(), a.lattice.double(), r, bond_tol
+        a.positions.double(), a.cell.double(), r, bond_tol
     )
     primary = spatial.KDTree(X_src)
     tiled = spatial.KDTree(X_supercell)
@@ -276,7 +279,7 @@ def periodic_radius_graph_kdtree(
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
-    # fractional coordinates and lattice matrix and compute cartesian coordinates
+    # fractional coordinates and cell matrix and compute cartesian coordinates
     # and bond distances on demand?
     g.ndata["Xfrac"] = a.positions
 
@@ -289,7 +292,7 @@ def periodic_radius_graph_kdtree(
 
 
 def periodic_adaptive_radius_graph(
-    a: Atoms, r: float = 5, bond_tol: float = 0.15, dtype=torch.float
+    a: nfflr.Atoms, r: float = 5, bond_tol: float = 0.15, dtype=torch.float
 ) -> dgl.DGLGraph:
     """Build periodic radius graph for crystal.
 
@@ -298,7 +301,7 @@ def periodic_adaptive_radius_graph(
 
     # build radius graph in supercell
     X_src, X_supercell, root_ids, cell_images = tile_supercell_2(
-        a.positions.double(), a.lattice.double(), r, bond_tol
+        a.positions.double(), a.cell.double(), r, bond_tol
     )
 
     # pairwise distances between atoms in (0,0,0) cell
@@ -323,7 +326,7 @@ def periodic_adaptive_radius_graph(
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
-    # fractional coordinates and lattice matrix and compute cartesian coordinates
+    # fractional coordinates and cell matrix and compute cartesian coordinates
     # and bond distances on demand?
     g.ndata["Xfrac"] = a.positions.to(dtype)
 
@@ -343,7 +346,11 @@ def periodic_adaptive_radius_graph(
 
 
 def periodic_kshell_graph(
-    a: Atoms, k: int = 12, r: float = 15.0, bond_tol: float = 0.15, dtype=torch.float
+    a: nfflr.Atoms,
+    k: int = 12,
+    r: float = 15.0,
+    bond_tol: float = 0.15,
+    dtype=torch.float,
 ) -> dgl.DGLGraph:
     """Build periodic radius graph for crystal.
 
@@ -352,7 +359,7 @@ def periodic_kshell_graph(
 
     # build radius graph in supercell
     X_src, X_supercell, root_ids, cell_images = tile_supercell_2(
-        a.positions.double(), a.lattice.double(), r, bond_tol
+        a.positions.double(), a.cell.double(), r, bond_tol
     )
 
     # pairwise distances between atoms in (0,0,0) cell
@@ -381,7 +388,7 @@ def periodic_kshell_graph(
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
-    # fractional coordinates and lattice matrix and compute cartesian coordinates
+    # fractional coordinates and cell matrix and compute cartesian coordinates
     # and bond distances on demand?
     g.ndata["Xfrac"] = a.positions.to(dtype)
 
@@ -396,7 +403,7 @@ def periodic_kshell_graph(
 
 
 def periodic_knn_graph(
-    a: Atoms, k: int = 12, r: float = 5, bond_tol: float = 0.15
+    a: nfflr.Atoms, k: int = 12, r: float = 5, bond_tol: float = 0.15
 ) -> dgl.DGLGraph:
     """Build periodic knn graph for crystal.
 
@@ -416,7 +423,7 @@ def periodic_knn_graph(
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
-    # fractional coordinates and lattice matrix and compute cartesian coordinates
+    # fractional coordinates and cell matrix and compute cartesian coordinates
     # and bond distances on demand?
     g.ndata["Xfrac"] = a.positions
 
@@ -429,7 +436,7 @@ def periodic_knn_graph(
 
 
 def build_radius_graph_torch(
-    a: Atoms,
+    a: jAtoms,
     r: float = 5,
     bond_tol: float = 0.15,
     neighbor_strategy: Literal["cutoff", "12nn"] = "cutoff",
@@ -512,7 +519,7 @@ def build_radius_graph_torch(
 
 
 def atom_dgl_multigraph_torch(
-    atoms: Atoms,
+    atoms: jAtoms,
     cutoff: float = 8,
     bond_tol: float = 0.15,
     atol=1e-5,

@@ -69,10 +69,10 @@ class LennardJonesK(nn.Module):
         offsets, atom_ids = pad_ghost_region(a)
         root_cell = (offsets == 0).all(dim=1).nonzero().flatten()
 
-        _xs = a.positions @ a.lattice
+        _xs = a.positions @ a.cell
         _xs.requires_grad_(True)
 
-        xs = offsets @ a.lattice + _xs[atom_ids]
+        xs = offsets @ a.cell + _xs[atom_ids]
 
         N, D = xs.shape
 
