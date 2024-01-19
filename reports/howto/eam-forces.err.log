@@ -15,17 +15,14 @@ Traceback (most recent call last):
     raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
 nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
 ------------------
-from plum import activate_autoreload
-activate_autoreload()
-
 from pathlib import Path
 
 import torch
 from ase.calculators.eam import EAM
 from ase.build import bulk
 
+import nfflr
 from nfflr.data import graph
-from nfflr.data.atoms import Atoms
 from nfflr.models.classical.eam import TorchEAM
 
 torch.set_default_dtype(torch.float64)
@@ -34,11 +31,11 @@ torch.set_default_dtype(torch.float64)
 
 [0;31m---------------------------------------------------------------------------[0m
 [0;31mModuleNotFoundError[0m                       Traceback (most recent call last)
-Cell [0;32mIn[2], line 12[0m
-[1;32m     10[0m [38;5;28;01mfrom[39;00m [38;5;21;01mnfflr[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdata[39;00m [38;5;28;01mimport[39;00m graph
-[1;32m     11[0m [38;5;28;01mfrom[39;00m [38;5;21;01mnfflr[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdata[39;00m[38;5;21;01m.[39;00m[38;5;21;01matoms[39;00m [38;5;28;01mimport[39;00m Atoms
-[0;32m---> 12[0m [38;5;28;01mfrom[39;00m [38;5;21;01mnfflr[39;00m[38;5;21;01m.[39;00m[38;5;21;01mmodels[39;00m[38;5;21;01m.[39;00m[38;5;21;01mclassical[39;00m[38;5;21;01m.[39;00m[38;5;21;01meam[39;00m [38;5;28;01mimport[39;00m TorchEAM
-[1;32m     14[0m torch[38;5;241m.[39mset_default_dtype(torch[38;5;241m.[39mfloat64)
+Cell [0;32mIn[2], line 9[0m
+[1;32m      7[0m [38;5;28;01mimport[39;00m [38;5;21;01mnfflr[39;00m
+[1;32m      8[0m [38;5;28;01mfrom[39;00m [38;5;21;01mnfflr[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdata[39;00m [38;5;28;01mimport[39;00m graph
+[0;32m----> 9[0m [38;5;28;01mfrom[39;00m [38;5;21;01mnfflr[39;00m[38;5;21;01m.[39;00m[38;5;21;01mmodels[39;00m[38;5;21;01m.[39;00m[38;5;21;01mclassical[39;00m[38;5;21;01m.[39;00m[38;5;21;01meam[39;00m [38;5;28;01mimport[39;00m TorchEAM
+[1;32m     11[0m torch[38;5;241m.[39mset_default_dtype(torch[38;5;241m.[39mfloat64)
 
 File [0;32m~/work/nfflr/nfflr/nfflr/models/classical/eam.py:12[0m
 [1;32m      9[0m [38;5;28;01mimport[39;00m [38;5;21;01mtorch[39;00m

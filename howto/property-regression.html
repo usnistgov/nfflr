@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Property regression example &#8212; nfflr 0.1.1 documentation</title>
+    <title>Property regression example &#8212; nfflr 0.1.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=1a9ffd16"></script>
+    <script src="../_static/documentation_options.js?v=0deb7d70"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
@@ -161,7 +161,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.1.1 documentation</p>
+    <p class="title logo__title">nfflr 0.1.2 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -387,12 +387,11 @@ document.write(`
 We can use the <code class="docutils literal notranslate"><span class="pre">periodic_radius_graph</span></code> transform to configure the <code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code> to automatically transform atomic configurations into <code class="docutils literal notranslate"><span class="pre">DGLGraph</span></code>s.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.data.dataset</span> <span class="kn">import</span> <span class="n">AtomsDataset</span>
-<span class="kn">from</span> <span class="nn">nfflr.nn.transform</span> <span class="kn">import</span> <span class="n">PeriodicRadiusGraph</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">nfflr</span>
 
-<span class="n">transform</span> <span class="o">=</span> <span class="n">PeriodicRadiusGraph</span><span class="p">(</span><span class="n">cutoff</span><span class="o">=</span><span class="mf">8.0</span><span class="p">)</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">PeriodicRadiusGraph</span><span class="p">(</span><span class="n">cutoff</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
 
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">AtomsDataset</span><span class="p">(</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">(</span>
     <span class="s2">&quot;dft_3d&quot;</span><span class="p">,</span> 
     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;formation_energy_peratom&quot;</span><span class="p">,</span> 
     <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
@@ -411,76 +410,43 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 0.00/40.8M [00:00&lt;?, ?iB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 4.10k/40.8M [00:00&lt;22:16, 30.5kiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 51.2k/40.8M [00:00&lt;01:49, 373kiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 56.3k/40.8M [00:00&lt;02:50, 239kiB/s] 
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  1%|          | 260k/40.8M [00:00&lt;00:37, 1.08MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 109k/40.8M [00:00&lt;02:13, 304kiB/s] 
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  3%|▎         | 1.10M/40.8M [00:00&lt;00:11, 3.37MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  1%|          | 248k/40.8M [00:00&lt;01:09, 587kiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 10%|█         | 4.16M/40.8M [00:00&lt;00:03, 12.2MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  1%|▏         | 544k/40.8M [00:00&lt;00:34, 1.16MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 16%|█▌        | 6.49M/40.8M [00:00&lt;00:02, 15.2MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  3%|▎         | 1.12M/40.8M [00:00&lt;00:18, 2.19MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 28%|██▊       | 11.3M/40.8M [00:00&lt;00:01, 22.6MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  6%|▌         | 2.26M/40.8M [00:00&lt;00:09, 4.20MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 40%|███▉      | 16.2M/40.8M [00:00&lt;00:00, 26.9MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 11%|█         | 4.54M/40.8M [00:01&lt;00:04, 8.16MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 51%|█████▏    | 21.0M/40.8M [00:01&lt;00:00, 29.2MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 16%|█▌        | 6.60M/40.8M [00:01&lt;00:03, 10.3MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 63%|██████▎   | 25.8M/40.8M [00:01&lt;00:00, 30.9MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 22%|██▏       | 8.93M/40.8M [00:01&lt;00:02, 12.4MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 76%|███████▌  | 30.9M/40.8M [00:01&lt;00:00, 32.6MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 28%|██▊       | 11.3M/40.8M [00:01&lt;00:02, 13.8MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 87%|████████▋ | 35.4M/40.8M [00:01&lt;00:00, 32.5MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 33%|███▎      | 13.6M/40.8M [00:01&lt;00:01, 14.8MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 99%|█████████▉| 40.5M/40.8M [00:01&lt;00:00, 33.5MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 39%|███▉      | 15.9M/40.8M [00:01&lt;00:01, 15.5MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 45%|████▍     | 18.3M/40.8M [00:01&lt;00:01, 16.0MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 51%|█████     | 20.6M/40.8M [00:02&lt;00:01, 16.3MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 56%|█████▌    | 23.0M/40.8M [00:02&lt;00:01, 16.5MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 62%|██████▏   | 25.2M/40.8M [00:02&lt;00:00, 16.6MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 67%|██████▋   | 27.5M/40.8M [00:02&lt;00:00, 16.6MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 73%|███████▎  | 29.9M/40.8M [00:02&lt;00:00, 16.7MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 79%|███████▉  | 32.1M/40.8M [00:02&lt;00:00, 16.7MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 85%|████████▍ | 34.5M/40.8M [00:02&lt;00:00, 16.8MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 90%|█████████ | 36.8M/40.8M [00:03&lt;00:00, 16.9MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 98%|█████████▊| 40.0M/40.8M [00:03&lt;00:00, 18.7MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 40.8M/40.8M [00:03&lt;00:00, 12.9MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 40.8M/40.8M [00:01&lt;00:00, 25.4MiB/s]
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -492,7 +458,7 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loading completed.
 </pre></div>
 </div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=8, num_edges=1248,
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=8, num_edges=288,
        ndata_schemes={&#39;Xfrac&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
        edata_schemes={&#39;r&#39;: Scheme(shape=(3,), dtype=torch.float32)}),
  tensor(-0.4276))
@@ -502,7 +468,7 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">AtomsDataset</span><span class="p">(</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">(</span>
     <span class="s2">&quot;/Users/bld/projects/nfflr/examples/poscar-folder-bandgap&quot;</span><span class="p">,</span> 
     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> 
     <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
@@ -518,7 +484,7 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
 <span class="ne">UnboundLocalError</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">dataset</span> <span class="o">=</span> <span class="n">AtomsDataset</span><span class="p">(</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">dataset</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">(</span>
 <span class="g g-Whitespace">      </span><span class="mi">2</span>     <span class="s2">&quot;/Users/bld/projects/nfflr/examples/poscar-folder-bandgap&quot;</span><span class="p">,</span> 
 <span class="g g-Whitespace">      </span><span class="mi">3</span>     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> 
 <span class="g g-Whitespace">      </span><span class="mi">4</span>     <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
@@ -548,16 +514,28 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 <p>Set up a medium-sized ALIGNN model:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.models.gnn</span> <span class="kn">import</span> <span class="n">alignn</span>
-<span class="n">cfg</span> <span class="o">=</span> <span class="n">alignn</span><span class="o">.</span><span class="n">ALIGNNConfig</span><span class="p">(</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Graph(num_nodes=8, num_edges=1248,
+      ndata_schemes={&#39;Xfrac&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
+      edata_schemes={&#39;r&#39;: Scheme(shape=(3,), dtype=torch.float32)})
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ALIGNNConfig</span><span class="p">(</span>
     <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
-    <span class="n">cutoff</span><span class="o">=</span><span class="p">(</span><span class="mf">7.5</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">),</span>
     <span class="n">alignn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
     <span class="n">gcn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
     <span class="n">norm</span><span class="o">=</span><span class="s2">&quot;layernorm&quot;</span><span class="p">,</span> 
     <span class="n">atom_features</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span>
 <span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">alignn</span><span class="o">.</span><span class="n">ALIGNN</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ALIGNN</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
 
 <span class="n">atoms</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">model</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
@@ -569,7 +547,7 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
   assert input.numel() == input.storage().size(), (
 </pre></div>
 </div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor(0.0467, grad_fn=&lt;SqueezeBackward0&gt;)
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor(-1.1278, grad_fn=&lt;SqueezeBackward0&gt;)
 </pre></div>
 </div>
 </div>
@@ -596,7 +574,7 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=41, num_edges=2188,
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=34, num_edges=1162,
        ndata_schemes={&#39;Xfrac&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
        edata_schemes={&#39;r&#39;: Scheme(shape=(3,), dtype=torch.float32)}),
  tensor([0., 0.]))
@@ -625,11 +603,11 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 19/19 [02:06&lt;00:00,  6.65s/it]
-100%|██████████| 19/19 [01:09&lt;00:00,  3.65s/it]
-100%|██████████| 19/19 [01:14&lt;00:00,  3.91s/it]
-100%|██████████| 19/19 [01:14&lt;00:00,  3.91s/it]
-100%|██████████| 19/19 [01:24&lt;00:00,  4.42s/it]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 19/19 [00:04&lt;00:00,  3.92it/s]
+100%|██████████| 19/19 [00:04&lt;00:00,  4.01it/s]
+100%|██████████| 19/19 [00:04&lt;00:00,  4.01it/s]
+100%|██████████| 19/19 [00:04&lt;00:00,  3.92it/s]
+100%|██████████| 19/19 [00:04&lt;00:00,  3.90it/s]
 </pre></div>
 </div>
 </div>
@@ -647,7 +625,7 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/8609d7ab6648b16506b6e0478e19b1e005c4f8d2979c7fff5f6632f359d94a89.png" src="../_images/8609d7ab6648b16506b6e0478e19b1e005c4f8d2979c7fff5f6632f359d94a89.png" />
+<img alt="../_images/37d889649da32a95fa675edb40946cb3d9a6418a778832e756a25123e409db6e.png" src="../_images/37d889649da32a95fa675edb40946cb3d9a6418a778832e756a25123e409db6e.png" />
 </div>
 </div>
 </section>
@@ -675,7 +653,6 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
     <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>
     <span class="s2">&quot;weight_decay&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="s2">&quot;epochs&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-    <span class="s2">&quot;warmup_steps&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
     <span class="s2">&quot;num_workers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
     <span class="s2">&quot;progress&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="s2">&quot;output_dir&quot;</span><span class="p">:</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
@@ -685,91 +662,50 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-06-08 07:31:34,434 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
-	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x293eda560&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x2c9fb2c50&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
-2023-06-08 07:31:34,434 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
-	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x293eda560&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x2c984f790&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-01-19 09:39:01,426 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
+	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x296db64d0&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x67e2de410&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
+2024-01-19 09:39:01,426 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
+	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x296db64d0&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x67d998dc0&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>starting training loop
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                               
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/bld/.pyenv/versions/3.10.9/envs/nfflr/lib/python3.10/site-packages/dgl/backend/pytorch/tensor.py:445: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  assert input.numel() == input.storage().size(), (
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 1  Avg loss: 0.11
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "01a82601f0ba4416b1f7f248071cd691", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "b93882e23b484a4fa762a638f356c97f", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 1  Avg loss: 0.00
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                              
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "8bedc34bb04e4fa9b42c76ab225fe235", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 1  Avg loss: 3.89
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 1  Avg loss: 3.52
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9e9b7606956b4c20b2712129c620342c", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "4846a6c28a754fbb9bcd54909e216041", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 2  Avg loss: 0.10
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                               
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "337badb9a6b54213a48eee0bfa197dc3", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 2  Avg loss: 3.95
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 2  Avg loss: 6.07
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "c6800818c524482c815e243f97f7a8e4", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "5d334d20246f4483834ea0ce6b25a169", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 3  Avg loss: 0.11
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                          
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3b0c0135aa594cdaabc77feebcae8135", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 3  Avg loss: 1.36
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 2  Avg loss: 3.54
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e46ce9317a9f47ada545acd328b4f3ac", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "ea410db99fbf4d8a8366dd7a9e6ff7ad", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 4  Avg loss: 0.03
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                              
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1919e08767f54d10b300e891d0f030af", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 4  Avg loss: 4.02
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 3  Avg loss: 14.54
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "986c4e49d3ea4ec0b288154ff073cf91", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "266c8c50d6fd4cd19242ddbcdea07e72", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 5  Avg loss: 0.01
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                              
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0ea25b0f85fa4d5bb9ffccdd4aae181a", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 5  Avg loss: 3.94
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 3  Avg loss: 0.19
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                               
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 4  Avg loss: 0.23
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                          
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 4  Avg loss: 3.54
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                                               
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 5  Avg loss: 0.09
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>                                          
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 5  Avg loss: 3.45
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3.4533848762512207
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>ls
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>atoms.ipynb               property-regression.ipynb test.ipynb
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3.9357571601867676
 </pre></div>
 </div>
 </div>

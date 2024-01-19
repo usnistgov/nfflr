@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Quickstart &#8212; nfflr 0.1.1 documentation</title>
+    <title>Quickstart &#8212; nfflr 0.1.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=1a9ffd16"></script>
+    <script src="../_static/documentation_options.js?v=0deb7d70"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
@@ -163,7 +163,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.1.1 documentation</p>
+    <p class="title logo__title">nfflr 0.1.2 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -402,18 +402,18 @@ This represents an atomistic system in the same way as <a class="reference exter
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">nfflr.data.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">import</span> <span class="nn">nfflr</span>
 
-<span class="n">lattice</span> <span class="o">=</span> <span class="mf">4.1</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="mf">4.1</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">positions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]])</span>
 <span class="n">numbers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">24</span><span class="p">,</span> <span class="mi">22</span><span class="p">])</span>
-<span class="n">atoms</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span>
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span>
 <span class="n">atoms</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Atoms(lattice=tensor([[4.1000, 0.0000, 0.0000],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Atoms(cell=tensor([[4.1000, 0.0000, 0.0000],
         [0.0000, 4.1000, 0.0000],
         [0.0000, 0.0000, 4.1000]]), positions=tensor([[0.0000, 0.0000, 0.0000],
         [0.5000, 0.5000, 0.5000]]), numbers=tensor([24, 22]), _batch_num_atoms=None)
@@ -430,7 +430,7 @@ This represents an atomistic system in the same way as <a class="reference exter
 <span class="o">%</span><span class="k">matplotlib</span> inline
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">AseAtoms</span><span class="p">(</span><span class="n">scaled_positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">lattice</span><span class="p">)</span>
+<span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">AseAtoms</span><span class="p">(</span><span class="n">scaled_positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">)</span>
 <span class="n">plot_atoms</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">radii</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;10x,20y,0z&quot;</span><span class="p">),</span> <span class="n">show_unit_cell</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">);</span>
 </pre></div>
@@ -450,9 +450,8 @@ This represents an atomistic system in the same way as <a class="reference exter
 <code class="docutils literal notranslate"><span class="pre">NFFLr</span></code> aims to simplify exploratory research by providing a common modeling interface, where all models internally transform <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> inputs to their native input representation, <em>e.g.</em> the <a class="reference external" href="https://docs.dgl.ai/api/python/dgl.DGLGraph.html">DGLGraph</a> structure expected by <code class="docutils literal notranslate"><span class="pre">ALIGNN</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.models.gnn</span> <span class="kn">import</span> <span class="n">alignn</span>
-<span class="n">cfg</span> <span class="o">=</span> <span class="n">alignn</span><span class="o">.</span><span class="n">ALIGNNConfig</span><span class="p">(</span><span class="n">alignn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">gcn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">alignn_model</span> <span class="o">=</span> <span class="n">alignn</span><span class="o">.</span><span class="n">ALIGNN</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ALIGNNConfig</span><span class="p">(</span><span class="n">alignn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">gcn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">alignn_model</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ALIGNN</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
 <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">alignn_model</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
 </pre></div>
@@ -465,7 +464,7 @@ warning: could not load CGCNN features for 101
 Setting it to max atomic number available here, 103
 warning: could not load CGCNN features for 102
 Setting it to max atomic number available here, 103
-tensor(0.7684)
+tensor(0.3095)
 </pre></div>
 </div>
 </div>
@@ -482,7 +481,7 @@ For example, calling <code class="docutils literal notranslate"><span class="pre
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>convert
-tensor(0.7684)
+tensor(0.3095)
 </pre></div>
 </div>
 </div>
@@ -494,23 +493,23 @@ tensor(0.7684)
 and its (negative) gradient with respect to the (cartesian) atomic coordinates - <em>i.e.</em> the force components on each atom.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">alignn</span><span class="o">.</span><span class="n">ALIGNNConfig</span><span class="p">(</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ALIGNNConfig</span><span class="p">(</span>
     <span class="n">alignn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
     <span class="n">gcn_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
     <span class="n">compute_forces</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
-<span class="n">alignn_model</span> <span class="o">=</span> <span class="n">alignn</span><span class="o">.</span><span class="n">ALIGNN</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+<span class="n">alignn_model</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ALIGNN</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
 <span class="n">alignn_model</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(0.7489, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[ 1.6689e-06,  7.5996e-07, -2.9802e-08],
-         [-1.1325e-06, -7.0035e-07,  2.6822e-07]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[ 3.1564e+01, -7.1526e-07,  1.6689e-06],
-          [ 2.3842e-07,  3.1564e+01, -7.1526e-07],
-          [ 1.5497e-06, -3.5763e-07,  3.1564e+01]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.3476, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[ 1.7881e-06,  6.1095e-07,  2.2352e-07],
+         [-1.7881e-07, -1.2666e-06,  1.3411e-07]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[-7.0595e+01, -2.9206e-06, -1.5497e-06],
+          [-2.7418e-06, -7.0594e+01,  1.0878e-06],
+          [-1.5497e-06,  1.4454e-06, -7.0594e+01]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
@@ -545,12 +544,12 @@ For example, <code class="docutils literal notranslate"><span class="pre">ALIGNN
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(0.7431, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[-9.5367e-07, -2.3842e-07, -8.1076e-06],
-         [ 2.3842e-07, -7.1526e-07,  8.5829e-06]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[-4.9169e+01, -1.0490e-05,  2.3842e-06],
-          [-1.0490e-05, -4.9169e+01, -3.8147e-06],
-          [ 2.3842e-06, -3.8147e-06, -4.9169e+01]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.3987, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[-3.1143e-06, -4.3064e-06, -3.4571e-06],
+         [ 3.4571e-06,  4.5300e-06,  4.1722e-06]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[-7.8351e+01,  4.6492e-06,  1.4305e-06],
+          [ 4.6492e-06, -7.8351e+01, -2.8610e-06],
+          [ 1.4305e-06, -2.3842e-06, -7.8351e+01]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
@@ -568,8 +567,7 @@ which is a <a class="reference external" href="https://pytorch.org/docs/stable/d
 The most convenient way to get started is with a <a class="reference external" href="https://jarvis-tools.readthedocs.io/en/master/databases.html">named Jarvis dataset</a>:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.data.dataset</span> <span class="kn">import</span> <span class="n">AtomsDataset</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">AtomsDataset</span><span class="p">(</span><span class="s2">&quot;dft_3d&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;formation_energy_peratom&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">(</span><span class="s2">&quot;dft_3d&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;formation_energy_peratom&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -590,7 +588,7 @@ Loading the zipfile...
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atoms</span><span class="o">.</span><span class="n">lattice</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">target</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -598,7 +596,7 @@ Loading the zipfile...
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>atoms.lattice=tensor([[3.5669, 0.0000, -0.0000],
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>atoms.cell=tensor([[3.5669, 0.0000, -0.0000],
         [0.0000, 3.5669, -0.0000],
         [-0.0000, -0.0000, 9.3971]])
 atoms.positions=tensor([[0.7500, 0.7500, 0.7849],
@@ -722,7 +720,7 @@ For example, <code class="docutils literal notranslate"><span class="pre">dft_3d
 <p>Force field datasets like <code class="docutils literal notranslate"><span class="pre">mlearn</span></code>, <code class="docutils literal notranslate"><span class="pre">alignn_ff_db</span></code>, and <code class="docutils literal notranslate"><span class="pre">m3gnet</span></code> have a special target key <code class="docutils literal notranslate"><span class="pre">target=&quot;energy_and_forces&quot;</span></code> that configure <code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code> to return a dictionary of target values containing the total energy of the atomic configuration, the forces, and the stresses if they are available.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">AtomsDataset</span><span class="p">(</span><span class="s2">&quot;mlearn&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;energy_and_forces&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">(</span><span class="s2">&quot;mlearn&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;energy_and_forces&quot;</span><span class="p">)</span>
 <span class="n">atoms</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">target</span>
 </pre></div>
@@ -850,30 +848,6 @@ Loading the zipfile...
          [ 5.9450, 41.1876,  1.0425],
          [-4.7715,  1.0425, 51.0653]]),
  &#39;volume&#39;: tensor(1165.6177)}
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.data.graph</span> <span class="kn">import</span> <span class="n">periodic_adaptive_radius_graph</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">14</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="ne">NameError</span>: name &#39;d&#39; is not defined
 </pre></div>
 </div>
 </div>

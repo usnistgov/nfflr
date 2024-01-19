@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Checking autograd forces against analytical forces for Embedded Atom model &#8212; nfflr 0.1.1 documentation</title>
+    <title>Checking autograd forces against analytical forces for Embedded Atom model &#8212; nfflr 0.1.2 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=1a9ffd16"></script>
+    <script src="../_static/documentation_options.js?v=0deb7d70"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
@@ -163,7 +163,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.1.1 documentation</p>
+    <p class="title logo__title">nfflr 0.1.2 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -398,10 +398,7 @@ document.write(`
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100  762k  100  762k    0     0   871k      0 --:--:-- --:--:-- --:--:--  871k
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100  762k  100  762k    0     0  3462k      0 --:--:-- --:--:-- --:--:-- 3464k
 </pre></div>
 </div>
 </div>
@@ -409,17 +406,14 @@ document.write(`
 <p>Gradient checking is best done in 64-bit floating point precision:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">plum</span> <span class="kn">import</span> <span class="n">activate_autoreload</span>
-<span class="n">activate_autoreload</span><span class="p">()</span>
-
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">ase.calculators.eam</span> <span class="kn">import</span> <span class="n">EAM</span>
 <span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">bulk</span>
 
+<span class="kn">import</span> <span class="nn">nfflr</span>
 <span class="kn">from</span> <span class="nn">nfflr.data</span> <span class="kn">import</span> <span class="n">graph</span>
-<span class="kn">from</span> <span class="nn">nfflr.data.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span>
 <span class="kn">from</span> <span class="nn">nfflr.models.classical.eam</span> <span class="kn">import</span> <span class="n">TorchEAM</span>
 
 <span class="n">torch</span><span class="o">.</span><span class="n">set_default_dtype</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
@@ -429,11 +423,11 @@ document.write(`
 <div class="cell_output docutils container">
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
 <span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">12</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="kn">from</span> <span class="nn">nfflr.data</span> <span class="kn">import</span> <span class="n">graph</span>
-<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="kn">from</span> <span class="nn">nfflr.data.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span>
-<span class="ne">---&gt; </span><span class="mi">12</span> <span class="kn">from</span> <span class="nn">nfflr.models.classical.eam</span> <span class="kn">import</span> <span class="n">TorchEAM</span>
-<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="n">torch</span><span class="o">.</span><span class="n">set_default_dtype</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">9</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="kn">import</span> <span class="nn">nfflr</span>
+<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="kn">from</span> <span class="nn">nfflr.data</span> <span class="kn">import</span> <span class="n">graph</span>
+<span class="ne">----&gt; </span><span class="mi">9</span> <span class="kn">from</span> <span class="nn">nfflr.models.classical.eam</span> <span class="kn">import</span> <span class="n">TorchEAM</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="n">torch</span><span class="o">.</span><span class="n">set_default_dtype</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
 <span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">nfflr</span><span class="o">/</span><span class="n">nfflr</span><span class="o">/</span><span class="n">nfflr</span><span class="o">/</span><span class="n">models</span><span class="o">/</span><span class="n">classical</span><span class="o">/</span><span class="n">eam</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">12</span>
 <span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="kn">import</span> <span class="nn">torch</span>
@@ -460,7 +454,7 @@ document.write(`
 <span class="n">al_ase</span><span class="o">.</span><span class="n">set_calculator</span><span class="p">(</span><span class="n">ase_eam</span><span class="p">)</span>
 
 <span class="c1"># set up pytorch version</span>
-<span class="n">al</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">al_ase</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">al_ase</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">(),</span> <span class="n">al_ase</span><span class="o">.</span><span class="n">numbers</span><span class="p">)</span>
+<span class="n">al</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">al_ase</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">al_ase</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">(),</span> <span class="n">al_ase</span><span class="o">.</span><span class="n">numbers</span><span class="p">)</span>
 <span class="n">torch_eam</span> <span class="o">=</span> <span class="n">TorchEAM</span><span class="p">(</span><span class="s2">&quot;Al99.eam.alloy&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -517,7 +511,7 @@ This demonstrates that forces computed by autograd with respect to relative posi
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100   532  100   532    0     0   1299      0 --:--:-- --:--:-- --:--:--  1310
+100   532  100   532    0     0     49      0  0:00:10  0:00:10 --:--:--   143 0 --:--:--  0:00:02 --:--:--     0     0 --:--:--  0:00:03 --:--:--     0
 # Parameters for the Tersoff Si(B) potential. CITATION: J. Tersoff, Phys. Rev. B 37, 6991 (1988)
 
 # Parameter values verified by Lucas Hale.
@@ -657,7 +651,7 @@ we can work around that in the short term by monkey-patching <code class="docuti
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>e_lammps=-592.3985671491665
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>e_lammps=-592.398567149167
 f_lammps[:5]=array([[-0.20522987, -0.26851818,  0.14179856],
        [ 0.06219078,  0.05221548,  0.0728464 ],
        [ 0.03842853, -0.02849059,  0.04544221],
@@ -670,9 +664,8 @@ f_lammps[:5]=array([[-0.20522987, -0.26851818,  0.14179856],
 <p>And</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">nfflr.models.classical.tersoff</span> <span class="kn">import</span> <span class="n">TersoffConfig</span><span class="p">,</span> <span class="n">Tersoff</span>
-<span class="n">g</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">periodic_radius_graph</span><span class="p">(</span><span class="n">Atoms</span><span class="p">(</span><span class="n">si_ase</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-<span class="n">tersoff</span> <span class="o">=</span> <span class="n">Tersoff</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">periodic_radius_graph</span><span class="p">(</span><span class="n">nfflr</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">si_ase</span><span class="p">),</span> <span class="n">r</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">tersoff</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Tersoff</span><span class="p">()</span>
 <span class="n">out</span> <span class="o">=</span> <span class="n">tersoff</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
 <span class="n">e_tersoff</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;total_energy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
 <span class="n">f_tersoff</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
@@ -694,10 +687,6 @@ f_tersoff[:5]=tensor([[-0.2052, -0.2685,  0.1418],
 stress_tersoff=tensor([[[-6.5235e-04,  1.6092e-03,  4.2400e-04],
          [ 1.6092e-03, -6.5744e-04,  2.0972e-06],
          [ 4.2400e-04,  2.0972e-06, -6.4832e-04]]])
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/bld/.pyenv/versions/3.10.9/envs/nfflr/lib/python3.10/site-packages/dgl/backend/pytorch/tensor.py:445: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  assert input.numel() == input.storage().size(), (
 </pre></div>
 </div>
 </div>
