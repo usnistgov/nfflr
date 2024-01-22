@@ -191,8 +191,8 @@ class PeriodicTableEmbedding(torch.nn.Module):
         )
         table["col"] = col.astype(int)
 
-        self.rows = torch.from_numpy(table.row.values)
-        self.cols = torch.from_numpy(table.col.values)
+        self.register_buffer("rows", torch.from_numpy(table.row.values))
+        self.register_buffer("cols", torch.from_numpy(table.col.values))
 
         self.row_embedding = torch.nn.Embedding(9, d_model)
         self.col_embedding = torch.nn.Embedding(18, d_model)
