@@ -75,7 +75,7 @@ class AtomPairType(torch.nn.Module):
             for idx, (r, c) in enumerate(zip(*np.triu_indices(n))):
                 a[r, c] = idx
 
-            self.ids = a + torch.triu(a, diagonal=1).T
+            self.register_buffer("ids", a + torch.triu(a, diagonal=1).T)
 
     def forward(self, z1: torch.Tensor, z2: torch.Tensor):
 

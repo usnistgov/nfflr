@@ -64,7 +64,9 @@ def deepmd_load_frameset(path, zs):
 
 
 def deepmd_hea_dataset(
-    datadir: Path | str, transform: Optional[torch.nn.Module] = None
+    datadir: Path | str,
+    transform: Optional[torch.nn.Module] = None,
+    diskcache: bool = False,
 ):
     """Load deepmd numpy format dataset."""
     # only supports HEA dataset for now...
@@ -95,4 +97,5 @@ def deepmd_hea_dataset(
         n_train=0.9,
         n_val=0.1,
         transform=transform,
+        diskcache=diskcache,
     )

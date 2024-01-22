@@ -113,8 +113,8 @@ class PolynomialEmbeddingFunction(torch.nn.Module):
                 (torch.tensor([-1, 0.1]), torch.zeros(degree - 2))
             )
 
-        self.powers = powers
-        self.scalefactors = scalefactors
+        self.register_buffer("powers", powers)
+        self.register_buffer("scalefactors", scalefactors)
 
         # start multivariate model with identical embedding functions
         init_weights = init_weights.repeat(1, d_model)
