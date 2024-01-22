@@ -1,14 +1,11 @@
 from typing import Literal
 
+import torch
+from torch.nn.functional import softplus
 import numpy as np
 
 import dgl
 import dgl.function as fn
-
-import torch
-
-# from torch import nn
-from torch.nn.functional import softplus
 
 import orthnet
 
@@ -20,20 +17,23 @@ class GaussianSpline(torch.nn.Module):
     def __init__(
         self,
         nbasis: int = 128,
+        d_model: int = 1,
         cutoff: float = 6.0,
         activation: Literal["softplus"] | None = None,
     ):
         super().__init__()
         self.nbasis = nbasis
+        self.d_model = d_model
         self.cutoff = cutoff
         self.activation = torch.nn.Identity()
 
-        ps = 0.1 * torch.ones(nbasis)
+        ps = 0.1 * torch.ones(nbasis, d_model)
         self.phi = torch.nn.Parameter(ps)
         self.basis = RBFExpansion(vmax=cutoff, bins=nbasis)
 
         if activation == "softplus":
             self.activation = torch.nn.Softplus()
+
         self.reset_parameters()
 
     def fcut(self, r):
@@ -49,9 +49,13 @@ class GaussianSpline(torch.nn.Module):
         torch.nn.init.normal_(self.phi.data, 0.0, 0.5)
 
     def forward(self, r):
+        """Evaluate radial Gaussian spline(s) at radial point `r`.
+
+        TODO: consider sparse evaluation for EAM style models
+        indexing into the coefficients rather than the radial functions
+        """
         b = self.basis(r) * self.fcut(r).unsqueeze(1) / 2
-        # b = (1 - self.basis(self.scale_distance(r))) * self.fcut(r).unsqueeze(1) / 2
-        return (self.activation(self.phi) * b).sum(dim=1)
+        return (b.unsqueeze(-1) * self.activation(self.phi)).sum(dim=1)
 
 
 class ExponentialRepulsive(torch.nn.Module):
@@ -87,7 +91,7 @@ class LaguerreRepulsive(torch.nn.Module):
 
 
 class PolynomialEmbeddingFunction(torch.nn.Module):
-    def __init__(self, degree: int = 4, use_sqrt_term: bool = True):
+    def __init__(self, degree: int = 4, d_model: int = 1, use_sqrt_term: bool = True):
         super().__init__()
         self.degree = degree
         self.use_sqrt_term = use_sqrt_term
@@ -111,17 +115,29 @@ class PolynomialEmbeddingFunction(torch.nn.Module):
 
         self.powers = powers
         self.scalefactors = scalefactors
+
+        # start multivariate model with identical embedding functions
+        init_weights = init_weights.repeat(1, d_model)
         self.weights = torch.nn.Parameter(init_weights)
 
     def forward(self, density):
         """Evaluate polynomial."""
-        return density.unsqueeze(-1).pow(self.powers) @ (
-            self.weights * self.scalefactors
-        )
+
+        basis = density.unsqueeze(-1).pow(self.powers)
+        scaled_weights = self.weights * self.scalefactors.unsqueeze(1)
+
+        # bach matrix-vector multiply basis and coefficients
+        # (vmap over output channel dimension)
+        f = torch.vmap(torch.matmul)(
+            basis.unsqueeze(0), scaled_weights.unsqueeze(0)
+        ).squeeze(0)
+
+        return f
 
     def curvature(self, density):
         """Analytic curvature of embedding function for regularization."""
 
+        # TODO: double check the broadcasting here
         # multiplicative factors from polynomial second derivatives...
         mult = (self.powers * (1 + self.powers))[:-1]
 
@@ -141,7 +157,16 @@ class PolynomialEmbeddingFunction(torch.nn.Module):
             sf = mult * self.scalefactors[1:]
             p = self.powers[1:] - 2
 
-        curve = density.unsqueeze(-1).pow(p) @ (w * sf)
+        basis = density.unsqueeze(-1).pow(p)
+        scaled_weights = w * sf.unsqueeze(1)
+
+        # bach matrix-vector multiply basis and coefficients
+        # (vmap over output channel dimension)
+        curve = torch.vmap(torch.matmul)(
+            basis.unsqueeze(0), scaled_weights.unsqueeze(0)
+        ).squeeze(0)
+
+        # curve = density.unsqueeze(-1).pow(p) @ (w * sf)
         return curve
 
 
@@ -159,7 +184,7 @@ class SplineEmbeddingFunction(torch.nn.Module):
         return curve
 
 
-class EmbeddedAtomPotential(torch.nn.Module):
+class ElementalEmbeddedAtomPotential(torch.nn.Module):
     def __init__(self, nbasis: int = 128, cutoff: float = 6.0):
         super().__init__()
 
@@ -203,6 +228,85 @@ class EmbeddedAtomPotential(torch.nn.Module):
         g.update_all(fn.copy_e("density_ij", "m"), fn.sum("m", "local_density"))
         g.ndata["F"] = self.embedding_energy(g.ndata["local_density"])
         g.edata["pair_repulsion"] = self.pair_repulsion(bondlen) / bondlen
+        potential_energy = dgl.readout_nodes(g, "F") + dgl.readout_edges(
+            g, "pair_repulsion"
+        )
+
+        # potential_energy = F.sum() + pair_repulsion.sum()
+
+        forces = nfflr.autograd_forces(potential_energy, r, g, energy_units="eV")
+        return {"total_energy": potential_energy, "forces": forces}
+
+
+class EmbeddedAtomPotential(torch.nn.Module):
+    def __init__(self, species: torch.Tensor, nbasis: int = 128, cutoff: float = 6.0):
+        """Multicomponent embedded atom potential."""
+        super().__init__()
+
+        self.nbasis = nbasis
+        self.cutoff = cutoff
+
+        self.atomtype = nfflr.nn.AtomType(species)
+        self.pairtype = nfflr.nn.AtomPairType(species, symmetric=True)
+
+        self.density = GaussianSpline(
+            nbasis=nbasis, d_model=len(species), cutoff=cutoff, activation="softplus"
+        )
+        self.pair_repulsion = GaussianSpline(
+            nbasis=nbasis, d_model=self.pairtype.num_classes, cutoff=cutoff
+        )
+        self.embedding_energy = PolynomialEmbeddingFunction(d_model=len(species))
+
+        self.transform = nfflr.nn.PeriodicRadiusGraph(self.cutoff)
+
+    def reset_parameters(self):
+        torch.nn.init.normal_(self.density.phi.data, -1.0, 0.1)
+        # phis = 1 / (1 + self.pair_repulsion.basis.centers)
+        self.pair_repulsion.phi.data = 10 * torch.exp(
+            -0.1 * self.pair_repulsion.basis.centers
+        )
+        # torch.nn.init.normal_(self.pair_repulsion.phi.data, phis, 0.1)
+        # torch.nn.init.normal_(self.embedding_energy.weights.data, 0.0, 0.5)
+
+    def forward(self, at: nfflr.Atoms):
+        if type(at) == nfflr.Atoms:
+            g = self.transform(at)
+        else:
+            g = at
+
+        g = g.local_var()
+
+        # initial bond features: bond displacement vectors
+        # need to add bond vectors to autograd graph
+        r = g.edata.pop("r")
+        r.requires_grad_(True)
+
+        bondlen = torch.norm(r, dim=1)
+
+        # look up atom and edge types
+        atomtype = self.atomtype(g.ndata["atomic_number"])
+
+        def types(edges):
+            srctype = self.atomtype(edges.src["atomic_number"])
+            pairtype = self.pairtype(
+                edges.src["atomic_number"], edges.dst["atomic_number"]
+            )
+            return {"srctype": srctype, "pairtype": pairtype}
+
+        g.apply_edges(types)
+
+        srctype = g.edata.pop("srctype")
+        pairtype = g.edata.pop("pairtype")
+
+        g.edata["density_ij"] = torch.take(self.density(bondlen), srctype)
+        g.update_all(fn.copy_e("density_ij", "m"), fn.sum("m", "local_density"))
+        g.ndata["F"] = torch.take(
+            self.embedding_energy(g.ndata["local_density"]), atomtype
+        )
+
+        g.edata["pair_repulsion"] = (
+            torch.take(self.pair_repulsion(bondlen), pairtype) / bondlen
+        )
         potential_energy = dgl.readout_nodes(g, "F") + dgl.readout_edges(
             g, "pair_repulsion"
         )
