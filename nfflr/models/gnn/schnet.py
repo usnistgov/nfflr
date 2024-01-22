@@ -139,15 +139,17 @@ class SchNet(torch.nn.Module):
             bins=config.edge_input_features,
         )
 
-        self.blocks = [
-            CFBlock(
-                config.d_model,
-                config.edge_input_features,
-                config.d_model,
-                norm=config.norm,
-            )
-            for idx in range(config.layers)
-        ]
+        self.blocks = torch.nn.ModuleList(
+            [
+                CFBlock(
+                    config.d_model,
+                    config.edge_input_features,
+                    config.d_model,
+                    norm=config.norm,
+                )
+                for idx in range(config.layers)
+            ]
+        )
 
         self.postnorm = Norm(config.d_model, config.norm)
 
