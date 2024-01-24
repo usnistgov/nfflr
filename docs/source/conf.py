@@ -9,7 +9,7 @@
 project = "nfflr"
 copyright = "2024, Brian DeCost"
 author = "Brian DeCost"
-release = "0.2.0"
+release = "0.2.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
