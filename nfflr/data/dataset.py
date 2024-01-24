@@ -3,10 +3,10 @@
 __all__ = ()
 
 import os
+import re
 import tempfile
 import warnings
 from pathlib import Path
-from functools import partial
 from typing import Any, Dict, List, Literal, Tuple, Union, Optional, Callable, Sequence
 
 import dgl
@@ -115,6 +115,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         train_val_seed: int = 42,
         id_tag: str = "jid",
         group_ids: bool = False,
+        group_split_token: str = "_",
         n_train: Union[float, int] = 0.8,
         n_val: Union[float, int] = 0.1,
         energy_units: Literal["eV", "eV/atom"] = "eV/atom",
@@ -144,9 +145,13 @@ class AtomsDataset(torch.utils.data.Dataset):
                 df["step_id"] = np.ones(df.shape[0])
             else:
                 # split key like "JVASP-6664_main-5"
-                df["group_id"], df["step_id"] = zip(
-                    *df[id_tag].apply(partial(str.split, sep="_"))
-                )
+                # if there are multiple underscores - split on just the first one
+                def _split_key(key):
+                    pattern = f"(.+?){group_split_token}"
+                    match = re.search(pattern, key)
+                    return key[: match.end() - 1], key[match.end() :]
+
+                df["group_id"], df["step_id"] = zip(*df[id_tag].apply(_split_key))
 
         if isinstance(df.atoms.iloc[0], dict):
             self.atoms = df.atoms.apply(lambda x: Atoms(jAtoms.from_dict(x)))
