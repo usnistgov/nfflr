@@ -189,25 +189,45 @@ $(document).ready(function(){
 
 <li class="toctree-l2"><a class="reference internal" href="eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="force-field-training.html">Property regression example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="force-field-training.html">Force field example</a></li>
 
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.Atoms.html">Atoms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.batch.html">nfflr.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.RBFExpansion.html">RBFExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.ChebyshevExpansion.html">ChebyshevExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.Norm.html">Norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.InstanceNorm.html">InstanceNorm</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
@@ -410,70 +430,46 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 0.00/40.8M [00:00&lt;?, ?iB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 17.4k/40.8M [00:00&lt;05:14, 130kiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 52.2k/40.8M [00:00&lt;01:47, 380kiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 52.2k/40.8M [00:00&lt;03:19, 205kiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  1%|          | 261k/40.8M [00:00&lt;00:39, 1.04MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 87.0k/40.8M [00:00&lt;02:58, 228kiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  3%|▎         | 1.10M/40.8M [00:00&lt;00:10, 3.61MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 191k/40.8M [00:00&lt;01:31, 442kiB/s] 
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  6%|▌         | 2.37M/40.8M [00:00&lt;00:05, 6.68MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  1%|          | 383k/40.8M [00:00&lt;00:51, 792kiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 16%|█▌        | 6.50M/40.8M [00:00&lt;00:01, 17.4MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  2%|▏         | 766k/40.8M [00:00&lt;00:27, 1.48MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 25%|██▌       | 10.3M/40.8M [00:00&lt;00:01, 23.6MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  4%|▍         | 1.55M/40.8M [00:00&lt;00:13, 2.88MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 36%|███▋      | 14.9M/40.8M [00:00&lt;00:00, 30.6MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  8%|▊         | 3.10M/40.8M [00:01&lt;00:06, 5.60MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 47%|████▋     | 19.0M/40.8M [00:00&lt;00:00, 32.6MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 15%|█▍        | 5.98M/40.8M [00:01&lt;00:03, 10.5MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 58%|█████▊    | 23.5M/40.8M [00:01&lt;00:00, 36.2MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 21%|██▏       | 8.74M/40.8M [00:01&lt;00:02, 13.5MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 67%|██████▋   | 27.4M/40.8M [00:01&lt;00:00, 36.0MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 27%|██▋       | 11.0M/40.8M [00:01&lt;00:02, 14.5MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 78%|███████▊  | 31.9M/40.8M [00:01&lt;00:00, 37.3MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 33%|███▎      | 13.5M/40.8M [00:01&lt;00:01, 15.6MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 88%|████████▊ | 36.1M/40.8M [00:01&lt;00:00, 38.6MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 40%|███▉      | 16.2M/40.8M [00:01&lt;00:01, 17.0MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 99%|█████████▉| 40.6M/40.8M [00:01&lt;00:00, 40.5MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 46%|████▌     | 18.7M/40.8M [00:01&lt;00:01, 17.5MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 52%|█████▏    | 21.2M/40.8M [00:02&lt;00:01, 17.8MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 59%|█████▊    | 23.9M/40.8M [00:02&lt;00:00, 18.3MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 65%|██████▍   | 26.5M/40.8M [00:02&lt;00:00, 18.6MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 72%|███████▏  | 29.3M/40.8M [00:02&lt;00:00, 19.1MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 79%|███████▉  | 32.3M/40.8M [00:02&lt;00:00, 20.0MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 86%|████████▌ | 35.1M/40.8M [00:02&lt;00:00, 20.3MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 93%|█████████▎| 37.9M/40.8M [00:02&lt;00:00, 20.3MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 40.8M/40.8M [00:02&lt;00:00, 14.0MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 40.8M/40.8M [00:01&lt;00:00, 28.1MiB/s]
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -486,17 +482,24 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=8, num_edges=288,
-       ndata_schemes={&#39;Xfrac&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
+       ndata_schemes={&#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
        edata_schemes={&#39;r&#39;: Scheme(shape=(3,), dtype=torch.float32)}),
  tensor(-0.4276))
 </pre></div>
 </div>
 </div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code> can also load structures from the directory format that ALIGNN uses; the directory should contain a collection of POSCAR, CIF, or XYZ files and a mapping from file names to prediction targets in the file <code class="docutils literal notranslate"><span class="pre">id_prop.csv</span></code>.</p>
+<p>For example, loading the small set of POSCAR files distributed with <code class="docutils literal notranslate"><span class="pre">nfflr</span></code> (and <code class="docutils literal notranslate"><span class="pre">alignn</span></code>):</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">(</span>
-    <span class="s2">&quot;/Users/bld/projects/nfflr/examples/poscar-folder-bandgap&quot;</span><span class="p">,</span> 
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">nfflr_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getfile</span><span class="p">(</span><span class="n">nfflr</span><span class="p">))</span><span class="o">.</span><span class="n">parent</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">(</span>
+    <span class="n">nfflr_root</span> <span class="o">/</span> <span class="s2">&quot;examples/sample_data&quot;</span><span class="p">,</span> 
     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> 
     <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
 <span class="p">)</span>
@@ -505,54 +508,18 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dataset_name=&#39;/Users/bld/projects/nfflr/examples/poscar-folder-bandgap&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dataset_name=PosixPath(&#39;/home/runner/work/nfflr/nfflr/nfflr/examples/sample_data&#39;)
 </pre></div>
 </div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">UnboundLocalError</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">dataset</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">(</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span>     <span class="s2">&quot;/Users/bld/projects/nfflr/examples/poscar-folder-bandgap&quot;</span><span class="p">,</span> 
-<span class="g g-Whitespace">      </span><span class="mi">3</span>     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">,</span> 
-<span class="g g-Whitespace">      </span><span class="mi">4</span>     <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
-<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="nn">File ~/work/nfflr/nfflr/nfflr/data/dataset.py:129,</span> in <span class="ni">AtomsDataset.__init__</span><span class="nt">(self, df, target, transform, custom_collate_fn, custom_prepare_batch_fn, train_val_seed, id_tag, group_ids, n_train, n_val, energy_units, diskcache)</span>
-<span class="g g-Whitespace">    </span><span class="mi">123</span><span class="w"> </span><span class="sd">&quot;&quot;&quot;Pytorch Dataset for atomistic graphs.</span>
-<span class="g g-Whitespace">    </span><span class="mi">124</span><span class="sd"> </span>
-<span class="g g-Whitespace">    </span><span class="mi">125</span><span class="sd"> `df`: pandas dataframe from e.g. jarvis.db.figshare.data</span>
-<span class="g g-Whitespace">    </span><span class="mi">126</span><span class="sd"> &quot;&quot;&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">128</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-<span class="ne">--&gt; </span><span class="mi">129</span>     <span class="n">df</span> <span class="o">=</span> <span class="n">_load_dataset</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">131</span> <span class="n">example_id</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_tag</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="g g-Whitespace">    </span><span class="mi">133</span> <span class="c1"># by default: don&#39;t try to process record ids</span>
-
-<span class="nn">File ~/work/nfflr/nfflr/nfflr/data/dataset.py:73,</span> in <span class="ni">_load_dataset</span><span class="nt">(dataset_name, cache_dir)</span>
-<span class="g g-Whitespace">     </span><span class="mi">70</span> <span class="k">elif</span> <span class="n">dataset_name</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-<span class="g g-Whitespace">     </span><span class="mi">71</span>     <span class="n">df</span> <span class="o">=</span> <span class="n">_load_dataset_directory</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">)</span>
-<span class="ne">---&gt; </span><span class="mi">73</span> <span class="k">return</span> <span class="n">df</span>
-
-<span class="ne">UnboundLocalError</span>: local variable &#39;df&#39; referenced before assignment
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=8, num_edges=392,
+       ndata_schemes={&#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
+       edata_schemes={&#39;r&#39;: Scheme(shape=(3,), dtype=torch.float32)}),
+ tensor(0.))
 </pre></div>
 </div>
 </div>
 </div>
 <p>Set up a medium-sized ALIGNN model:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">atoms</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Graph(num_nodes=8, num_edges=1248,
-      ndata_schemes={&#39;Xfrac&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
-      edata_schemes={&#39;r&#39;: Scheme(shape=(3,), dtype=torch.float32)})
-</pre></div>
-</div>
-</div>
-</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">ALIGNNConfig</span><span class="p">(</span>
@@ -570,15 +537,13 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/bld/.pyenv/versions/3.10.9/envs/nfflr/lib/python3.10/site-packages/dgl/backend/pytorch/tensor.py:445: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  assert input.numel() == input.storage().size(), (
-</pre></div>
-</div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor(-1.1278, grad_fn=&lt;SqueezeBackward0&gt;)
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tensor(0.1853, grad_fn=&lt;SqueezeBackward0&gt;)
 </pre></div>
 </div>
 </div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code> is meant to work nicely with standard pytorch DataLoaders.
+Because of the rich structure of the common input formats for atomistic ML, often a custom <a class="reference external" href="https://pytorch.org/docs/stable/data.html#dataloader-collate-fn">collation function</a> is needed to properly auto-batch samples - <code class="docutils literal notranslate"><span class="pre">AtomsDataset</span></code> tries to automatically select an appropriate <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code> for tasks that it knows about, which can be accessed by <code class="docutils literal notranslate"><span class="pre">AtomsDataset.collate</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -601,10 +566,10 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=34, num_edges=1162,
-       ndata_schemes={&#39;Xfrac&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(Graph(num_nodes=18, num_edges=1026,
+       ndata_schemes={&#39;coord&#39;: Scheme(shape=(3,), dtype=torch.float32), &#39;atomic_number&#39;: Scheme(shape=(), dtype=torch.int32)}
        edata_schemes={&#39;r&#39;: Scheme(shape=(3,), dtype=torch.float32)}),
- tensor([0., 0.]))
+ tensor([0.0000, 0.6890]))
 </pre></div>
 </div>
 </div>
@@ -630,11 +595,252 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 19/19 [00:04&lt;00:00,  3.92it/s]
-100%|██████████| 19/19 [00:04&lt;00:00,  4.01it/s]
-100%|██████████| 19/19 [00:04&lt;00:00,  4.01it/s]
-100%|██████████| 19/19 [00:04&lt;00:00,  3.92it/s]
-100%|██████████| 19/19 [00:04&lt;00:00,  3.90it/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/19 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  5%|▌         | 1/19 [00:00&lt;00:05,  3.39it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 11%|█         | 2/19 [00:01&lt;00:10,  1.65it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 21%|██        | 4/19 [00:02&lt;00:09,  1.62it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 26%|██▋       | 5/19 [00:02&lt;00:06,  2.06it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 32%|███▏      | 6/19 [00:02&lt;00:05,  2.37it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 37%|███▋      | 7/19 [00:02&lt;00:03,  3.05it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 42%|████▏     | 8/19 [00:04&lt;00:06,  1.77it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 53%|█████▎    | 10/19 [00:05&lt;00:05,  1.60it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 58%|█████▊    | 11/19 [00:06&lt;00:05,  1.36it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 63%|██████▎   | 12/19 [00:08&lt;00:07,  1.04s/it]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 68%|██████▊   | 13/19 [00:08&lt;00:04,  1.22it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 74%|███████▎  | 14/19 [00:09&lt;00:03,  1.26it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 84%|████████▍ | 16/19 [00:09&lt;00:01,  1.80it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 89%|████████▉ | 17/19 [00:11&lt;00:01,  1.28it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 95%|█████████▍| 18/19 [00:14&lt;00:01,  1.44s/it]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 19/19 [00:14&lt;00:00,  1.10s/it]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 19/19 [00:14&lt;00:00,  1.27it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/19 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  5%|▌         | 1/19 [00:00&lt;00:10,  1.76it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 16%|█▌        | 3/19 [00:00&lt;00:03,  4.04it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 21%|██        | 4/19 [00:02&lt;00:08,  1.71it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 26%|██▋       | 5/19 [00:02&lt;00:06,  2.33it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 32%|███▏      | 6/19 [00:03&lt;00:08,  1.55it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 37%|███▋      | 7/19 [00:03&lt;00:06,  1.97it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 42%|████▏     | 8/19 [00:04&lt;00:05,  1.94it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 47%|████▋     | 9/19 [00:07&lt;00:13,  1.35s/it]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 53%|█████▎    | 10/19 [00:09&lt;00:13,  1.54s/it]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 63%|██████▎   | 12/19 [00:10&lt;00:07,  1.06s/it]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 68%|██████▊   | 13/19 [00:10&lt;00:05,  1.14it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 74%|███████▎  | 14/19 [00:11&lt;00:04,  1.02it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 79%|███████▉  | 15/19 [00:12&lt;00:03,  1.31it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 84%|████████▍ | 16/19 [00:12&lt;00:01,  1.68it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 89%|████████▉ | 17/19 [00:13&lt;00:01,  1.28it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 95%|█████████▍| 18/19 [00:13&lt;00:00,  1.59it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 95%|█████████▍| 18/19 [00:14&lt;00:00,  1.24it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">KeyboardInterrupt</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">line</span> <span class="mi">8</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span>     <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)):</span>
+<span class="ne">----&gt; </span><span class="mi">8</span>         <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span>         <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span>         <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1518,</span> in <span class="ni">Module._wrapped_call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1516</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compiled_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
+<span class="g g-Whitespace">   </span><span class="mi">1517</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1518</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1527,</span> in <span class="ni">Module._call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1522</span> <span class="c1"># If we don&#39;t have any hooks, we want to skip the rest of the logic in</span>
+<span class="g g-Whitespace">   </span><span class="mi">1523</span> <span class="c1"># this function, and just call forward.</span>
+<span class="g g-Whitespace">   </span><span class="mi">1524</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backward_pre_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_pre_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1525</span>         <span class="ow">or</span> <span class="n">_global_backward_pre_hooks</span> <span class="ow">or</span> <span class="n">_global_backward_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1526</span>         <span class="ow">or</span> <span class="n">_global_forward_hooks</span> <span class="ow">or</span> <span class="n">_global_forward_pre_hooks</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1527</span>     <span class="k">return</span> <span class="n">forward_call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1529</span> <span class="k">try</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1530</span>     <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/plum/function.py:484,</span> in <span class="ni">_BoundFunction.__call__</span><span class="nt">(self, _, *args, **kw_args)</span>
+<span class="g g-Whitespace">    </span><span class="mi">483</span> <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">484</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_instance</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
+
+    <span class="p">[</span><span class="o">...</span> <span class="n">skipping</span> <span class="n">hidden</span> <span class="mi">1</span> <span class="n">frame</span><span class="p">]</span>
+
+<span class="nn">File ~/work/nfflr/nfflr/nfflr/models/gnn/alignn.py:186,</span> in <span class="ni">ALIGNN.forward</span><span class="nt">(self, g)</span>
+<span class="g g-Whitespace">    </span><span class="mi">184</span> <span class="c1"># ALIGNN updates: update node, edge, triplet features</span>
+<span class="g g-Whitespace">    </span><span class="mi">185</span> <span class="k">for</span> <span class="n">alignn_layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alignn_layers</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">186</span>     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">alignn_layer</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">lg</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">188</span> <span class="c1"># gated GCN updates: update node, edge features</span>
+<span class="g g-Whitespace">    </span><span class="mi">189</span> <span class="k">for</span> <span class="n">gcn_layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gcn_layers</span><span class="p">:</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1518,</span> in <span class="ni">Module._wrapped_call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1516</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compiled_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
+<span class="g g-Whitespace">   </span><span class="mi">1517</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1518</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1527,</span> in <span class="ni">Module._call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1522</span> <span class="c1"># If we don&#39;t have any hooks, we want to skip the rest of the logic in</span>
+<span class="g g-Whitespace">   </span><span class="mi">1523</span> <span class="c1"># this function, and just call forward.</span>
+<span class="g g-Whitespace">   </span><span class="mi">1524</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backward_pre_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_pre_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1525</span>         <span class="ow">or</span> <span class="n">_global_backward_pre_hooks</span> <span class="ow">or</span> <span class="n">_global_backward_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1526</span>         <span class="ow">or</span> <span class="n">_global_forward_hooks</span> <span class="ow">or</span> <span class="n">_global_forward_pre_hooks</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1527</span>     <span class="k">return</span> <span class="n">forward_call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1529</span> <span class="k">try</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1530</span>     <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="nn">File ~/work/nfflr/nfflr/nfflr/nn/layers/alignn.py:46,</span> in <span class="ni">ALIGNNConv.forward</span><span class="nt">(self, g, lg, x, y, z)</span>
+<span class="g g-Whitespace">     </span><span class="mi">43</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_update</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">45</span> <span class="c1"># Edge-gated graph convolution update on crystal graph</span>
+<span class="ne">---&gt; </span><span class="mi">46</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_update</span><span class="p">(</span><span class="n">lg</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">48</span> <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1518,</span> in <span class="ni">Module._wrapped_call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1516</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compiled_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
+<span class="g g-Whitespace">   </span><span class="mi">1517</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1518</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1527,</span> in <span class="ni">Module._call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1522</span> <span class="c1"># If we don&#39;t have any hooks, we want to skip the rest of the logic in</span>
+<span class="g g-Whitespace">   </span><span class="mi">1523</span> <span class="c1"># this function, and just call forward.</span>
+<span class="g g-Whitespace">   </span><span class="mi">1524</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backward_pre_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_pre_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1525</span>         <span class="ow">or</span> <span class="n">_global_backward_pre_hooks</span> <span class="ow">or</span> <span class="n">_global_backward_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1526</span>         <span class="ow">or</span> <span class="n">_global_forward_hooks</span> <span class="ow">or</span> <span class="n">_global_forward_pre_hooks</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1527</span>     <span class="k">return</span> <span class="n">forward_call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1529</span> <span class="k">try</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1530</span>     <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="nn">File ~/work/nfflr/nfflr/nfflr/nn/layers/conv.py:107,</span> in <span class="ni">EdgeGatedGraphConv.forward</span><span class="nt">(self, g, node_feats, edge_feats)</span>
+<span class="g g-Whitespace">     </span><span class="mi">96</span> <span class="c1"># softmax version seems to perform slightly worse</span>
+<span class="g g-Whitespace">     </span><span class="mi">97</span> <span class="c1"># that the sigmoid-gated version</span>
+<span class="g g-Whitespace">     </span><span class="mi">98</span> <span class="c1"># compute node updates</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">104</span> 
+<span class="g g-Whitespace">    </span><span class="mi">105</span> <span class="c1"># node and edge updates</span>
+<span class="g g-Whitespace">    </span><span class="mi">106</span> <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">silu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_nodes</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="ne">--&gt; </span><span class="mi">107</span> <span class="n">y</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">silu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">norm_edges</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+<span class="g g-Whitespace">    </span><span class="mi">109</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">110</span>     <span class="n">x</span> <span class="o">=</span> <span class="n">node_feats</span> <span class="o">+</span> <span class="n">x</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1518,</span> in <span class="ni">Module._wrapped_call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1516</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compiled_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
+<span class="g g-Whitespace">   </span><span class="mi">1517</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1518</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1527,</span> in <span class="ni">Module._call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1522</span> <span class="c1"># If we don&#39;t have any hooks, we want to skip the rest of the logic in</span>
+<span class="g g-Whitespace">   </span><span class="mi">1523</span> <span class="c1"># this function, and just call forward.</span>
+<span class="g g-Whitespace">   </span><span class="mi">1524</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backward_pre_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_pre_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1525</span>         <span class="ow">or</span> <span class="n">_global_backward_pre_hooks</span> <span class="ow">or</span> <span class="n">_global_backward_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1526</span>         <span class="ow">or</span> <span class="n">_global_forward_hooks</span> <span class="ow">or</span> <span class="n">_global_forward_pre_hooks</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1527</span>     <span class="k">return</span> <span class="n">forward_call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1529</span> <span class="k">try</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1530</span>     <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="nn">File ~/work/nfflr/nfflr/nfflr/nn/layers/norm.py:27,</span> in <span class="ni">Norm.forward</span><span class="nt">(self, x)</span>
+<span class="g g-Whitespace">     </span><span class="mi">26</span> <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<span class="ne">---&gt; </span><span class="mi">27</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1518,</span> in <span class="ni">Module._wrapped_call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1516</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compiled_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[misc]</span>
+<span class="g g-Whitespace">   </span><span class="mi">1517</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1518</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call_impl</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/module.py:1527,</span> in <span class="ni">Module._call_impl</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1522</span> <span class="c1"># If we don&#39;t have any hooks, we want to skip the rest of the logic in</span>
+<span class="g g-Whitespace">   </span><span class="mi">1523</span> <span class="c1"># this function, and just call forward.</span>
+<span class="g g-Whitespace">   </span><span class="mi">1524</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backward_pre_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_hooks</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_pre_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1525</span>         <span class="ow">or</span> <span class="n">_global_backward_pre_hooks</span> <span class="ow">or</span> <span class="n">_global_backward_hooks</span>
+<span class="g g-Whitespace">   </span><span class="mi">1526</span>         <span class="ow">or</span> <span class="n">_global_forward_hooks</span> <span class="ow">or</span> <span class="n">_global_forward_pre_hooks</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1527</span>     <span class="k">return</span> <span class="n">forward_call</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1529</span> <span class="k">try</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1530</span>     <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/modules/normalization.py:196,</span> in <span class="ni">LayerNorm.forward</span><span class="nt">(self, input)</span>
+<span class="g g-Whitespace">    </span><span class="mi">195</span> <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">196</span>     <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">layer_norm</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">197</span>         <span class="nb">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/torch/nn/functional.py:2543,</span> in <span class="ni">layer_norm</span><span class="nt">(input, normalized_shape, weight, bias, eps)</span>
+<span class="g g-Whitespace">   </span><span class="mi">2539</span> <span class="k">if</span> <span class="n">has_torch_function_variadic</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">bias</span><span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">2540</span>     <span class="k">return</span> <span class="n">handle_torch_function</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">2541</span>         <span class="n">layer_norm</span><span class="p">,</span> <span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">bias</span><span class="p">),</span> <span class="nb">input</span><span class="p">,</span> <span class="n">normalized_shape</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="n">bias</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span>
+<span class="g g-Whitespace">   </span><span class="mi">2542</span>     <span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">2543</span> <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">layer_norm</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">normalized_shape</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="n">bias</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">enabled</span><span class="p">)</span>
+
+<span class="ne">KeyboardInterrupt</span>: 
 </pre></div>
 </div>
 </div>
@@ -652,7 +858,7 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/37d889649da32a95fa675edb40946cb3d9a6418a778832e756a25123e409db6e.png" src="../_images/37d889649da32a95fa675edb40946cb3d9a6418a778832e756a25123e409db6e.png" />
+<img alt="../_images/31bee70c248b1cb5b998f6ae6018eb9a5d8e4a7398deafb514aa65ac2fd07671.png" src="../_images/31bee70c248b1cb5b998f6ae6018eb9a5d8e4a7398deafb514aa65ac2fd07671.png" />
 </div>
 </div>
 </section>
@@ -689,50 +895,48 @@ Other versions:https://doi.org/10.6084/m9.figshare.6815699
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-01-19 09:39:01,426 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
-	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x296db64d0&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x67e2de410&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
-2024-01-19 09:39:01,426 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
-	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x296db64d0&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x67d998dc0&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-01-24 14:46:26,979 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
+	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x29a06a560&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x107b71510&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
+2024-01-24 14:46:26,979 ignite.distributed.auto.auto_dataloader INFO: Use data loader kwargs for dataset &#39;&lt;nfflr.data.dataset.&#39;: 
+	{&#39;collate_fn&#39;: &lt;function AtomsDataset.collate_default at 0x29a06a560&gt;, &#39;batch_size&#39;: 2, &#39;sampler&#39;: &lt;torch.utils.data.sampler.SubsetRandomSampler object at 0x30ec1da80&gt;, &#39;drop_last&#39;: True, &#39;num_workers&#39;: 0, &#39;pin_memory&#39;: False}
+/Users/bld/.pyenv/versions/3.10.9/envs/nfflr/lib/python3.10/site-packages/dgl/backend/pytorch/tensor.py:445: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  assert input.numel() == input.storage().size(), (
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>starting training loop
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/bld/.pyenv/versions/3.10.9/envs/nfflr/lib/python3.10/site-packages/dgl/backend/pytorch/tensor.py:445: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
-  assert input.numel() == input.storage().size(), (
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b293d298d86642fbafe0d2e0374e0fbe", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "198dcd4d894f4ee191f2a520682d8140", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 1  Avg loss: 0.01
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "01a82601f0ba4416b1f7f248071cd691", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "b93882e23b484a4fa762a638f356c97f", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 1  Avg loss: 0.00
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "69ab84babd8049a18168a537a91e00de", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 1  Avg loss: 3.60
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "8bedc34bb04e4fa9b42c76ab225fe235", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 1  Avg loss: 3.89
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9a47addbabc040c6ba0a8d8658235300", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "8beb793e6b844fe8a5634a6af9644aaa", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 2  Avg loss: 0.45
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "9e9b7606956b4c20b2712129c620342c", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "4846a6c28a754fbb9bcd54909e216041", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 2  Avg loss: 0.10
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "84afe53be07e46648b051334c2dd138a", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 2  Avg loss: 4.95
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "337badb9a6b54213a48eee0bfa197dc3", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 2  Avg loss: 3.95
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1a0ee91c7fda4fc096547ab7b037a885", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "0a2d9b4b52d14355ab65831c421a5dd8", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 3  Avg loss: 0.05
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "c6800818c524482c815e243f97f7a8e4", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "5d334d20246f4483834ea0ce6b25a169", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 3  Avg loss: 0.11
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "8b574884e3b54dc7838aebfdfb261455", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 3  Avg loss: 1.20
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3b0c0135aa594cdaabc77feebcae8135", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 3  Avg loss: 1.36
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "fd38ad5074bc4263ab40d10f63b602ce", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "e535d754d9554af381b757ec7be31b8a", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 4  Avg loss: 0.02
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e46ce9317a9f47ada545acd328b4f3ac", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "ea410db99fbf4d8a8366dd7a9e6ff7ad", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 4  Avg loss: 0.03
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "e04fde0c5e9844d1b3f3d898ae55a408", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 4  Avg loss: 3.59
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1919e08767f54d10b300e891d0f030af", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 4  Avg loss: 4.02
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6ba39b2564f04137a71c6fc35d3648a8", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "0317d4800e5d4aeeab419b5bcdb898e3", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 5  Avg loss: 0.00
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "986c4e49d3ea4ec0b288154ff073cf91", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "266c8c50d6fd4cd19242ddbcdea07e72", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>train results - Epoch: 5  Avg loss: 0.01
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "03fbe926284d4ab2b088727b61cdeddc", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 5  Avg loss: 3.85
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0ea25b0f85fa4d5bb9ffccdd4aae181a", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>val results - Epoch: 5  Avg loss: 3.94
-</pre></div>
-</div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3.9357571601867676
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3.854463577270508
 </pre></div>
 </div>
 </div>

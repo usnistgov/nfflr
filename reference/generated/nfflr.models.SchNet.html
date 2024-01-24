@@ -189,25 +189,45 @@ $(document).ready(function(){
 
 <li class="toctree-l2"><a class="reference internal" href="../../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../../howto/force-field-training.html">Property regression example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../howto/force-field-training.html">Force field example</a></li>
 
 </ul>
 </li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l2 has-children"><a class="reference internal" href="../api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.Atoms.html">Atoms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.AtomsDataset.html">AtomsDataset</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.FeedForward.html">FeedForward</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.batch.html">nfflr.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.unbatch.html">nfflr.unbatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.to_ase.html">nfflr.to_ase</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current active has-children"><a class="reference internal" href="../models.html">nfflr.models</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.RBFExpansion.html">RBFExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.ChebyshevExpansion.html">ChebyshevExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.XPLOR.html">XPLOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.Norm.html">Norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.InstanceNorm.html">InstanceNorm</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current active has-children"><a class="reference internal" href="../models.html">nfflr.models</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3 current active"><a class="current reference internal" href="#">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.models.Tersoff.html">Tersoff</a></li>

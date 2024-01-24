@@ -45,8 +45,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'reference/nn';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="FeedForward" href="generated/nfflr.nn.FeedForward.html" />
-    <link rel="prev" title="AtomsDataset" href="generated/nfflr.AtomsDataset.html" />
+    <link rel="next" title="RBFExpansion" href="generated/nfflr.nn.RBFExpansion.html" />
+    <link rel="prev" title="nfflr.data.deepmd_hea_dataset" href="generated/nfflr.data.deepmd_hea_dataset.html" />
 <!-- <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css"> -->
 
 <script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
@@ -189,25 +189,45 @@ $(document).ready(function(){
 
 <li class="toctree-l2"><a class="reference internal" href="../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Property regression example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Force field example</a></li>
 
 </ul>
 </li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l2 has-children"><a class="reference internal" href="api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.Atoms.html">Atoms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
-</ul>
-</li>
-<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">nfflr.nn</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.batch.html">nfflr.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">nfflr.nn</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.RBFExpansion.html">RBFExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.ChebyshevExpansion.html">ChebyshevExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.Norm.html">Norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.InstanceNorm.html">InstanceNorm</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.models.Tersoff.html">Tersoff</a></li>
@@ -362,8 +382,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basis-functions">Basis functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#graph-convolution-layers">Graph convolution layers</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cutoff-functions">Cutoff functions</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-layers">Common layers</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#graph-construction">Graph construction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#normalization-layers">Normalization layers</a></li>
 </ul>
             </nav>
         </div>
@@ -377,6 +400,46 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="module-nfflr.nn">
 <span id="nfflr-nn"></span><h1>nfflr.nn<a class="headerlink" href="#module-nfflr.nn" title="Link to this heading">#</a></h1>
+<section id="basis-functions">
+<h2>Basis functions<a class="headerlink" href="#basis-functions" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.RBFExpansion.html#nfflr.nn.RBFExpansion" title="nfflr.nn.RBFExpansion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RBFExpansion</span></code></a></p></td>
+<td><p>Expand interatomic distances with radial basis functions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.nn.ChebyshevExpansion.html#nfflr.nn.ChebyshevExpansion" title="nfflr.nn.ChebyshevExpansion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ChebyshevExpansion</span></code></a></p></td>
+<td><p>Expand features in (-1, 1) interval with Chebyshev basis.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="graph-convolution-layers">
+<h2>Graph convolution layers<a class="headerlink" href="#graph-convolution-layers" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.EdgeGatedGraphConv.html#nfflr.nn.EdgeGatedGraphConv" title="nfflr.nn.EdgeGatedGraphConv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EdgeGatedGraphConv</span></code></a></p></td>
+<td><p>Edge gated graph convolution from arxiv:1711.07553.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.nn.ALIGNNConv.html#nfflr.nn.ALIGNNConv" title="nfflr.nn.ALIGNNConv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ALIGNNConv</span></code></a></p></td>
+<td><p>Line graph update.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.SparseALIGNNConv.html#nfflr.nn.SparseALIGNNConv" title="nfflr.nn.SparseALIGNNConv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SparseALIGNNConv</span></code></a></p></td>
+<td><p>ALIGNN with sparser line graph</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="cutoff-functions">
+<h2>Cutoff functions<a class="headerlink" href="#cutoff-functions" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.XPLOR.html#nfflr.nn.XPLOR" title="nfflr.nn.XPLOR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">XPLOR</span></code></a></p></td>
+<td><p><p class="rubric">Methods</p>
+</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="common-layers">
 <h2>Common layers<a class="headerlink" href="#common-layers" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
@@ -390,18 +453,15 @@ document.write(`
 </tbody>
 </table>
 </section>
-<section id="graph-construction">
-<h2>Graph construction<a class="headerlink" href="#graph-construction" title="Link to this heading">#</a></h2>
+<section id="normalization-layers">
+<h2>Normalization layers<a class="headerlink" href="#normalization-layers" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.PeriodicRadiusGraph.html#nfflr.nn.PeriodicRadiusGraph" title="nfflr.nn.PeriodicRadiusGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicRadiusGraph</span></code></a></p></td>
-<td><p>Periodic radius graph transform.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.nn.PeriodicKShellGraph.html#nfflr.nn.PeriodicKShellGraph" title="nfflr.nn.PeriodicKShellGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicKShellGraph</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.Norm.html#nfflr.nn.Norm" title="nfflr.nn.Norm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Norm</span></code></a></p></td>
 <td><p><p class="rubric">Methods</p>
 </p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html#nfflr.nn.PeriodicAdaptiveRadiusGraph" title="nfflr.nn.PeriodicAdaptiveRadiusGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicAdaptiveRadiusGraph</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.nn.InstanceNorm.html#nfflr.nn.InstanceNorm" title="nfflr.nn.InstanceNorm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InstanceNorm</span></code></a></p></td>
 <td><p><p class="rubric">Methods</p>
 </p></td>
 </tr>
@@ -422,20 +482,20 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="generated/nfflr.AtomsDataset.html"
+       href="generated/nfflr.data.deepmd_hea_dataset.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">AtomsDataset</p>
+        <p class="prev-next-title">nfflr.data.deepmd_hea_dataset</p>
       </div>
     </a>
     <a class="right-next"
-       href="generated/nfflr.nn.FeedForward.html"
+       href="generated/nfflr.nn.RBFExpansion.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">FeedForward</p>
+        <p class="prev-next-title">RBFExpansion</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -455,8 +515,11 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basis-functions">Basis functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#graph-convolution-layers">Graph convolution layers</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cutoff-functions">Cutoff functions</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#common-layers">Common layers</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#graph-construction">Graph construction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#normalization-layers">Normalization layers</a></li>
 </ul>
   </nav></div>
 

@@ -188,25 +188,45 @@ $(document).ready(function(){
 
 <li class="toctree-l2"><a class="reference internal" href="../../../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../../../howto/force-field-training.html">Property regression example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../howto/force-field-training.html">Force field example</a></li>
 
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.Atoms.html">Atoms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.batch.html">nfflr.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.RBFExpansion.html">RBFExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.ChebyshevExpansion.html">ChebyshevExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.Norm.html">Norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.InstanceNorm.html">InstanceNorm</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
@@ -469,7 +489,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="AtomsDataset">
-<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset">[docs]</a>
+<a class="viewcode-back" href="../../../reference/dataset.html#nfflr.AtomsDataset">[docs]</a>
 <span class="k">class</span> <span class="nc">AtomsDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dataset of Atoms.&quot;&quot;&quot;</span>
 
@@ -635,8 +655,6 @@ document.write(`
 
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">solution</span>
 
-<div class="viewcode-block" id="AtomsDataset.split_dataset_by_id">
-<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.split_dataset_by_id">[docs]</a>
     <span class="k">def</span> <span class="nf">split_dataset_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_train</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">n_val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get train/val/test split indices for SubsetRandomSampler.</span>
 
@@ -681,11 +699,8 @@ document.write(`
         <span class="k">return</span> <span class="p">{</span>
             <span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">all_ids</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">split_ids</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">split_ids</span> <span class="ow">in</span> <span class="n">split_ids</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">}</span></div>
+        <span class="p">}</span>
 
-
-<div class="viewcode-block" id="AtomsDataset.split_dataset">
-<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.split_dataset">[docs]</a>
     <span class="k">def</span> <span class="nf">split_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get train/val/test split indices for SubsetRandomSampler.&quot;&quot;&quot;</span>
         <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -706,11 +721,8 @@ document.write(`
         <span class="n">val_ids</span> <span class="o">=</span> <span class="n">train_val_ids</span><span class="p">[:</span><span class="n">n_val</span><span class="p">]</span>
         <span class="n">train_ids</span> <span class="o">=</span> <span class="n">train_val_ids</span><span class="p">[</span><span class="n">n_val</span><span class="p">:]</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="n">train_ids</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">:</span> <span class="n">val_ids</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="n">test_ids</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="n">train_ids</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">:</span> <span class="n">val_ids</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="n">test_ids</span><span class="p">}</span>
 
-
-<div class="viewcode-block" id="AtomsDataset.collate_forcefield">
-<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_forcefield">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">collate_forcefield</span><span class="p">(</span><span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dataloader helper to batch graphs cross `samples`.</span>
@@ -728,11 +740,8 @@ document.write(`
         <span class="n">targets</span> <span class="o">=</span> <span class="n">collate_forcefield_targets</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
 
         <span class="n">batched_graph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">batched_graph</span><span class="p">,</span> <span class="n">targets</span></div>
+        <span class="k">return</span> <span class="n">batched_graph</span><span class="p">,</span> <span class="n">targets</span>
 
-
-<div class="viewcode-block" id="AtomsDataset.prepare_batch_default">
-<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.prepare_batch_default">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">prepare_batch_default</span><span class="p">(</span>
         <span class="n">batch</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span>
@@ -760,11 +769,8 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="n">non_blocking</span><span class="p">),</span> <span class="n">targets</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">batch</span></div>
+        <span class="k">return</span> <span class="n">batch</span>
 
-
-<div class="viewcode-block" id="AtomsDataset.collate_default">
-<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_default">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">collate_default</span><span class="p">(</span><span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dataloader helper to batch graphs cross `samples`.</span>
@@ -778,11 +784,8 @@ document.write(`
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">graphs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">samples</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="AtomsDataset.collate_default_line_graph">
-<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_default_line_graph">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">collate_default_line_graph</span><span class="p">(</span><span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dataloader helper to batch graphs cross `samples`.</span>
@@ -797,11 +800,8 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">samples</span><span class="p">))</span>
         <span class="n">graphs</span><span class="p">,</span> <span class="n">line_graphs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">))</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">line_graphs</span><span class="p">)),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">line_graphs</span><span class="p">)),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="AtomsDataset.collate_line_graph_ff">
-<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_line_graph_ff">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">collate_line_graph_ff</span><span class="p">(</span>
         <span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span>
@@ -815,7 +815,6 @@ document.write(`
         <span class="n">targets</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">total_energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">forces</span><span class="o">=</span><span class="n">forces</span><span class="p">,</span> <span class="n">stresses</span><span class="o">=</span><span class="n">stresses</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">line_graphs</span><span class="p">),</span> <span class="n">targets</span></div>
-</div>
 
 </pre></div>
 

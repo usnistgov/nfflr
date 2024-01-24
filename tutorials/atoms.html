@@ -189,25 +189,45 @@ $(document).ready(function(){
 
 <li class="toctree-l2"><a class="reference internal" href="../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Property regression example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Force field example</a></li>
 
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.Atoms.html">Atoms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.batch.html">nfflr.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.RBFExpansion.html">RBFExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.ChebyshevExpansion.html">ChebyshevExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.Norm.html">Norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.InstanceNorm.html">InstanceNorm</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
@@ -372,9 +392,9 @@ document.write(`
 <span class="kn">import</span> <span class="nn">nfflr</span>
 
 <span class="n">cell</span> <span class="o">=</span> <span class="mf">4.1</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">positions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]])</span>
+<span class="n">scaled_positions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]])</span>
 <span class="n">numbers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">24</span><span class="p">,</span> <span class="mi">22</span><span class="p">])</span>
-<span class="n">atoms</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span>
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">scaled_positions</span> <span class="o">@</span> <span class="n">cell</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span>
 <span class="n">atoms</span>
 </pre></div>
 </div>
@@ -383,7 +403,7 @@ document.write(`
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Atoms(cell=tensor([[4.1000, 0.0000, 0.0000],
         [0.0000, 4.1000, 0.0000],
         [0.0000, 0.0000, 4.1000]]), positions=tensor([[0.0000, 0.0000, 0.0000],
-        [0.5000, 0.5000, 0.5000]]), numbers=tensor([24, 22]), _batch_num_atoms=None)
+        [2.0500, 2.0500, 2.0500]]), numbers=tensor([24, 22]), _batch_num_atoms=None)
 </pre></div>
 </div>
 </div>
@@ -398,14 +418,26 @@ document.write(`
 <span class="o">%</span><span class="k">matplotlib</span> inline
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">AseAtoms</span><span class="p">(</span><span class="n">scaled_positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">)</span>
+<span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">AseAtoms</span><span class="p">(</span><span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">)</span>
 <span class="n">plot_atoms</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">radii</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;10x,20y,0z&quot;</span><span class="p">),</span> <span class="n">show_unit_cell</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/9b323fc1a569c31530ffae79a7604e693026288687ba5f9410dbcedcabd6de81.png" src="../_images/9b323fc1a569c31530ffae79a7604e693026288687ba5f9410dbcedcabd6de81.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">9</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">get_ipython</span><span class="p">()</span><span class="o">.</span><span class="n">run_line_magic</span><span class="p">(</span><span class="s1">&#39;matplotlib&#39;</span><span class="p">,</span> <span class="s1">&#39;inline&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="ne">----&gt; </span><span class="mi">9</span> <span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">AseAtoms</span><span class="p">(</span><span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="n">plot_atoms</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">radii</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;10x,20y,0z&quot;</span><span class="p">),</span> <span class="n">show_unit_cell</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">);</span>
+
+<span class="ne">NameError</span>: name &#39;positions&#39; is not defined
+</pre></div>
+</div>
+<img alt="../_images/a5729cd14919a8de917de0663c9c4c2daa4670b47317d3fbb51a8d253ba1d977.png" src="../_images/a5729cd14919a8de917de0663c9c4c2daa4670b47317d3fbb51a8d253ba1d977.png" />
 </div>
 </div>
 </section>

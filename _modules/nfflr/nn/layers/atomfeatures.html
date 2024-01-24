@@ -1,0 +1,675 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nfflr.nn.layers.atomfeatures &#8212; nfflr 0.1.2 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../../../_static/documentation_options.js?v=0deb7d70"></script>
+    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/nfflr/nn/layers/atomfeatures';</script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<!-- <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css"> -->
+
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+<script async type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-66610693-1&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c">
+</script>
+
+
+<script type="text/javascript" src="https://pages.nist.gov/leaveNotice/js/jquery.leaveNotice-nist.min.js"></script>
+<script>
+$(document).ready(function(){
+  // Mark external (non-nist.gov) A tags with class "external"
+  //If the adress start with https and ends with nist.gov
+  var re_nist = new RegExp('^https?:\/\/((^\/)*\.)*nist\\.gov(\/|$)');
+  //Regex to find address that start with https
+  var re_absolute_address = new RegExp('^((https?:)?\/\/)');
+  $("a").each(function(){
+    var url=$(this).attr('href');
+    if(re_nist.test(url) || !re_absolute_address.test(url)){
+      $(this).addClass('local');
+    }else{
+      //This a href appears to be external, so tag it
+      $(this).addClass('external');
+    }
+  });
+  // Add leaveNotice to external A elements
+  $('a.external').leaveNotice();
+});
+</script>
+<link rel="stylesheet" type="text/css" href="https://pages.nist.gov/leaveNotice/css/jquery.leaveNotice.css" />
+
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">nfflr 0.1.2 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../overview.html">Overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../tutorials/index.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorials/quickstart.html">Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorials/atoms.html">Atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../howto/index.html">How-to guides</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../howto/property-regression.html">Property regression example</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../../howto/force-field-training.html">Force field example</a></li>
+
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.batch.html">nfflr.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.RBFExpansion.html">RBFExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.ChebyshevExpansion.html">ChebyshevExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.Norm.html">Norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.nn.InstanceNorm.html">InstanceNorm</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr/issues/new?title=Issue%20on%20page%20%2F_modules/nfflr/nn/layers/atomfeatures.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for nfflr.nn.layers.atomfeatures</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">einops</span>
+
+<span class="kn">from</span> <span class="nn">mendeleev.fetch</span> <span class="kn">import</span> <span class="n">fetch_table</span>
+<span class="kn">from</span> <span class="nn">jarvis.core.specie</span> <span class="kn">import</span> <span class="n">chem_data</span><span class="p">,</span> <span class="n">get_node_attributes</span>
+
+
+<div class="viewcode-block" id="AtomType">
+<a class="viewcode-back" href="../../../../reference/generated/nfflr.nn.AtomType.html#nfflr.nn.AtomType">[docs]</a>
+<span class="k">class</span> <span class="nc">AtomType</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compact atom type lookup table.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">one_hot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compact atom type lookup table.</span>
+
+<span class="sd">        species should be an int tensor of unique atomic numbers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">one_hot</span> <span class="o">=</span> <span class="n">one_hot</span>
+
+        <span class="c1"># map atomic numbers to species ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">z</span><span class="o">.</span><span class="n">item</span><span class="p">():</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">species</span><span class="p">)}</span>
+
+        <span class="c1"># tensorized version of species id map - store in zero-indexed format</span>
+        <span class="c1"># initialize to -1 to raise errors on out-of-domain species</span>
+        <span class="n">_weight</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">118</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">z</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">_weight</span><span class="p">[</span><span class="n">z</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">species</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span>
+            <span class="mi">118</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">_weight</span><span class="o">=</span><span class="n">_weight</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">_freeze</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+
+        <span class="c1"># z-1: data for atomic species stored in zero-indexed format</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">one_hot</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">idx</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="AtomPairType">
+<a class="viewcode-back" href="../../../../reference/generated/nfflr.nn.AtomPairType.html#nfflr.nn.AtomPairType">[docs]</a>
+<span class="k">class</span> <span class="nc">AtomPairType</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compact atom pair type lookup table.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">symmetric</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">one_hot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compact atom pair type lookup table.</span>
+
+<span class="sd">        species should be an int tensor of unique atomic numbers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symmetric</span> <span class="o">=</span> <span class="n">symmetric</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">one_hot</span> <span class="o">=</span> <span class="n">one_hot</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomtypes</span> <span class="o">=</span> <span class="n">AtomType</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">one_hot</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomtypes</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="n">n</span><span class="o">**</span><span class="mi">2</span>
+
+        <span class="k">if</span> <span class="n">symmetric</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+            <span class="c1"># just store a symmetric lookup table for the linear index</span>
+            <span class="c1"># into the triangular matrix of atom type pairs</span>
+            <span class="c1"># instead of sorting atom ids at runtime, just multi-index</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="n">n</span><span class="p">))):</span>
+                <span class="n">a</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">diagonal</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z1</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">z2</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomtypes</span><span class="p">)</span>
+
+        <span class="c1"># concatenate atomic numbers into pairs</span>
+        <span class="n">zs</span><span class="p">,</span> <span class="n">ps</span> <span class="o">=</span> <span class="n">einops</span><span class="o">.</span><span class="n">pack</span><span class="p">((</span><span class="n">z1</span><span class="p">,</span> <span class="n">z2</span><span class="p">),</span> <span class="s2">&quot;i *&quot;</span><span class="p">)</span>
+
+        <span class="c1"># look up atom type ids for pairs</span>
+        <span class="n">atomtypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomtypes</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
+
+        <span class="c1"># calculate 2D pair index</span>
+        <span class="n">ia</span><span class="p">,</span> <span class="n">ib</span> <span class="o">=</span> <span class="n">einops</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">atomtypes</span><span class="p">,</span> <span class="n">ps</span><span class="p">,</span> <span class="s2">&quot;i *&quot;</span><span class="p">)</span>
+        <span class="c1"># pairtype = torch.from_numpy(np.ravel_multi_index((ia, ib), (n, n)))</span>
+
+        <span class="c1"># convert to pair index</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmetric</span><span class="p">:</span>
+            <span class="n">pairtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="n">ia</span><span class="p">,</span> <span class="n">ib</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pairtype</span> <span class="o">=</span> <span class="n">ia</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="n">ib</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">one_hot</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">pairtype</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pairtype</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_get_attribute_lookup</span><span class="p">(</span><span class="n">atom_features</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cgcnn&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a lookup array indexed by atomic number.</span>
+
+<span class="sd">    atom_features can be</span>
+<span class="sd">    cgcnn: standard one-hot encoded CGCNN atom embeddings</span>
+<span class="sd">    basic: similar feature set, real values instead</span>
+<span class="sd">    cfid: 438 chemical features</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">max_z</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">chem_data</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="c1"># get feature shape (referencing Carbon)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">get_node_attributes</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="n">atom_features</span><span class="p">)</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">max_z</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">template</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">element</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">chem_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="s2">&quot;Z&quot;</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">get_node_attributes</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">atom_features</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">features</span><span class="p">[</span><span class="n">z</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># replace missing features with NaN</span>
+    <span class="n">features</span><span class="p">[(</span><span class="n">features</span> <span class="o">==</span> <span class="o">-</span><span class="mi">9999</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="c1"># create fixed feature embedding indexed by atomic number</span>
+    <span class="n">n_elements</span><span class="p">,</span> <span class="n">embedding_dim</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span>
+        <span class="n">num_embeddings</span><span class="o">=</span><span class="n">n_elements</span><span class="p">,</span>
+        <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+        <span class="n">_weight</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">features</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">features</span>
+
+
+<div class="viewcode-block" id="AttributeEmbedding">
+<a class="viewcode-back" href="../../../../reference/generated/nfflr.nn.AttributeEmbedding.html#nfflr.nn.AttributeEmbedding">[docs]</a>
+<span class="k">class</span> <span class="nc">AttributeEmbedding</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">atom_features</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;cgcnn&quot;</span><span class="p">,</span> <span class="s2">&quot;basic&quot;</span><span class="p">,</span> <span class="s2">&quot;cfid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cgcnn&quot;</span><span class="p">,</span>
+        <span class="n">d_model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="n">_get_attribute_lookup</span><span class="p">(</span><span class="n">atom_features</span><span class="o">=</span><span class="n">atom_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_embedding</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">embedding_dim</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_embedding</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="AtomicNumberEmbedding">
+<a class="viewcode-back" href="../../../../reference/generated/nfflr.nn.AtomicNumberEmbedding.html#nfflr.nn.AtomicNumberEmbedding">[docs]</a>
+<span class="k">class</span> <span class="nc">AtomicNumberEmbedding</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">num_embeddings</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">118</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_embedding</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">num_embeddings</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_embedding</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="PeriodicTableEmbedding">
+<a class="viewcode-back" href="../../../../reference/generated/nfflr.nn.PeriodicTableEmbedding.html#nfflr.nn.PeriodicTableEmbedding">[docs]</a>
+<span class="k">class</span> <span class="nc">PeriodicTableEmbedding</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Additive row and column embedding.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="n">table</span> <span class="o">=</span> <span class="n">fetch_table</span><span class="p">(</span><span class="s2">&quot;elements&quot;</span><span class="p">)</span>
+
+        <span class="c1"># build static lookup table mapping Z -&gt; row, column</span>
+        <span class="c1"># follow CGCNN and treat lanthanides and actinides as rows 8, 9</span>
+
+        <span class="n">f_mask</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">block</span> <span class="o">==</span> <span class="s2">&quot;f&quot;</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">period</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">row</span><span class="p">[</span><span class="n">f_mask</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">2</span>
+        <span class="n">table</span><span class="p">[</span><span class="s2">&quot;row&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span>
+
+        <span class="n">col</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">group_id</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">col</span><span class="p">[</span><span class="n">f_mask</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">table</span><span class="p">[</span><span class="n">f_mask</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;period&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;atomic_number&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;atomic_number&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+            <span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="o">+</span> <span class="mi">3</span>
+        <span class="p">)</span>
+        <span class="n">table</span><span class="p">[</span><span class="s2">&quot;col&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;rows&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">row</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;cols&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">col</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">row_embedding</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col_embedding</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zs</span><span class="p">):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">[</span><span class="n">zs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">[</span><span class="n">zs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_embedding</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">col_embedding</span><span class="p">(</span><span class="n">col</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Brian DeCost
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Brian DeCost.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -188,25 +188,45 @@ $(document).ready(function(){
 
 <li class="toctree-l2"><a class="reference internal" href="../../../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../../../howto/force-field-training.html">Property regression example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../howto/force-field-training.html">Force field example</a></li>
 
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.Atoms.html">Atoms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.batch.html">nfflr.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.RBFExpansion.html">RBFExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.ChebyshevExpansion.html">ChebyshevExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.Norm.html">Norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.InstanceNorm.html">InstanceNorm</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
@@ -399,18 +419,18 @@ document.write(`
 
 
 <div class="viewcode-block" id="Atoms">
-<a class="viewcode-back" href="../../../reference/generated/nfflr.Atoms.html#nfflr.Atoms">[docs]</a>
+<a class="viewcode-back" href="../../../reference/atoms.html#nfflr.Atoms">[docs]</a>
 <span class="k">class</span> <span class="nc">Atoms</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Atoms: a basic crystal structure data class.</span>
 
-<span class="sd">    ## What is fundamental about a crystal?</span>
-
+<span class="sd">    nfflr.Atoms consists of:</span>
 <span class="sd">    - cell (lattice parameters / cell matrix)</span>
-<span class="sd">    - positions (fractional coordinates)</span>
+<span class="sd">    - positions (Cartesian coordinates)</span>
 <span class="sd">    - numbers (atom identities / fractional site occupancies)</span>
-<span class="sd">    - periodic boundary conditions - 3D, 2D, ...?</span>
+<span class="sd">    - batching information</span>
 
-<span class="sd">    so work with this foundational representation, and transform it</span>
+<span class="sd">    The goal is to make it easy to work with a common representation,</span>
+<span class="sd">    and transform it as needed to other formats:</span>
 
 <span class="sd">    - DGLGraph</span>
 <span class="sd">    - ALIGNNGraphTuple</span>
@@ -445,12 +465,12 @@ document.write(`
 
     <span class="nd">@dispatch</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">jarvis</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
-        <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">matrix</span><span class="p">,</span> <span class="n">atoms</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">atoms</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">matrix</span><span class="p">,</span> <span class="n">atoms</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">atoms</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">)</span>
 
     <span class="nd">@dispatch</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">):</span>  <span class="c1"># noqa: F811</span>
         <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">(),</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">()</span>
+            <span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_positions</span><span class="p">(),</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">()</span>
         <span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -475,6 +495,9 @@ document.write(`
                 <span class="s2">&quot;__len__ not defined for batched atoms. use batch_num_atoms instead.&quot;</span>
             <span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">scaled_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="o">@</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cell</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="n">non_blocking</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="n">non_blocking</span><span class="p">)</span>
@@ -483,18 +506,22 @@ document.write(`
 
 
 
+<div class="viewcode-block" id="to_ase">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.to_ase.html#nfflr.to_ase">[docs]</a>
 <span class="k">def</span> <span class="nf">to_ase</span><span class="p">(</span><span class="n">at</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert nfflr.Atoms to ase.Atoms.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span>
-        <span class="n">cell</span><span class="o">=</span><span class="n">at</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">scaled_positions</span><span class="o">=</span><span class="n">at</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">at</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">ase</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">cell</span><span class="o">=</span><span class="n">at</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">at</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">at</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
+
+<div class="viewcode-block" id="spglib_cell">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.spglib_cell.html#nfflr.spglib_cell">[docs]</a>
 <span class="k">def</span> <span class="nf">spglib_cell</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Unpack Atoms to spglib tuple format.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">batched</span><span class="p">():</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">spglib_cell</span><span class="p">(</span><span class="n">at</span><span class="p">)</span> <span class="k">for</span> <span class="n">at</span> <span class="ow">in</span> <span class="n">unbatch</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">numbers</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">scaled_positions</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">numbers</span><span class="p">)</span></div>
+
 
 
 <span class="nd">@dispatch</span>
@@ -506,21 +533,27 @@ document.write(`
     <span class="k">return</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">,</span> <span class="n">batch_num_atoms</span><span class="o">=</span><span class="n">batch_num_atoms</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="unbatch">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.unbatch.html#nfflr.unbatch">[docs]</a>
 <span class="nd">@dispatch</span>
 <span class="k">def</span> <span class="nf">unbatch</span><span class="p">(</span><span class="n">atoms</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Atoms</span><span class="p">]:</span>
     <span class="n">num_atoms</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">batch_num_atoms</span>
     <span class="n">cell</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="p">]</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">num_atoms</span><span class="p">)</span>
     <span class="n">numbers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span> <span class="n">num_atoms</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">Atoms</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">Atoms</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)]</span></div>
+
 
 
 <span class="n">AtomsGraph</span><span class="p">:</span> <span class="n">TypeAlias</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span>
 
 
+<div class="viewcode-block" id="batch">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.batch.html#nfflr.batch">[docs]</a>
 <span class="nd">@dispatch</span>
 <span class="k">def</span> <span class="nf">batch</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">AtomsGraph</span><span class="p">]):</span>  <span class="c1"># noqa: F811</span>
-    <span class="k">return</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">g</span><span class="p">)</span></div>
+
 </pre></div>
 
                 </article>

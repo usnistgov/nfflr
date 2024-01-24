@@ -5,7 +5,43 @@
 .. currentmodule:: nfflr.nn
 ```
 
-### Common layers
+## Basis functions
+
+```{eval-rst}
+.. autosummary::
+   :toctree: generated
+   :nosignatures:
+   :template: classtemplate.rst
+
+   RBFExpansion
+   ChebyshevExpansion
+```
+
+## Graph convolution layers
+
+```{eval-rst}
+.. autosummary::
+   :toctree: generated
+   :nosignatures:
+   :template: classtemplate.rst
+
+   EdgeGatedGraphConv
+   ALIGNNConv
+   SparseALIGNNConv
+```
+
+## Cutoff functions
+
+```{eval-rst}
+.. autosummary::
+   :toctree: generated
+   :nosignatures:
+   :template: classtemplate.rst
+
+   XPLOR
+```
+
+## Common layers
 
 ```{eval-rst}
 .. autosummary::
@@ -17,16 +53,14 @@
    MLPLayer
 ```
 
-
-### Graph construction
+## Normalization layers
 
 ```{eval-rst}
 .. autosummary::
    :toctree: generated
    :nosignatures:
-   :template: newclass.rst
+   :template: classtemplate.rst
 
-   PeriodicRadiusGraph
-   PeriodicKShellGraph
-   PeriodicAdaptiveRadiusGraph
+   Norm
+   InstanceNorm
 ```

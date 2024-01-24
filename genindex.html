@@ -188,25 +188,45 @@ $(document).ready(function(){
 
 <li class="toctree-l2"><a class="reference internal" href="howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="howto/force-field-training.html">Property regression example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto/force-field-training.html">Force field example</a></li>
 
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l2 has-children"><a class="reference internal" href="reference/api.html">nfflr</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.Atoms.html">Atoms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
-</ul>
-</li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
 <li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.batch.html">nfflr.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.RBFExpansion.html">RBFExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.ChebyshevExpansion.html">ChebyshevExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.Norm.html">Norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.nn.InstanceNorm.html">InstanceNorm</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
@@ -368,14 +388,21 @@ document.write(`
 
 <div class="genindex-jumpbox">
  <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#I"><strong>I</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#X"><strong>X</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -387,13 +414,31 @@ document.write(`
 </li>
       <li><a href="reference/generated/nfflr.models.ALIGNN.html#nfflr.models.ALIGNNConfig">ALIGNNConfig (class in nfflr.models)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/nfflr.nn.ALIGNNConv.html#nfflr.nn.ALIGNNConv">ALIGNNConv (class in nfflr.nn)</a>
+</li>
       <li><a href="reference/generated/nfflr.models.Tersoff.html#nfflr.models.Tersoff.angular_term">angular_term() (nfflr.models.Tersoff method)</a>
 </li>
-      <li><a href="reference/generated/nfflr.Atoms.html#nfflr.Atoms">Atoms (class in nfflr)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/nfflr.nn.AtomicNumberEmbedding.html#nfflr.nn.AtomicNumberEmbedding">AtomicNumberEmbedding (class in nfflr.nn)</a>
 </li>
-      <li><a href="reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset">AtomsDataset (class in nfflr)</a>
+      <li><a href="reference/generated/nfflr.nn.AtomPairType.html#nfflr.nn.AtomPairType">AtomPairType (class in nfflr.nn)</a>
+</li>
+      <li><a href="reference/atoms.html#nfflr.Atoms">Atoms (class in nfflr)</a>
+</li>
+      <li><a href="reference/dataset.html#nfflr.AtomsDataset">AtomsDataset (class in nfflr)</a>
+</li>
+      <li><a href="reference/generated/nfflr.nn.AtomType.html#nfflr.nn.AtomType">AtomType (class in nfflr.nn)</a>
+</li>
+      <li><a href="reference/generated/nfflr.nn.AttributeEmbedding.html#nfflr.nn.AttributeEmbedding">AttributeEmbedding (class in nfflr.nn)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/atoms.html#nfflr.batch">batch() (in module nfflr)</a>, <a href="reference/generated/nfflr.batch.html#id0">[1]</a>, <a href="reference/generated/nfflr.batch.html#nfflr.batch">[2]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -401,15 +446,23 @@ document.write(`
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_default">collate_default() (nfflr.AtomsDataset static method)</a>
-</li>
-      <li><a href="reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_default_line_graph">collate_default_line_graph() (nfflr.AtomsDataset static method)</a>
+      <li><a href="reference/generated/nfflr.nn.ChebyshevExpansion.html#nfflr.nn.ChebyshevExpansion">ChebyshevExpansion (class in nfflr.nn)</a>
 </li>
   </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_forcefield">collate_forcefield() (nfflr.AtomsDataset static method)</a>
+      <li><a href="reference/generated/nfflr.data.deepmd_hea_dataset.html#nfflr.data.deepmd_hea_dataset">deepmd_hea_dataset() (in module nfflr.data)</a>
 </li>
-      <li><a href="reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_line_graph_ff">collate_line_graph_ff() (nfflr.AtomsDataset static method)</a>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/nfflr.nn.EdgeGatedGraphConv.html#nfflr.nn.EdgeGatedGraphConv">EdgeGatedGraphConv (class in nfflr.nn)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -425,16 +478,24 @@ document.write(`
 </li>
       <li><a href="reference/generated/nfflr.nn.FeedForward.html#nfflr.nn.FeedForward">FeedForward (class in nfflr.nn)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/generated/nfflr.models.ALIGNN.html#id0">forward() (nfflr.models.ALIGNN method)</a>
 
       <ul>
         <li><a href="reference/generated/nfflr.models.Tersoff.html#nfflr.models.Tersoff.forward">(nfflr.models.Tersoff method)</a>
 </li>
+        <li><a href="reference/generated/nfflr.nn.ALIGNNConv.html#nfflr.nn.ALIGNNConv.forward">(nfflr.nn.ALIGNNConv method)</a>
+</li>
+        <li><a href="reference/generated/nfflr.nn.ChebyshevExpansion.html#nfflr.nn.ChebyshevExpansion.forward">(nfflr.nn.ChebyshevExpansion method)</a>
+</li>
+        <li><a href="reference/generated/nfflr.nn.EdgeGatedGraphConv.html#nfflr.nn.EdgeGatedGraphConv.forward">(nfflr.nn.EdgeGatedGraphConv method)</a>
+</li>
         <li><a href="reference/generated/nfflr.nn.FeedForward.html#nfflr.nn.FeedForward.forward">(nfflr.nn.FeedForward method)</a>
 </li>
         <li><a href="reference/generated/nfflr.nn.MLPLayer.html#nfflr.nn.MLPLayer.forward">(nfflr.nn.MLPLayer method)</a>
+</li>
+        <li><a href="reference/generated/nfflr.nn.RBFExpansion.html#nfflr.nn.RBFExpansion.forward">(nfflr.nn.RBFExpansion method)</a>
+</li>
+        <li><a href="reference/generated/nfflr.nn.SparseALIGNNConv.html#nfflr.nn.SparseALIGNNConv.forward">(nfflr.nn.SparseALIGNNConv method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -448,20 +509,32 @@ document.write(`
   </ul></td>
 </tr></table>
 
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/nfflr.nn.InstanceNorm.html#nfflr.nn.InstanceNorm">InstanceNorm (class in nfflr.nn)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/nfflr.data.mlearn_dataset.html#nfflr.data.mlearn_dataset">mlearn_dataset() (in module nfflr.data)</a>
+</li>
       <li><a href="reference/generated/nfflr.nn.MLPLayer.html#nfflr.nn.MLPLayer">MLPLayer (class in nfflr.nn)</a>
 </li>
       <li>
     module
 
       <ul>
-        <li><a href="reference/api.html#module-nfflr">nfflr</a>
+        <li><a href="reference/atoms.html#module-nfflr">nfflr</a>, <a href="reference/dataset.html#module-nfflr">[1]</a>
+</li>
+        <li><a href="reference/dataset.html#module-nfflr.data">nfflr.data</a>
 </li>
         <li><a href="reference/models.html#module-nfflr.models">nfflr.models</a>
 </li>
-        <li><a href="reference/nn.html#module-nfflr.nn">nfflr.nn</a>
+        <li><a href="reference/atoms.html#module-nfflr.nn">nfflr.nn</a>, <a href="reference/nn.html#module-nfflr.nn">[1]</a>
 </li>
       </ul></li>
   </ul></td>
@@ -474,9 +547,18 @@ document.write(`
     nfflr
 
       <ul>
-        <li><a href="reference/api.html#module-nfflr">module</a>
+        <li><a href="reference/atoms.html#module-nfflr">module</a>, <a href="reference/dataset.html#module-nfflr">[1]</a>
 </li>
       </ul></li>
+      <li>
+    nfflr.data
+
+      <ul>
+        <li><a href="reference/dataset.html#module-nfflr.data">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     nfflr.models
 
@@ -484,15 +566,15 @@ document.write(`
         <li><a href="reference/models.html#module-nfflr.models">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     nfflr.nn
 
       <ul>
-        <li><a href="reference/nn.html#module-nfflr.nn">module</a>
+        <li><a href="reference/atoms.html#module-nfflr.nn">module</a>, <a href="reference/nn.html#module-nfflr.nn">[1]</a>
 </li>
       </ul></li>
+      <li><a href="reference/generated/nfflr.nn.Norm.html#nfflr.nn.Norm">Norm (class in nfflr.nn)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -507,7 +589,15 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/generated/nfflr.nn.PeriodicRadiusGraph.html#nfflr.nn.PeriodicRadiusGraph">PeriodicRadiusGraph (class in nfflr.nn)</a>
 </li>
-      <li><a href="reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.prepare_batch_default">prepare_batch_default() (nfflr.AtomsDataset static method)</a>
+      <li><a href="reference/generated/nfflr.nn.PeriodicTableEmbedding.html#nfflr.nn.PeriodicTableEmbedding">PeriodicTableEmbedding (class in nfflr.nn)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/nfflr.nn.RBFExpansion.html#nfflr.nn.RBFExpansion">RBFExpansion (class in nfflr.nn)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -521,9 +611,9 @@ document.write(`
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.split_dataset">split_dataset() (nfflr.AtomsDataset method)</a>
+      <li><a href="reference/generated/nfflr.nn.SparseALIGNNConv.html#nfflr.nn.SparseALIGNNConv">SparseALIGNNConv (class in nfflr.nn)</a>
 </li>
-      <li><a href="reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.split_dataset_by_id">split_dataset_by_id() (nfflr.AtomsDataset method)</a>
+      <li><a href="reference/generated/nfflr.spglib_cell.html#nfflr.spglib_cell">spglib_cell() (in module nfflr)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -536,6 +626,24 @@ document.write(`
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="reference/generated/nfflr.models.Tersoff.html#nfflr.models.TersoffConfig">TersoffConfig (class in nfflr.models)</a>
+</li>
+      <li><a href="reference/generated/nfflr.to_ase.html#nfflr.to_ase">to_ase() (in module nfflr)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/nfflr.unbatch.html#nfflr.unbatch">unbatch() (in module nfflr)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="X">X</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="reference/generated/nfflr.nn.XPLOR.html#nfflr.nn.XPLOR">XPLOR (class in nfflr.nn)</a>
 </li>
   </ul></td>
 </tr></table>
