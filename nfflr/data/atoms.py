@@ -35,14 +35,14 @@ def jarvis_load_atoms(path: Path):
 class Atoms:
     """Atoms: a basic crystal structure data class.
 
-    ## What is fundamental about a crystal?
-
+    nfflr.Atoms consists of:
     - cell (lattice parameters / cell matrix)
-    - positions (fractional coordinates)
+    - positions (Cartesian coordinates)
     - numbers (atom identities / fractional site occupancies)
-    - periodic boundary conditions - 3D, 2D, ...?
+    - batching information
 
-    so work with this foundational representation, and transform it
+    The goal is to make it easy to work with a common representation,
+    and transform it as needed to other formats:
 
     - DGLGraph
     - ALIGNNGraphTuple
@@ -77,12 +77,12 @@ class Atoms:
 
     @dispatch
     def __init__(self, atoms: jarvis.core.atoms.Atoms):  # noqa: F811
-        self.__init__(atoms.lattice.matrix, atoms.frac_coords, atoms.atomic_numbers)
+        self.__init__(atoms.lattice.matrix, atoms.coords, atoms.atomic_numbers)
 
     @dispatch
     def __init__(self, atoms: ase.Atoms):  # noqa: F811
         self.__init__(
-            atoms.cell.array, atoms.get_scaled_positions(), atoms.get_atomic_numbers()
+            atoms.cell.array, atoms.get_positions(), atoms.get_atomic_numbers()
         )
 
     @property
@@ -107,6 +107,9 @@ class Atoms:
                 "__len__ not defined for batched atoms. use batch_num_atoms instead."
             )
 
+    def scaled_positions(self):
+        return self.positions @ torch.linalg.inv(self.cell)
+
     def to(self, device, non_blocking: bool = False):
         self.cell = self.cell.to(device, non_blocking=non_blocking)
         self.positions = self.positions.to(device, non_blocking=non_blocking)
@@ -116,16 +119,14 @@ class Atoms:
 
 def to_ase(at: Atoms):
     """Convert nfflr.Atoms to ase.Atoms."""
-    return ase.Atoms(
-        cell=at.cell, scaled_positions=at.positions, numbers=at.numbers, pbc=True
-    )
+    return ase.Atoms(cell=at.cell, positions=at.positions, numbers=at.numbers, pbc=True)
 
 
 def spglib_cell(x: Atoms):
     """Unpack Atoms to spglib tuple format."""
     if x.batched():
         return [spglib_cell(at) for at in unbatch(x)]
-    return (x.cell, x.positions, x.numbers)
+    return (x.cell, x.scaled_positions(), x.numbers)
 
 
 @dispatch

@@ -58,7 +58,8 @@ def deepmd_load_frameset(path, zs):
     coord = rearrange(coord, "cells (atoms dims) -> cells atoms dims", dims=3)
     force = rearrange(force, "cells (atoms dims) -> cells atoms dims", dims=3)
 
-    at = [nfflr.Atoms(b, x @ np.linalg.inv(b), zs) for b, x in zip(box, coord)]
+    # at = [nfflr.Atoms(b, x @ np.linalg.inv(b), zs) for b, x in zip(box, coord)]
+    at = [nfflr.Atoms(b, x, zs) for b, x in zip(box, coord)]
 
     return at, energy, force.unbind(0)
 
