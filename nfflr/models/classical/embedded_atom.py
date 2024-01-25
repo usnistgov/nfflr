@@ -203,12 +203,12 @@ class ElementalEmbeddedAtomPotential(torch.nn.Module):
 
     def reset_parameters(self):
         torch.nn.init.normal_(self.density.phi.data, -1.0, 0.1)
-        # phis = 1 / (1 + self.pair_repulsion.basis.centers)
-        self.pair_repulsion.phi.data = 10 * torch.exp(
-            -0.1 * self.pair_repulsion.basis.centers
+
+        ones = torch.ones_like(self.pair_repulsion.phi.data)
+        phis = (
+            ones * 10 * torch.exp(-0.1 * self.pair_repulsion.basis.centers).unsqueeze(1)
         )
-        # torch.nn.init.normal_(self.pair_repulsion.phi.data, phis, 0.1)
-        # torch.nn.init.normal_(self.embedding_energy.weights.data, 0.0, 0.5)
+        self.pair_repulsion.phi.data = phis
 
     def forward(self, at: nfflr.Atoms):
         if type(at) == nfflr.Atoms:
