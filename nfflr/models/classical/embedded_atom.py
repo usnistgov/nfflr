@@ -117,7 +117,8 @@ class PolynomialEmbeddingFunction(torch.nn.Module):
         self.register_buffer("scalefactors", scalefactors)
 
         # start multivariate model with identical embedding functions
-        init_weights = init_weights.repeat(1, d_model)
+        init_weights = init_weights.unsqueeze(1).repeat(1, d_model)
+
         self.weights = torch.nn.Parameter(init_weights)
 
     def forward(self, density):
@@ -259,12 +260,14 @@ class EmbeddedAtomPotential(torch.nn.Module):
 
         self.transform = nfflr.nn.PeriodicRadiusGraph(self.cutoff)
 
+        self.reset_parameters()
+
     def reset_parameters(self):
         torch.nn.init.normal_(self.density.phi.data, -1.0, 0.1)
         # phis = 1 / (1 + self.pair_repulsion.basis.centers)
-        self.pair_repulsion.phi.data = 10 * torch.exp(
-            -0.1 * self.pair_repulsion.basis.centers
-        )
+        # self.pair_repulsion.phi.data = 10 * torch.exp(
+        #     -0.1 * self.pair_repulsion.basis.centers
+        # )
         # torch.nn.init.normal_(self.pair_repulsion.phi.data, phis, 0.1)
         # torch.nn.init.normal_(self.embedding_energy.weights.data, 0.0, 0.5)
 
@@ -300,9 +303,14 @@ class EmbeddedAtomPotential(torch.nn.Module):
 
         g.edata["density_ij"] = torch.take(self.density(bondlen), srctype)
         g.update_all(fn.copy_e("density_ij", "m"), fn.sum("m", "local_density"))
-        g.ndata["F"] = torch.take(
-            self.embedding_energy(g.ndata["local_density"]), atomtype
-        )
+        print(f"local density: {g.ndata['local_density']}")
+        F = self.embedding_energy(g.ndata["local_density"])
+        print(f"{F.shape=}")
+        g.ndata["F"] = torch.take(F, atomtype)
+
+        # g.ndata["F"] = torch.take(
+        #     self.embedding_energy(g.ndata["local_density"]), atomtype
+        # )
 
         g.edata["pair_repulsion"] = (
             torch.take(self.pair_repulsion(bondlen), pairtype) / bondlen
