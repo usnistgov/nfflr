@@ -17,6 +17,7 @@ from ignite.handlers import Checkpoint, DiskSaver, FastaiLRFinder, TerminateOnNa
 from ignite.engine import Events, create_supervised_trainer
 
 import ray
+import ray.tune
 from ray.air import session
 
 from py_config_runner import ConfigObject
