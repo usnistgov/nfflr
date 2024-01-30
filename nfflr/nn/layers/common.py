@@ -8,7 +8,11 @@ class FeedForward(torch.nn.Module):
     """Two-layer feedforward network."""
 
     def __init__(
-        self, d_in: int, d_hidden: Optional[int] = None, d_out: Optional[int] = None
+        self,
+        d_in: int,
+        d_hidden: Optional[int] = None,
+        d_out: Optional[int] = None,
+        norm: bool = False,
     ):
         """Doc for init"""
         super().__init__()
@@ -18,15 +22,30 @@ class FeedForward(torch.nn.Module):
         if d_out is None:
             d_out = d_in
 
-        self.layers = torch.nn.Sequential(
-            torch.nn.Linear(d_in, d_hidden),
-            torch.nn.SiLU(),
-            torch.nn.Linear(d_hidden, d_out),
-        )
+        self.project_hidden = torch.nn.Linear(d_in, d_hidden)
+        if norm:
+            self.norm = torch.nn.LayerNorm(d_hidden)
+        else:
+            self.norm = None
+        self.project_out = torch.nn.Linear(d_hidden, d_out)
+
+        self.reset_parameters()
 
     def forward(self, x: torch.Tensor):
         """Doc for forward."""
+        x = torch.nn.functional.silu(self.project_hidden(x))
+        if self.norm:
+            x = self.norm(x)
+        return self.project_out(x)
         return self.layers(x)
+
+    def reset_parameters(self):
+
+        torch.nn.init.kaiming_normal_(self.project_hidden.weight, nonlinearity="relu")
+        torch.nn.init.zeros_(self.project_hidden.bias)
+
+        torch.nn.init.kaiming_normal_(self.project_out.weight, nonlinearity="relu")
+        torch.nn.init.zeros_(self.project_out.bias)
 
 
 class MLPLayer(torch.nn.Module):

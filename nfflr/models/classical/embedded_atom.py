@@ -34,7 +34,7 @@ class GaussianSpline(torch.nn.Module):
         if activation == "softplus":
             self.activation = torch.nn.Softplus()
 
-        self.reset_parameters()
+        # self.reset_parameters()
 
     def fcut(self, r):
         return (1 + torch.cos(np.pi * r / self.cutoff)) / 2
@@ -46,7 +46,7 @@ class GaussianSpline(torch.nn.Module):
         )
 
     def reset_parameters(self):
-        torch.nn.init.normal_(self.phi.data, 0.0, 0.5)
+        torch.nn.init.normal_(self.phi.data, 100.0, 100.0)
 
     def forward(self, r):
         """Evaluate radial Gaussian spline(s) at radial point `r`.
@@ -264,12 +264,12 @@ class EmbeddedAtomPotential(torch.nn.Module):
 
     def reset_parameters(self):
         torch.nn.init.normal_(self.density.phi.data, -1.0, 0.1)
-        # phis = 1 / (1 + self.pair_repulsion.basis.centers)
-        # self.pair_repulsion.phi.data = 10 * torch.exp(
-        #     -0.1 * self.pair_repulsion.basis.centers
-        # )
-        # torch.nn.init.normal_(self.pair_repulsion.phi.data, phis, 0.1)
-        # torch.nn.init.normal_(self.embedding_energy.weights.data, 0.0, 0.5)
+
+        ones = torch.ones_like(self.pair_repulsion.phi.data)
+        phis = (
+            ones * 10 * torch.exp(-0.1 * self.pair_repulsion.basis.centers).unsqueeze(1)
+        )
+        self.pair_repulsion.phi.data = phis
 
     def forward(self, at: nfflr.Atoms):
         if type(at) == nfflr.Atoms:
@@ -303,9 +303,7 @@ class EmbeddedAtomPotential(torch.nn.Module):
 
         g.edata["density_ij"] = torch.take(self.density(bondlen), srctype)
         g.update_all(fn.copy_e("density_ij", "m"), fn.sum("m", "local_density"))
-        print(f"local density: {g.ndata['local_density']}")
         F = self.embedding_energy(g.ndata["local_density"])
-        print(f"{F.shape=}")
         g.ndata["F"] = torch.take(F, atomtype)
 
         # g.ndata["F"] = torch.take(

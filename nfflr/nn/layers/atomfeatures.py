@@ -196,6 +196,13 @@ class PeriodicTableEmbedding(torch.nn.Module):
 
         self.row_embedding = torch.nn.Embedding(9, d_model)
         self.col_embedding = torch.nn.Embedding(18, d_model)
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        # set the variance to 1/2 so the variance of the sum of the embeddings is 1
+        sd = np.sqrt(1 / 2)
+        torch.nn.init.normal_(self.row_embedding.weight, std=sd)
+        torch.nn.init.normal_(self.col_embedding.weight, std=sd)
 
     def forward(self, zs):
         row = self.rows[zs - 1]

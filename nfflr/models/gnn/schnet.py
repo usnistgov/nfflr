@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional, Literal, Callable
 
 import torch
+import numpy as np
 
 import dgl
 import dgl.function as fn
@@ -24,6 +25,7 @@ class DepthwiseConv(torch.nn.Module):
     def __init__(self, d_in, d_radial):
         super().__init__()
         self.radial_filters = torch.nn.Linear(d_radial, d_in)
+        self.reset_parameters()
 
     def forward(self, g: dgl.DGLGraph, x: torch.Tensor, edge_basis: torch.Tensor):
         with g.local_scope():
@@ -31,6 +33,15 @@ class DepthwiseConv(torch.nn.Module):
             g.edata["filter"] = self.radial_filters(edge_basis)
             g.update_all(fn.u_mul_e("hv", "filter", "m"), fn.sum("m", "h"))
             return g.dstdata["h"]
+
+    def reset_parameters(self):
+        # initialize filter-generating layer parameters
+        # so feature variance at initialization after aggregation is roughly 1.
+        # this may be dataset/cutoff dependent...
+        torch.nn.init.kaiming_normal_(
+            self.radial_filters.weight, nonlinearity="linear", mode="fan_in"
+        )
+        torch.nn.init.zeros_(self.radial_filters.bias)
 
 
 class CFConv(torch.nn.Module):
@@ -47,11 +58,18 @@ class CFConv(torch.nn.Module):
             torch.nn.Linear(d_hidden, d_out),
             torch.nn.SiLU(),
         )
+        self.reset_parameters()
 
     def forward(self, g: dgl.DGLGraph, x: torch.Tensor, edge_basis: torch.Tensor):
         x = self.pre(x)
         x = self.depthwise(g, x, edge_basis)
         return self.post(x)
+
+    def reset_parameters(self):
+        torch.nn.init.kaiming_normal_(self.pre.weight, nonlinearity="linear")
+        torch.nn.init.zeros_(self.pre.bias)
+        torch.nn.init.kaiming_normal_(self.post[0].weight, nonlinearity="relu")
+        torch.nn.init.zeros_(self.post[0].bias)
 
 
 class CFConvFused(torch.nn.Module):
@@ -88,18 +106,12 @@ class CFBlock(torch.nn.Module):
         super().__init__()
         self.prenorm = Norm(d_model, norm)
         self.conv = CFConv(d_model, d_radial, d_hidden)
-        self.feedforward = torch.nn.Sequential(
-            Norm(d_model, norm), FeedForward(d_model)
-        )
+        self.feedforward = FeedForward(d_model, norm=False)
 
     def forward(self, g, x, radial_basis):
-        identity = x
         x = self.prenorm(x)
-        x = self.conv(g, x, radial_basis) + identity
-
-        identity = x
-        x = self.feedforward(x)
-        return x + identity
+        x = self.conv(g, x, radial_basis)
+        return self.feedforward(x)
 
 
 @dataclass
@@ -133,6 +145,13 @@ class SchNet(torch.nn.Module):
                 config.atom_features, config.d_model
             )
 
+        self.reference_energy = None
+        if config.reference_energies is not None:
+            self.reference_energy = torch.nn.Embedding(
+                108, embedding_dim=1, _weight=config.reference_energies.view(-1, 1)
+            )
+            # self.reference_energy.weight.requires_grad_(False)
+
         self.edge_basis = RBFExpansion(
             vmin=0,
             vmax=self.config.cutoff.r_cutoff,
@@ -152,6 +171,7 @@ class SchNet(torch.nn.Module):
         )
 
         self.postnorm = Norm(config.d_model, config.norm)
+        # self.postnorm = torch.nn.LayerNorm(config.d_model, elementwise_affine=False)
 
         if config.energy_units == "eV/atom":
             self.readout = AvgPooling()
@@ -159,6 +179,17 @@ class SchNet(torch.nn.Module):
             self.readout = SumPooling()
 
         self.fc = torch.nn.Linear(config.d_model, config.output_features)
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        torch.nn.init.kaiming_normal_(self.fc.weight, nonlinearity="relu")
+        torch.nn.init.zeros_(self.fc.bias)
+
+    def reset_output_scale(self, avg_num_nodes: int):
+        """Initialize output layer so average total energy at init has std 1."""
+        var = 1 / (avg_num_nodes * self.config.d_model)
+        torch.nn.init.normal_(self.fc.weight, std=np.sqrt(var))
+        torch.nn.init.zeros_(self.fc.bias)
 
     def forward(self, g: nfflr.Atoms | dgl.DGLGraph):
         config = self.config
@@ -180,6 +211,10 @@ class SchNet(torch.nn.Module):
         # norm-linear-sum
         x = self.postnorm(x)
         x = self.fc(x)
+
+        if self.reference_energy is not None:
+            x += self.reference_energy(g.ndata["atomic_number"])
+
         output = torch.squeeze(self.readout(g, x))
 
         if config.compute_forces:
@@ -191,6 +226,8 @@ class SchNet(torch.nn.Module):
                 compute_stress=True,
             )
 
-            return dict(total_energy=output, forces=forces, stress=stress)
+            return dict(
+                total_energy=output, forces=forces, stress=stress, x=x.squeeze()
+            )
 
         return output

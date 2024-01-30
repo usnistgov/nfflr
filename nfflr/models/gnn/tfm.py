@@ -180,7 +180,10 @@ class TFM(nn.Module):
         elif self.config.energy_units == "eV":
             self.readout = SumPooling()
 
-        self.fc = nn.Linear(config.hidden_features, config.output_features)
+        self.fc = nn.Sequential(
+            # nn.LayerNorm(config.hidden_features),
+            nn.Linear(config.hidden_features, config.output_features)
+        )
 
     @dispatch
     def forward(self, x):
@@ -246,6 +249,8 @@ class TFM(nn.Module):
                 compute_stress=True,
             )
 
-            return dict(total_energy=output, forces=forces, stress=stress)
+            return dict(
+                total_energy=output, forces=forces, stress=stress, x=atomwise_energy
+            )
 
         return output
