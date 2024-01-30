@@ -109,9 +109,11 @@ class CFBlock(torch.nn.Module):
         self.feedforward = FeedForward(d_model, norm=False)
 
     def forward(self, g, x, radial_basis):
+        identity = x
         x = self.prenorm(x)
-        x = self.conv(g, x, radial_basis)
-        return self.feedforward(x)
+        x = self.conv(g, x, radial_basis) + identity
+        identity = x
+        return self.feedforward(x) + identity
 
 
 @dataclass
@@ -182,7 +184,9 @@ class SchNet(torch.nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
-        torch.nn.init.kaiming_normal_(self.fc.weight, nonlinearity="relu")
+        torch.nn.init.kaiming_normal_(
+            self.fc.weight, nonlinearity="linear", mode="fan_in"
+        )
         torch.nn.init.zeros_(self.fc.bias)
 
     def reset_output_scale(self, avg_num_nodes: int):
@@ -205,8 +209,7 @@ class SchNet(torch.nn.Module):
         radial_basis = self.edge_basis(torch.norm(g.edata["r"], dim=1))
 
         for cfblock in self.blocks:
-            identity = x
-            x = cfblock(g, x, radial_basis) + identity
+            x = cfblock(g, x, radial_basis)
 
         # norm-linear-sum
         x = self.postnorm(x)
