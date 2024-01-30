@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 
 def xplor_cutoff(r, r_onset=3.5, r_cutoff=4):
@@ -33,3 +34,28 @@ class XPLOR(torch.nn.Module):
 
     def forward(self, r):
         return xplor_cutoff(r, self.r_onset, self.r_cutoff)
+
+
+def cosine_cutoff(r: torch.Tensor, r_cutoff: float = 4):
+    """Apply smooth cutoff to pairwise interactions
+
+    Cosine smoothing to zero at the cutoff distance
+
+    r: bond lengths
+    r_cutoff: cutoff radius
+
+    inside cutoff radius, apply smooth cutoff envelope
+    outside cutoff radius: hard zeros
+    """
+
+    smoothed = (1 + torch.cos(r * np.pi / r_cutoff)) / 2
+    return torch.where(r < r_cutoff, smoothed, 0)
+
+
+class Cosine(torch.nn.Module):
+    def __init__(self, r_cutoff: float = 4):
+        super().__init__()
+        self.r_cutoff = r_cutoff
+
+    def forward(self, r):
+        return cosine_cutoff(r, self.r_cutoff)
