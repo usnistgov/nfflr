@@ -16,6 +16,9 @@ import torch
 from numpy.random import default_rng
 import matplotlib.pyplot as plt
 
+from nfflr.data.atoms import Atoms, jarvis_load_atoms  # noqa:E402
+from nfflr.models.utils import EnergyScaling
+
 from jarvis.core.atoms import Atoms as jAtoms
 
 # make sure jarvis-tools doesn't override matplotlib backend
@@ -23,8 +26,6 @@ mpl_backend = plt.get_backend()
 from jarvis.db.figshare import data as jdata  # noqa:E402
 
 plt.switch_backend(mpl_backend)
-
-from nfflr.data.atoms import Atoms, jarvis_load_atoms  # noqa:E402
 
 
 def _load_dataset_directory(directory: Path) -> pd.DataFrame:
@@ -119,6 +120,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         n_train: Union[float, int] = 0.8,
         n_val: Union[float, int] = 0.1,
         energy_units: Literal["eV", "eV/atom"] = "eV/atom",
+        standardize: bool = False,
         diskcache: bool = False,
     ):
         """Pytorch Dataset for atomistic graphs.
@@ -192,6 +194,18 @@ class AtomsDataset(torch.utils.data.Dataset):
         if callable(custom_prepare_batch_fn):
             self.prepare_batch = custom_prepare_batch_fn
 
+        # atomwise standardization
+        if standardize:
+            self.scaler = self.setup_target_standardization()
+            self.standardize = True
+
+    def setup_target_standardization(self):
+        self.standardize = True
+        sel = self.split["train"]
+        avg_n_atoms = np.mean(self.df.atoms.iloc[sel].apply(len))
+        energies = self.df[self.energy_key].iloc[sel].values
+        self.scaler = EnergyScaling(energies, avg_n_atoms)
+
     def __len__(self):
         """Get length."""
         return self.df.shape[0]
@@ -240,8 +254,14 @@ class AtomsDataset(torch.utils.data.Dataset):
             "energy": self.df[self.energy_key].iloc[idx],
             "forces": self.df["forces"].iloc[idx],
         }
+        if self.standardize:
+            target["energy"] = self.scaler.transform(target["energy"])
+            target["forces"] = self.scaler.scale(target["forces"])
+
         if "stresses" in self.df:
             target["stresses"] = self.df["stresses"].iloc[idx]
+            if self.standardize:
+                raise NotImplementedError("TODO: fix stress standardization")
 
         # TODO: make sure datasets use standard units...
         # data store should have total energies in eV
@@ -263,7 +283,9 @@ class AtomsDataset(torch.utils.data.Dataset):
             e *= self.atoms.apply(len).values
 
         e = e[sel]
-        zs = self.atoms[sel].apply(lambda a: torch.bincount(a.numbers, minlength=108))
+        zs = self.atoms.iloc[sel].apply(
+            lambda a: torch.bincount(a.numbers, minlength=108)
+        )
         zs = torch.stack(zs.values.tolist()).type(e.dtype)
 
         if use_bias:

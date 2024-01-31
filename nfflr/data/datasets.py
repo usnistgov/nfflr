@@ -50,7 +50,7 @@ def deepmd_load_frameset(path, zs):
     """Load MD frames from deepmd numpy format."""
     box = torch.tensor(np.load(path / "box.npy"))
     # energies stored as meV I think
-    energy = torch.tensor(np.load(path / "energy.npy")) / 1000
+    energy = torch.tensor(np.load(path / "energy.npy"))
     coord = torch.tensor(np.load(path / "coord.npy"))
     force = torch.tensor(np.load(path / "force.npy"))
 

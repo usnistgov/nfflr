@@ -1,7 +1,13 @@
 # docs artifacts
 docs/source/howto/Al99.eam.alloy
 docs/source/howto/Si.tersoff
+docs/source/reference/generated/
 
+# scratch directories...
+notebooks/
+scratch/
+scripts/
+test/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

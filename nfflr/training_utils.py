@@ -1,10 +1,9 @@
 """Common training setup utility functions."""
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable, Dict
 
 import torch
 from torch import nn
 from ignite.engine import Engine
-from ignite.engine import Events, create_supervised_trainer
 
 
 def multitarget_loss(criteria: Dict[dict, nn.Module], scales: Dict[str, float]):
@@ -77,7 +76,7 @@ def transfer_outputs_eos(outputs):
     return y_pred.detach().cpu(), y.detach().cpu()
 
 
-def select_target(name: str):
+def select_target(name: str, unscale_fn: Callable = None):
     """Build ignite metric transforms for multi-output models.
 
     `output` should be Tuple[Dict[str,torch.Tensor], Dict[str,torch.Tensor]]
@@ -86,6 +85,8 @@ def select_target(name: str):
     def output_transform(output):
         """Select output tensor for metric computation."""
         pred, target = output
+        if unscale_fn is not None:
+            return unscale_fn(pred[name]), unscale_fn(target[name])
         return pred[name], target[name]
 
     return output_transform

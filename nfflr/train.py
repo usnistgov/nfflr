@@ -32,6 +32,7 @@ from nfflr.training_utils import (
     transfer_outputs_eos,
     setup_criterion,
 )
+from nfflr.models.utils import reset_initial_output_bias
 
 cli = typer.Typer()
 
@@ -222,12 +223,20 @@ def run_train(local_rank: int, config):
     metrics.update({"loss": Loss(setup_criterion(config))})
 
     if config["dataset"].target == "energy_and_forces":
-        metrics.update(
-            {
-                "mae_energy": MeanAbsoluteError(select_target("total_energy")),
-                "mae_forces": MeanAbsoluteError(select_target("forces")),
-            }
-        )
+
+        unscale = None
+        if config["dataset"].standardize:
+            unscale = config["dataset"].scaler.unscale
+
+        eval_metrics = {
+            "mae_energy": MeanAbsoluteError(
+                select_target("total_energy", unscale_fn=unscale)
+            ),
+            "mae_forces": MeanAbsoluteError(
+                select_target("forces", unscale_fn=unscale)
+            ),
+        }
+        metrics.update(eval_metrics)
 
     train_evaluator, val_evaluator = setup_evaluators(
         rank, model, config, metrics, transfer_outputs
@@ -289,6 +298,11 @@ def run_lr(local_rank: int, config):
 
     train_loader, val_loader = get_dataflow(config)
     model, optimizer, scheduler = _initialize(config, len(train_loader))
+
+    reset_initial_output_bias(
+        model, train_loader, max_samples=500 / config["batch_size"]
+    )
+
     scheduler = None  # explicitly disable scheduler for LRFinder
     trainer = setup_trainer(rank, model, optimizer, scheduler, config)
 
