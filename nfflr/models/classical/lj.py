@@ -15,8 +15,9 @@ from dgl.nn import AvgPooling, SumPooling
 import pykeops
 from pykeops.torch import LazyTensor
 
+import nfflr
+
 # from nfflr.models.abstract import AbstractModel
-from nfflr.data.atoms import Atoms
 from nfflr.data.graph import periodic_radius_graph, pad_ghost_region
 from nfflr.models.utils import autograd_forces
 
@@ -61,7 +62,7 @@ class LennardJonesK(nn.Module):
         super().__init__()
         self.parameters = parameters
 
-    def forward(self, a: Atoms):
+    def forward(self, a: nfflr.Atoms):
         ps = self.parameters
         if ps.smooth:
             raise NotImplementedError("cutoff function not implemented")
@@ -115,7 +116,7 @@ class LennardJones(nn.Module):
         super().__init__()
         self.parameters = parameters
 
-    def forward(self, a: Atoms):
+    def forward(self, a: nfflr.Atoms):
         """LennardJones
 
         The energy is decomposed into pairwise ϕ terms

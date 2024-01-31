@@ -5,7 +5,7 @@ __all__ = ["Atoms", "AtomsDataset"]
 
 # nfflr: top-level API
 # Atoms
-from .data.atoms import Atoms, spglib_cell, batch, unbatch, to_ase
+from .atoms import Atoms, spglib_cell, batch, unbatch, to_ase
 
 # AtomsDataset
 from .data.dataset import AtomsDataset, collate_forcefield_targets

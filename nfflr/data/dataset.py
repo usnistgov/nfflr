@@ -16,7 +16,7 @@ import torch
 from numpy.random import default_rng
 import matplotlib.pyplot as plt
 
-from nfflr.data.atoms import Atoms, jarvis_load_atoms  # noqa:E402
+from nfflr.atoms import Atoms, jarvis_load_atoms  # noqa:E402
 from nfflr.models.utils import EnergyScaling
 
 from jarvis.core.atoms import Atoms as jAtoms
@@ -195,6 +195,7 @@ class AtomsDataset(torch.utils.data.Dataset):
             self.prepare_batch = custom_prepare_batch_fn
 
         # atomwise standardization
+        self.standardize = standardize
         if standardize:
             self.scaler = self.setup_target_standardization()
             self.standardize = True
