@@ -109,7 +109,7 @@ def vasprun_dataset(
     datadir: Path,
     transform: Optional[torch.nn.Module] = None,
     diskcache: bool = False,
-) -> nfflr.AtomsDataset:
+):
     """Construct an AtomsDataset from a collection of vasprun.xml files.
 
     e.g. datafiles = datadir.glob("*/*/vasprun.xml")
