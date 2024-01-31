@@ -37,8 +37,6 @@ class EnergyScaling(torch.nn.Module):
     def __init__(self, energy: np.array, n_avg: float):
         super().__init__()
 
-        print(energy)
-        print(energy.mean())
         # sigma_E = sigma_a / sqrt(n_avg)
         target_std = 1 * np.sqrt(n_avg) / np.sqrt(2)
         # scale by ratio of standard deviations

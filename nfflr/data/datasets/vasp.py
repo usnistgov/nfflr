@@ -1,9 +1,12 @@
 """Dataset construction based on collections of Vasp outputs."""
 
 from pathlib import Path
+from typing import Iterator, Optional
 
 import ase
+import torch
 import numpy as np
+import pandas as pd
 from jarvis.io.vasp.outputs import Vasprun
 
 import nfflr
@@ -99,3 +102,27 @@ def load_vasp_steps_jv(path: Path, dataset_dir: Path):
         configurations.append(data)
 
     return configurations
+
+
+def vasprun_dataset(
+    datafiles: Iterator[Path],
+    datadir: Path,
+    transform: Optional[torch.nn.Module] = None,
+    diskcache: bool = False,
+) -> nfflr.AtomsDataset:
+    """Construct an AtomsDataset from a collection of vasprun.xml files.
+
+    e.g. datafiles = datadir.glob("*/*/vasprun.xml")
+    """
+    data = []
+    for datafile in datadir.glob("*/*/vasprun.xml"):
+        data += load_vasp_steps_jv(datafile, datadir)
+
+    return nfflr.AtomsDataset(
+        pd.DataFrame(data),
+        id_tag="id",
+        target="energy_and_forces",
+        energy_units="eV",
+        transform=transform,
+        diskcache=diskcache,
+    )

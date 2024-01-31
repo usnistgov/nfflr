@@ -197,7 +197,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         # atomwise standardization
         self.standardize = standardize
         if standardize:
-            self.scaler = self.setup_target_standardization()
+            self.setup_target_standardization()
             self.standardize = True
 
     def setup_target_standardization(self):
