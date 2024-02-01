@@ -77,7 +77,7 @@ class Atoms:
 
     @dispatch
     def __init__(self, atoms: jarvis.core.atoms.Atoms):  # noqa: F811
-        self.__init__(atoms.lattice.matrix, atoms.coords, atoms.atomic_numbers)
+        self.__init__(atoms.lattice.matrix, atoms.cart_coords, atoms.atomic_numbers)
 
     @dispatch
     def __init__(self, atoms: ase.Atoms):  # noqa: F811
