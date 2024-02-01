@@ -137,6 +137,9 @@ class AtomsDataset(torch.utils.data.Dataset):
         if not group_ids:
             df["group_id"] = df[id_tag]
             df["step_id"] = np.ones(df.shape[0])
+        elif "group_id" in df:
+            print("keeping predefined group ids")
+            pass
         else:
             # try to parse record ids to extract group and step ids
             if isinstance(example_id, int):

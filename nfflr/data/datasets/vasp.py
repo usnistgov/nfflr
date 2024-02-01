@@ -124,6 +124,7 @@ def vasprun_dataset(
     return nfflr.AtomsDataset(
         pd.DataFrame(data),
         id_tag="id",
+        group_ids=True,
         target="energy_and_forces",
         energy_units="eV",
         transform=transform,
