@@ -92,6 +92,23 @@ def get_cachedir():
     return cachedir
 
 
+def _select_relaxation_configurations(trajectory, atol=1e-2):
+    """Filter relaxation threshold by absolute energy difference threshold
+
+    Returns pandas index values for rows to keep
+    """
+
+    order = np.argsort(trajectory.energy)
+    es = trajectory.energy.values[order]
+    idx = trajectory.index.values[order]
+
+    d = np.abs(np.diff(es, prepend=es[0] - 2 * atol))
+
+    selection = d > atol
+
+    return idx[selection]
+
+
 def collate_forcefield_targets(targets: Sequence[Dict[str, torch.Tensor]]):
     """Specialized collate function for force field datasets."""
     energy = torch.tensor([t["energy"] for t in targets])
@@ -101,6 +118,12 @@ def collate_forcefield_targets(targets: Sequence[Dict[str, torch.Tensor]]):
     if "stresses" in targets[0]:
         result["stresses"] = torch.stack([t["stresses"] for t in targets])
     return result
+
+
+def to_tensor(x):
+    if isinstance(x, torch.Tensor):
+        return x.clone().detach()
+    return torch.tensor(x, dtype=torch.get_default_dtype())
 
 
 class AtomsDataset(torch.utils.data.Dataset):
@@ -222,11 +245,6 @@ class AtomsDataset(torch.utils.data.Dataset):
         n_atoms = len(atoms)
         # print(f"{key=}, {n_atoms=}")
 
-        def to_tensor(x):
-            if isinstance(x, torch.Tensor):
-                return x.clone().detach()
-            return torch.tensor(x, dtype=torch.get_default_dtype())
-
         if self.target == "energy_and_forces":
             target = self.get_energy_and_forces(idx, n_atoms=n_atoms)
             # volume: abs(determinant(cell))
@@ -255,8 +273,8 @@ class AtomsDataset(torch.utils.data.Dataset):
 
     def get_energy_and_forces(self, idx, n_atoms) -> dict:
         target = {
-            "energy": self.df[self.energy_key].iloc[idx],
-            "forces": self.df["forces"].iloc[idx],
+            "energy": to_tensor(self.df[self.energy_key].iloc[idx]),
+            "forces": to_tensor(self.df["forces"].iloc[idx]),
         }
         if self.standardize:
             target["energy"] = self.scaler.transform(target["energy"])
