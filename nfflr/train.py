@@ -216,6 +216,12 @@ def run_train(local_rank: int, config):
 
     # TODO: add criterion to this...
     model, optimizer, scheduler = _initialize(config, len(train_loader))
+
+    if model.config.initialize_bias:
+        reset_initial_output_bias(
+            model, train_loader, max_samples=500 / config["batch_size"]
+        )
+
     trainer = setup_trainer(rank, model, optimizer, scheduler, config)
 
     # evaluation
@@ -254,8 +260,8 @@ def run_train(local_rank: int, config):
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def _eval(engine):
-        n_train_eval = int(0.1 * len(train_loader))
-        # n_train_eval = len(train_loader)
+        train_eval_fraction = config.get("train_eval_fraction", 0.1)
+        n_train_eval = int(train_eval_fraction * len(train_loader))
         train_evaluator.state.training_epoch = engine.state.epoch
         val_evaluator.state.training_epoch = engine.state.epoch
         train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
@@ -299,9 +305,10 @@ def run_lr(local_rank: int, config):
     train_loader, val_loader = get_dataflow(config)
     model, optimizer, scheduler = _initialize(config, len(train_loader))
 
-    reset_initial_output_bias(
-        model, train_loader, max_samples=500 / config["batch_size"]
-    )
+    if model.config.initialize_bias:
+        reset_initial_output_bias(
+            model, train_loader, max_samples=500 / config["batch_size"]
+        )
 
     scheduler = None  # explicitly disable scheduler for LRFinder
     trainer = setup_trainer(rank, model, optimizer, scheduler, config)

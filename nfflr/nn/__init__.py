@@ -8,7 +8,7 @@ __all__ = (
     "FeedForward",
 )
 
-from .cutoff import XPLOR
+from .cutoff import XPLOR, Cosine
 from .transform import (
     PeriodicRadiusGraph,
     PeriodicAdaptiveRadiusGraph,

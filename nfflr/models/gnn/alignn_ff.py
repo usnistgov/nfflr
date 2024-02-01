@@ -43,6 +43,7 @@ class ALIGNNFFConfig:
     compute_forces: bool = False
     energy_units: Literal["eV", "eV/atom"] = "eV/atom"
     reference_energies: Optional[torch.Tensor] = None
+    initialize_bias: bool = False
 
 
 class ALIGNNFF(nn.Module):

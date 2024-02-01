@@ -40,6 +40,8 @@ def deepmd_load_frameset(path, zs):
 
 def deepmd_hea_dataset(
     datadir: Path | str,
+    n_train: float | int = 0.9,
+    n_val: float | int = 0.1,
     transform: Optional[torch.nn.Module] = None,
     diskcache: bool = False,
 ):
@@ -69,8 +71,8 @@ def deepmd_hea_dataset(
         target="energy_and_forces",
         energy_units="eV",
         group_ids=True,
-        n_train=0.9,
-        n_val=0.1,
+        n_train=n_train,
+        n_val=n_val,
         transform=transform,
         diskcache=diskcache,
     )
