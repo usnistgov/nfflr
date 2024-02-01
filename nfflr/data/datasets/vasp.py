@@ -116,7 +116,10 @@ def vasprun_dataset(
     """
     data = []
     for datafile in datadir.glob("*/*/vasprun.xml"):
-        data += load_vasp_steps_jv(datafile, datadir)
+        try:
+            data += load_vasp_steps_jv(datafile, datadir)
+        except:
+            print(f"error loading {datafile}")
 
     return nfflr.AtomsDataset(
         pd.DataFrame(data),
