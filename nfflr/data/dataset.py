@@ -257,7 +257,8 @@ class AtomsDataset(torch.utils.data.Dataset):
             )
 
         if self.transform and self.diskcache is not None:
-            cachefile = Path(self.diskcache.name) / f"jarvis-{key}-{idx}.pkl"
+            cachekey = key.replace("/", "_")
+            cachefile = Path(self.diskcache.name) / f"{cachekey}-{idx}.pkl"
 
             if cachefile.is_file():
                 # print(f"loading from {cachefile}")
