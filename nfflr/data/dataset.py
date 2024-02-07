@@ -153,12 +153,14 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         if not isinstance(df, pd.DataFrame):
             df = _load_dataset(df)
+        else:
+            df = df.copy()
 
         example_id = df[id_tag].iloc[0]
 
         # by default: don't try to process record ids
         if not group_ids:
-            df["group_id"] = df[id_tag]
+            df["group_id"] = df.loc[:, id_tag]
             df["step_id"] = np.ones(df.shape[0])
         elif "group_id" in df:
             print("keeping predefined group ids")
@@ -169,7 +171,7 @@ class AtomsDataset(torch.utils.data.Dataset):
                 df["group_id"] = df[id_tag]
                 df["step_id"] = df.index
             elif "_" not in example_id:
-                df["group_id"] = df[id_tag]
+                df["group_id"] = df[id_tag].values
                 df["step_id"] = np.ones(df.shape[0])
             else:
                 # split key like "JVASP-6664_main-5"
@@ -282,9 +284,9 @@ class AtomsDataset(torch.utils.data.Dataset):
             target["forces"] = self.scaler.scale(target["forces"])
 
         if "stresses" in self.df:
-            target["stresses"] = self.df["stresses"].iloc[idx]
+            target["stresses"] = to_tensor(self.df["stresses"].iloc[idx])
             if self.standardize:
-                raise NotImplementedError("TODO: fix stress standardization")
+                target["stresses"] = self.scaler.scale(target["stresses"])
 
         # TODO: make sure datasets use standard units...
         # data store should have total energies in eV
