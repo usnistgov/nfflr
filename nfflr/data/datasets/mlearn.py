@@ -1,6 +1,7 @@
 __all__ = ()
 
 from pathlib import Path
+from typing import Optional
 
 import torch
 import jarvis
@@ -35,7 +36,11 @@ def _mlearn_dataset(datafile: Path):
     return nfflr.AtomsDataset(data, target="energy_and_forces", energy_units="eV")
 
 
-def mlearn_dataset(elements: str | list[str] = "Si"):
+def mlearn_dataset(
+    elements: str | list[str] = "Si",
+    transform: Optional[torch.nn.Module] = None,
+    diskcache: bool = False,
+):
     """Construct mlearn dataset with standard splits.
 
     Downloads and caches json datafiles from github.com/materialsvirtuallab/mlearn
@@ -63,7 +68,13 @@ def mlearn_dataset(elements: str | list[str] = "Si"):
     df["stresses"] = df.outputs.apply(lambda x: x["virial_stress"])
     df["jid"] = df.index
 
-    dataset = nfflr.AtomsDataset(df, target="energy_and_forces", energy_units="eV")
+    dataset = nfflr.AtomsDataset(
+        df,
+        target="energy_and_forces",
+        energy_units="eV",
+        transform=transform,
+        diskcache=diskcache,
+    )
 
     # use the standard split: override random splits
     (id_train,) = np.where(df.tag == "train")
