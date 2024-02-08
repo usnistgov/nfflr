@@ -16,7 +16,7 @@ def pmg_to_nfflr(atoms: dict):
     """load atoms from pymatgen dict without pymatgen dependency."""
     # ignores partially occupied sites...
     cell = atoms["lattice"]["matrix"]
-    coords = torch.tensor([site["abc"] for site in atoms["sites"]])
+    coords = torch.tensor([site["xyz"] for site in atoms["sites"]])
     symbols = [site["species"][0]["element"] for site in atoms["sites"]]
     numbers = [jarvis.core.specie.chem_data[sym]["Z"] for sym in symbols]
 
