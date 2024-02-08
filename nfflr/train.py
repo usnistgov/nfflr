@@ -262,6 +262,7 @@ def run_train(local_rank: int, config):
     def _eval(engine):
         train_eval_fraction = config.get("train_eval_fraction", 0.1)
         n_train_eval = int(train_eval_fraction * len(train_loader))
+        n_train_eval = max(n_train_eval, 1)  # at least one batch
         train_evaluator.state.training_epoch = engine.state.epoch
         val_evaluator.state.training_epoch = engine.state.epoch
         train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
