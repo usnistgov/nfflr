@@ -24,6 +24,8 @@ dependencies = [
     "pykeops",
     "mendeleev",
     "matplotlib",
+    "cached-path",
+    "platformdirs",
     "plum-dispatch",
     "pytorch-ignite",
     "py-config-runner",
