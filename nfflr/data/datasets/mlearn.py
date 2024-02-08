@@ -66,7 +66,10 @@ def mlearn_dataset(
     df["energy"] = df.outputs.apply(lambda x: x["energy"])
     df["forces"] = df.outputs.apply(lambda x: x["forces"])
     df["stresses"] = df.outputs.apply(lambda x: x["virial_stress"])
-    df["jid"] = df.index
+
+    # TODO: fix this index
+    ids = [f"{row.element}-{idx}" for idx, row in df.iterrows()]
+    df["jid"] = ids
 
     dataset = nfflr.AtomsDataset(
         df,
