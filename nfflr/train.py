@@ -115,7 +115,7 @@ def get_dataflow(config):
         collate_fn=dataset.collate,
         batch_size=config["batch_size"],
         sampler=SubsetRandomSampler(dataset.split["val"]),
-        drop_last=True,  # needed to prevent crashing with MP dataset
+        drop_last=False,  # True -> possible issue crashing with MP dataset
         num_workers=config["num_workers"],
         pin_memory="cuda" in idist.device().type,
     )
