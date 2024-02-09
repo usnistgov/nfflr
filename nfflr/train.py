@@ -178,6 +178,12 @@ def setup_trainer(rank, model, optimizer, scheduler, config):
     if rank == 0:
         trainer.add_event_handler(Events.EPOCH_COMPLETED, checkpoint_handler)
 
+    resume_checkpoint = config.get("resume_checkpoint")
+    if resume_checkpoint:
+        checkpoint = torch.load(resume_checkpoint, map_location=idist.device())
+        Checkpoint.load_objects(to_load=to_save, checkpoint=checkpoint)
+        scheduler.load_state_dict(checkpoint["scheduler"])
+
     return trainer
 
 
