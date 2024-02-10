@@ -388,25 +388,6 @@ class AtomsDataset(torch.utils.data.Dataset):
         return {"train": train_ids, "val": val_ids, "test": test_ids}
 
     @staticmethod
-    def collate_forcefield(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
-        """Dataloader helper to batch graphs cross `samples`.
-
-        Forces get collated into a graph batch
-        by concatenating along the atoms dimension
-
-        energy and stress are global targets (properties of the whole graph)
-        total energy is a scalar, stess is a rank 2 tensor
-
-
-        """
-        graphs, targets = map(list, zip(*samples))
-
-        targets = collate_forcefield_targets(targets)
-
-        batched_graph = dgl.batch(graphs)
-        return batched_graph, targets
-
-    @staticmethod
     def prepare_batch_default(
         batch: Tuple[Any, Dict[str, torch.Tensor]],
         device=None,
@@ -421,7 +402,7 @@ class AtomsDataset(torch.utils.data.Dataset):
                 k: v.to(device, non_blocking=non_blocking) for k, v in targets.items()
             }
 
-        if isinstance(atoms, list):
+        if isinstance(atoms, list) or isinstance(atoms, tuple):
             g, lg = atoms
             batch = (
                 (
@@ -447,11 +428,18 @@ class AtomsDataset(torch.utils.data.Dataset):
 
 
         """
-        graphs, targets = map(list, zip(*samples))
-        return dgl.batch(graphs), torch.tensor(targets)
+        inputs, targets = map(list, zip(*samples))
+
+        if isinstance(inputs[0], tuple):
+            graphs, line_graphs = map(list, zip(*inputs))
+            batched_inputs = (dgl.batch(graphs), dgl.batch(line_graphs))
+        else:
+            batched_inputs = dgl.batch(inputs)
+
+        return batched_inputs, torch.tensor(targets)
 
     @staticmethod
-    def collate_default_line_graph(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
+    def collate_forcefield(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
         """Dataloader helper to batch graphs cross `samples`.
 
         Forces get collated into a graph batch
@@ -459,23 +447,14 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         energy and stress are global targets (properties of the whole graph)
         total energy is a scalar, stess is a rank 2 tensor
-
-
         """
         inputs, targets = map(list, zip(*samples))
-        graphs, line_graphs = map(list, zip(*inputs))
-        return (dgl.batch(graphs), dgl.batch(line_graphs)), torch.tensor(targets)
+        targets = collate_forcefield_targets(targets)
 
-    @staticmethod
-    def collate_line_graph_ff(
-        samples: List[Tuple[dgl.DGLGraph, dgl.DGLGraph, torch.Tensor]]
-    ):
-        """Dataloader helper to batch graphs cross `samples`."""
-        graphs, line_graphs, targets = map(list, zip(*samples))
+        if isinstance(inputs[0], tuple):
+            graphs, line_graphs = map(list, zip(*inputs))
+            batched_inputs = (dgl.batch(graphs), dgl.batch(line_graphs))
+        else:
+            batched_inputs = dgl.batch(inputs)
 
-        energy = torch.tensor([t["energy"] for t in targets])
-        forces = torch.cat([t["forces"] for t in targets], dim=0)
-        stresses = torch.stack([t["stresses"] for t in targets])
-        targets = dict(total_energy=energy, forces=forces, stresses=stresses)
-
-        return dgl.batch(graphs), dgl.batch(line_graphs), targets
+        return batched_inputs, targets
