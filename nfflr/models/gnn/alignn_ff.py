@@ -32,6 +32,7 @@ class ALIGNNFFConfig:
 
     transform: Callable = PeriodicRadiusGraph(cutoff=8.0)
     cutoff: torch.nn.Module = XPLOR(7.5, 8.0)
+    local_cutoff: float = 4.0
     alignn_layers: int = 4
     gcn_layers: int = 4
     atom_features: str = "cgcnn"
@@ -157,23 +158,25 @@ class ALIGNNFF(nn.Module):
 
         # Local: apply GCN to local neighborhoods
         # solution: index into bond features and turn it into a residual connection?
-        local_cutoff = 6.0  # 4.0
+        edge_mask = bondlength <= config.local_cutoff
+
         if len(self.alignn_layers) > 0:
             if lg is None:
-                g_local = dgl.edge_subgraph(
-                    g, bondlength <= local_cutoff, relabel_nodes=False
-                )
+                g_local = dgl.edge_subgraph(g, edge_mask, relabel_nodes=False)
+
                 if g.num_nodes() != g_local.num_nodes():
                     print("problem with edge_subgraph!")
 
-                lg = g_local.line_graph(shared=True)
+                lg = g_local.line_graph(backtracking=False)
 
-            # angle features (fixed)
+            lg.ndata["r"] = g.edata["r"][edge_mask]
+
+            # compute angle features (don't break autograd graph with precomputed lg)
             lg.apply_edges(compute_bond_cosines)
             z = self.angle_embedding(lg.edata.pop("h"))
 
         # ALIGNN updates: update node, edge, triplet features
-        y_mask = torch.where(bondlength <= local_cutoff)[0]
+        y_mask = torch.where(edge_mask)[0]
         for alignn_layer in self.alignn_layers:
             x, y, z = alignn_layer(g, lg, x, y, z, y_mask=y_mask)
 
