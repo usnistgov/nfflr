@@ -77,8 +77,8 @@ def parity_plots(engine, directory, name="train"):
     for (pred, tgt) in output:
 
         axes[0].scatter(
-            tgt["total_energy"].cpu().detach().numpy(),
-            pred["total_energy"].cpu().detach().numpy(),
+            tgt["energy"].cpu().detach().numpy(),
+            pred["energy"].cpu().detach().numpy(),
             # color="k",
         )
         axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
@@ -242,7 +242,7 @@ def run_train(local_rank: int, config):
 
         eval_metrics = {
             "mae_energy": MeanAbsoluteError(
-                select_target("total_energy", unscale_fn=unscale)
+                select_target("energy", unscale_fn=unscale)
             ),
             "mae_forces": MeanAbsoluteError(
                 select_target("forces", unscale_fn=unscale)

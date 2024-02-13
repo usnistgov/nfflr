@@ -114,9 +114,9 @@ def collate_forcefield_targets(targets: Sequence[Dict[str, torch.Tensor]]):
     energy = torch.tensor([t["energy"] for t in targets])
     n_atoms = torch.tensor([t["forces"].size(0) for t in targets])
     forces = torch.cat([t["forces"] for t in targets], dim=0)
-    result = dict(total_energy=energy, n_atoms=n_atoms, forces=forces)
-    if "stresses" in targets[0]:
-        result["stresses"] = torch.stack([t["stresses"] for t in targets])
+    result = dict(energy=energy, n_atoms=n_atoms, forces=forces)
+    if "stress" in targets[0]:
+        result["stress"] = torch.stack([t["stress"] for t in targets])
     return result
 
 
@@ -283,10 +283,10 @@ class AtomsDataset(torch.utils.data.Dataset):
             target["energy"] = self.scaler.transform(target["energy"])
             target["forces"] = self.scaler.scale(target["forces"])
 
-        if "stresses" in self.df:
-            target["stresses"] = to_tensor(self.df["stresses"].iloc[idx])
+        if "stress" in self.df:
+            target["stress"] = to_tensor(self.df["stress"].iloc[idx])
             if self.standardize:
-                target["stresses"] = self.scaler.scale(target["stresses"])
+                target["stress"] = self.scaler.scale(target["stress"])
 
         # TODO: make sure datasets use standard units...
         # data store should have total energies in eV

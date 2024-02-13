@@ -30,7 +30,7 @@ def _mlearn_dataset(datafile: Path):
     data["atoms"] = data.structure.apply(pmg_to_nfflr)
     data["energy"] = data.outputs.apply(lambda x: x["energy"])
     data["forces"] = data.outputs.apply(lambda x: x["forces"])
-    data["stresses"] = data.outputs.apply(lambda x: x["virial_stress"])
+    data["stress"] = data.outputs.apply(lambda x: x["virial_stress"])
     data["jid"] = data.index
 
     return nfflr.AtomsDataset(data, target="energy_and_forces", energy_units="eV")
@@ -65,7 +65,7 @@ def mlearn_dataset(
     df["atoms"] = df.structure.apply(pmg_to_nfflr)
     df["energy"] = df.outputs.apply(lambda x: x["energy"])
     df["forces"] = df.outputs.apply(lambda x: x["forces"])
-    df["stresses"] = df.outputs.apply(lambda x: x["virial_stress"])
+    df["stress"] = df.outputs.apply(lambda x: x["virial_stress"])
 
     # TODO: fix this index
     ids = [f"{row.element}-{idx}" for idx, row in df.iterrows()]

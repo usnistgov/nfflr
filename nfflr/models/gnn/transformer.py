@@ -11,30 +11,67 @@ import dgl.function as fn
 from dgl.nn import AvgPooling, SumPooling
 from dgl.nn.functional import edge_softmax
 
+import pykeops
+from pykeops.torch import LazyTensor
+
 import nfflr
 from nfflr.nn import (
     RBFExpansion,
     ChebyshevExpansion,
     MLPLayer,
     AttributeEmbedding,
-    PeriodicRadiusGraph,
-    XPLOR,
 )
 
 
-def edge_attention_graph(g: dgl.DGLGraph, shared=False):
+def _find_reverse_edge_ids(us, vs, rs):
+    """Brute force edge reversal
 
-    # get all pairs of incident edges for each node
-    # torch.combinations gives half the pairs
-    eids = torch.vstack(
-        [torch.combinations(g.in_edges(id_node, form="eid")) for id_node in g.nodes()]
-    )
+    given edges (u, v) with displacement vectors r
+    search for index of (v, u) with displacement -r
+    """
+    # N: number of edges
+    N, D = rs.shape
 
-    src, dst = eids.T
+    # KeOps can't handle int64
+    _us = us.float()
+    _vs = vs.float()
 
-    # to_bidirected fills in the other half of edge pairs
-    # all at once
-    t = dgl.to_bidirected(dgl.graph((src, dst)))
+    # node labels corresponding to edges
+    u_i = LazyTensor(_us.view(N, 1, 1))
+    u_j = LazyTensor(_us.view(1, N, 1))
+    v_i = LazyTensor(_vs.view(N, 1, 1))
+    v_j = LazyTensor(_vs.view(1, N, 1))
+
+    # displacement vectors
+    r_i = LazyTensor(rs.view(N, 1, D))
+    r_j = LazyTensor(rs.view(1, N, D))
+
+    # match u_i == v_j
+    id_mask = (u_i - v_j).abs() + (v_i - u_j).abs()
+
+    # r_j should exactly equal -r_i
+    # r_j + r_i = 0
+    d_ji = (r_j + r_i).abs().sum(-1)
+
+    return (d_ji + id_mask).argmin(0).squeeze()
+
+
+def edge_attention_graph(g, shared: bool = False):
+    lg = g.line_graph(backtracking=False, shared=False)
+
+    # node ids are bond ids
+    srcbond, dstbond = lg.edges()
+
+    # so look up reverse edges of dstbond - this might be messy for periodic systems though...
+    # ids should be swapped and displacement vectors should point in opposite directions
+
+    # one idea: sort the graph edges somehow beforehand to make search easier?
+    # could use KeOps to do this search...
+
+    src, dst = g.edges(form="uv")
+    edgeperm = _find_reverse_edge_ids(src, dst, g.edata["r"])
+
+    t = dgl.graph((srcbond, edgeperm[dstbond]))
 
     if shared:
         t.ndata["r"] = g.edata["r"]
@@ -46,8 +83,8 @@ def edge_attention_graph(g: dgl.DGLGraph, shared=False):
 class TFMConfig:
     """Hyperparameter schema for nfflr.models.gnn.tfm"""
 
-    transform: Callable = PeriodicRadiusGraph(cutoff=5.0)
-    cutoff: torch.nn.Module = XPLOR(7.5, 8.0)
+    transform: Callable = nfflr.nn.PeriodicRadiusGraph(cutoff=5.0)
+    cutoff: torch.nn.Module = nfflr.nn.Cosine(5.0)
     layers: int = 3
     norm: Literal["layernorm", "instancenorm"] = "layernorm"
     atom_features: str = "embedding"
@@ -57,23 +94,7 @@ class TFMConfig:
     compute_forces: bool = False
     energy_units: Literal["eV", "eV/atom"] = "eV/atom"
     reference_energies: Optional[torch.Tensor] = None
-
-
-class FeedForward(nn.Module):
-    """feedforward layer."""
-
-    def __init__(self, in_features: int, hidden_features: int, out_features: int):
-        """Linear SiLU Linear feedforward layer."""
-        super().__init__()
-        self.layer = nn.Sequential(
-            nn.Linear(in_features, hidden_features),
-            nn.SiLU(),
-            nn.Linear(hidden_features, out_features),
-        )
-
-    def forward(self, x):
-        """Linear, norm, silu layer."""
-        return self.layer(x)
+    initialize_bias: bool = False
 
 
 class TersoffAttention(nn.Module):
@@ -120,7 +141,7 @@ class TersoffBlock(nn.Module):
         self.project_dst = nn.Linear(d_model, d_message)
         self.project_edge = nn.Linear(d_model, d_message)
 
-        self.feedforward = FeedForward(d_message, 4 * d_model, d_model)
+        self.feedforward = nfflr.nn.FeedForward(d_message, 4 * d_model, d_model)
 
     def forward(
         self, g: dgl.DGLGraph, t: dgl.DGLGraph, x: torch.Tensor, y: torch.Tensor
@@ -157,9 +178,9 @@ class TFM(nn.Module):
         self.transform = config.transform
 
         if config.atom_features == "embedding":
-            self.atom_embedding = torch.nn.Embedding(108, config.d_model)
+            self.atom_embedding = nfflr.nn.PeriodicTableEmbedding(config.d_model)
         else:
-            self.atom_embedding = AttributeEmbedding(
+            self.atom_embedding = nfflr.nn.AttributeEmbedding(
                 config.atom_features, config.d_model
             )
 
@@ -253,6 +274,6 @@ class TFM(nn.Module):
                 compute_stress=True,
             )
 
-            return dict(total_energy=output, forces=forces, stress=stress)
+            return dict(energy=output, forces=forces, stress=stress)
 
         return output

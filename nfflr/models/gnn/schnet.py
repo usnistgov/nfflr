@@ -232,8 +232,6 @@ class SchNet(torch.nn.Module):
                 compute_stress=True,
             )
 
-            return dict(
-                total_energy=output, forces=forces, stress=stress, x=x.squeeze()
-            )
+            return dict(energy=output, forces=forces, stress=stress)
 
         return output

@@ -32,7 +32,7 @@ class NFFLrCalculator(Calculator):
 
         outputs = self.model(nfflr.Atoms(atoms))
 
-        energy = outputs["total_energy"].detach()
+        energy = outputs["energy"].detach()
         forces = outputs["forces"].detach()
 
         if self.scaler is not None:

@@ -194,7 +194,7 @@ class Tersoff(nn.Module):
         )
 
         return dict(
-            total_energy=total_energy,
+            energy=total_energy,
             forces=forces,
             stress=stress,
         )

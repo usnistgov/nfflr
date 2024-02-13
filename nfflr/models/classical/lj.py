@@ -137,6 +137,7 @@ class LennardJones(nn.Module):
         # need to add bond vectors to autograd graph
         bond_vectors = g.edata.pop("r")
         bond_vectors.requires_grad_(True)
+
         # bondlen = torch.norm(bond_vectors, dim=1)
         r2 = (bond_vectors**2).sum(dim=1)
 

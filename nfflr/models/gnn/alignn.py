@@ -203,6 +203,6 @@ class ALIGNN(torch.nn.Module):
                 compute_stress=True,
             )
 
-            return dict(total_energy=output, forces=forces, stress=stress)
+            return dict(energy=output, forces=forces, stress=stress)
 
         return output

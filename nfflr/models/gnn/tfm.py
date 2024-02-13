@@ -249,8 +249,6 @@ class TFM(nn.Module):
                 compute_stress=True,
             )
 
-            return dict(
-                total_energy=output, forces=forces, stress=stress, x=atomwise_energy
-            )
+            return dict(energy=output, forces=forces, stress=stress, x=atomwise_energy)
 
         return output

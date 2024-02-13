@@ -203,7 +203,7 @@ class ALIGNNFF(nn.Module):
             )
 
             return dict(
-                total_energy=output,
+                energy=output,
                 forces=forces,
                 stress=stress,
             )

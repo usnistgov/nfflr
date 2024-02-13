@@ -62,7 +62,7 @@ def deepmd_hea_dataset(
         zs = deepmd_load_atomic_numbers(set_dir.parent)
         at, e, f = deepmd_load_frameset(set_dir, zs)
         jid = [f"{key}_{idx}" for idx in range(len(at))]
-        data.append({"atoms": at, "total_energy": e, "forces": f, "jid": jid})
+        data.append({"atoms": at, "energy": e, "forces": f, "jid": jid})
 
     df = pd.concat([pd.DataFrame(_data) for _data in data])
 

@@ -342,7 +342,7 @@ class NeuralBondOrder(nn.Module):
                 forces = forces * n_nodes[:, None]
 
         result = dict(
-            total_energy=energy,
+            energy=energy,
             forces=forces,
             atomwise_energy=atomwise_energy,
         )

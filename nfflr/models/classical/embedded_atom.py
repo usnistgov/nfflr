@@ -236,7 +236,7 @@ class ElementalEmbeddedAtomPotential(torch.nn.Module):
         # potential_energy = F.sum() + pair_repulsion.sum()
 
         forces = nfflr.autograd_forces(potential_energy, r, g, energy_units="eV")
-        return {"total_energy": potential_energy, "forces": forces}
+        return {"energy": potential_energy, "forces": forces}
 
 
 class EmbeddedAtomPotential(torch.nn.Module):
@@ -320,7 +320,7 @@ class EmbeddedAtomPotential(torch.nn.Module):
         # potential_energy = F.sum() + pair_repulsion.sum()
 
         forces = nfflr.autograd_forces(potential_energy, r, g, energy_units="eV")
-        return {"total_energy": potential_energy, "forces": forces}
+        return {"energy": potential_energy, "forces": forces}
 
 
 class ExponentialDensity(torch.nn.Module):
@@ -388,6 +388,6 @@ class SimpleEmbeddedAtomPotential(torch.nn.Module):
         # potential_energy = F.sum() + pair_repulsion.sum()
 
         forces = nfflr.autograd_forces(potential_energy, r, g, energy_units="eV")
-        return {"total_energy": potential_energy, "forces": forces}
+        return {"energy": potential_energy, "forces": forces}
 
         return
