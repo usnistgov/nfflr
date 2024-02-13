@@ -123,7 +123,7 @@ class SchNetConfig:
     transform: Callable = PeriodicRadiusGraph(cutoff=5.0)
     cutoff: torch.nn.Module = XPLOR(7.5, 8.0)
     layers: int = 4
-    norm: Literal["batchnorm", "layernorm"] = "layernorm"
+    norm: Optional[Literal["batchnorm", "layernorm"]] = None
     atom_features: str | torch.nn.Module = "cgcnn"
     edge_input_features: int = 128
     d_model: int = 128
@@ -209,11 +209,13 @@ class SchNet(torch.nn.Module):
         x = self.atom_embedding(g.ndata["atomic_number"])
         radial_basis = self.edge_basis(torch.norm(g.edata["r"], dim=1))
 
+        identity = x
         for cfblock in self.blocks:
-            x = cfblock(g, x, radial_basis)
+            x = cfblock(g, x, radial_basis) + identity
 
         # norm-linear-sum
-        x = self.postnorm(x)
+        if config.norm:
+            x = self.postnorm(x)
         x = self.fc(x)
 
         if self.reference_energy is not None:

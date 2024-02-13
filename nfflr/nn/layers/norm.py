@@ -1,14 +1,16 @@
 import dgl
 import torch
 from torch import nn
-from typing import Literal
+from typing import Literal, Optional
 
 
 class Norm(nn.Module):
     def __init__(
         self,
         num_features: int,
-        norm_type: Literal["batchnorm", "layernorm", "instancenorm"] = "layernorm",
+        norm_type: Optional[
+            Literal["batchnorm", "layernorm", "instancenorm"]
+        ] = "layernorm",
         mode: Literal["node", "edge"] = "node",
     ):
         super().__init__()
@@ -22,6 +24,8 @@ class Norm(nn.Module):
         elif norm_type == "instancenorm":
             self.norm = InstanceNorm(mode=mode)
             self.forward = self._forward_graph_instancenorm
+        elif norm_type is None:
+            self.norm = nn.Identity()
 
     def forward(self, x: torch.Tensor):
         return self.norm(x)
