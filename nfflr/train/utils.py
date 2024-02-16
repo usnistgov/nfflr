@@ -1,48 +1,13 @@
 """Common training setup utility functions."""
 from typing import Any, Callable, Dict
+from pathlib import Path
 
 import torch
 from torch import nn
 from ignite.engine import Engine
+import matplotlib.pyplot as plt
 
-
-def multitarget_loss(criteria: Dict[dict, nn.Module], scales: Dict[str, float]):
-    def loss(outputs, targets):
-        return sum(
-            scales.get(key, 1.0) * criteria[key](outputs[key], targets[key])
-            for key in criteria
-        )
-
-    return loss
-
-
-def losswrapper(criterion):
-    def loss(outputs, targets):
-        return sum(criterion(outputs[key], targets[key]) for key in outputs)
-
-    return loss
-
-
-def setup_criterion(config):
-    """Optimization criterion helper function.
-
-    config["criterion"] can be
-
-    - a pytorch loss (nn.Module)
-    - dict[str, nn.Module]
-    - a `Callable`
-    """
-    criterion = config["criterion"]
-    forcefield = config["dataset"].target == "energy_and_forces"
-
-    if forcefield:
-        if isinstance(criterion, dict):
-            loss_scale = config.get("loss_scale", {})
-            return multitarget_loss(criterion, loss_scale)
-        if isinstance(criterion, nn.Module):
-            return losswrapper(criterion)
-
-    return criterion
+import nfflr
 
 
 def transfer_outputs(x, y, y_pred):
@@ -211,3 +176,39 @@ def setup_evaluator_with_grad(
         metric.attach(evaluator, name)
 
     return evaluator
+
+
+def parity_plots(engine: Engine, directory: str | Path, name: str = "train"):
+    """Plot predictions for energy and forces.
+
+    # attach to evaluators:
+    eos_train = EpochOutputStore(output_transform=transfer_outputs_eos)
+    eos_train.attach(train_evaluator, "output")
+    eos_val = EpochOutputStore(output_transform=transfer_outputs_eos)
+    eos_val.attach(val_evaluator, "output")
+
+    """
+    epoch = engine.state.training_epoch  # custom state field
+    output = engine.state.output
+
+    fig, axes = plt.subplots(ncols=2, figsize=(16, 8))
+
+    for pred, tgt in output:
+        axes[0].scatter(
+            tgt["energy"].cpu().detach().numpy(),
+            pred["energy"].cpu().detach().numpy(),
+            # color="k",
+        )
+        axes[0].set(xlabel="DFT energy", ylabel="predicted energy")
+        axes[1].scatter(
+            tgt["forces"].cpu().detach().numpy(),
+            pred["forces"].cpu().detach().numpy(),
+            # color="k",
+        )
+        axes[1].set(xlabel="DFT force", ylabel="predicted force")
+        axes[1].set_ylim(-10, 10)
+
+    plt.tight_layout()
+    plt.savefig(Path(directory) / f"parity_plots_{name}_{epoch:03d}.png")
+    plt.clf()
+    plt.close()

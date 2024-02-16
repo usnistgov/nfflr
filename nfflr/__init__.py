@@ -22,6 +22,9 @@ from . import models
 # datasets
 from . import data
 
+# training
+from . import train
+
 # ASE interface
 from .ase import NFFLrCalculator
 

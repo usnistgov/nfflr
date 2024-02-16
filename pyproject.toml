@@ -41,8 +41,8 @@ issues = "https://github.com/usnistgov/nfflr/issues"
 # changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [project.scripts]
-nff = "nfflr.train:cli"
-nffd = "nfflr.distributed:main"
+nff = "nfflr.train.trainer:cli"
+nffd = "nfflr.train.distributed:main"
 
 [tool.setuptools]
 packages = [

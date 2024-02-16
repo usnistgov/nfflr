@@ -9,6 +9,7 @@ __all__ = (
 )
 
 from .cutoff import XPLOR, Cosine
+from .loss import MultitaskLoss, PerAtomLoss
 from .transform import (
     PeriodicRadiusGraph,
     PeriodicAdaptiveRadiusGraph,
