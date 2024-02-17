@@ -20,7 +20,7 @@ from nfflr.nn import (
     EdgeGatedGraphConv,
     AttributeEmbedding,
     PeriodicRadiusGraph,
-    XPLOR,
+    Cosine,
 )
 
 from nfflr.data.graph import compute_bond_cosines
@@ -28,10 +28,10 @@ from nfflr.data.graph import compute_bond_cosines
 
 @dataclass
 class ALIGNNFFConfig:
-    """Hyperparameter schema for nfflr.models.gnn.alignn"""
+    """Hyperparameters for alignn force field"""
 
-    transform: Callable = PeriodicRadiusGraph(cutoff=8.0)
-    cutoff: torch.nn.Module = XPLOR(7.5, 8.0)
+    transform: Callable = PeriodicRadiusGraph(cutoff=5.0)
+    cutoff: torch.nn.Module = Cosine(5.0)
     local_cutoff: float = 4.0
     alignn_layers: int = 4
     gcn_layers: int = 4
@@ -41,7 +41,7 @@ class ALIGNNFFConfig:
     embedding_features: int = 64
     hidden_features: int = 256
     output_features: int = 1
-    compute_forces: bool = False
+    compute_forces: bool = True
     energy_units: Literal["eV", "eV/atom"] = "eV/atom"
     reference_energies: Optional[torch.Tensor] = None
     initialize_bias: bool = False

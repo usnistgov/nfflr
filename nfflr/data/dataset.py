@@ -74,22 +74,24 @@ def _load_dataset(dataset_name, cache_dir=None):
     return df
 
 
-def get_cachedir():
+def get_cachedir(scratchdir: Path | bool = True):
     """Get local scratch directory."""
 
-    scratchdir = None
     prefix = "nfflr-"
 
-    slurm_job = os.environ.get("SLURM_JOB_ID")
-    scratchspace = os.environ.get("SCRATCH", "/scratch")
-    if slurm_job is not None:
-        scratchdir = f"{scratchspace}/{slurm_job}"
-        if not os.path.isdir(scratchdir):
-            os.makedirs(scratchdir, exist_ok=True)
+    if isinstance(scratchdir, bool) and scratchdir:
+        scratchdir = None
 
-    cachedir = tempfile.TemporaryDirectory(dir=scratchdir, prefix=prefix)
+    if "SCRATCH" in os.environ:
+        scratchdir = Path(os.environ.get("SCRATCH"))
 
-    return cachedir
+    if "SLURM_JOB_ID" in os.environ:
+        scratchdir = scratchdir / os.environ.get("SLURM_JOB_ID")
+
+    if scratchdir is not None:
+        os.makedirs(scratchdir, exist_ok=True)
+
+    return tempfile.TemporaryDirectory(dir=scratchdir, prefix=prefix)
 
 
 def _select_relaxation_configurations(trajectory, atol=1e-2):
@@ -144,7 +146,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         n_val: Union[float, int] = 0.1,
         energy_units: Literal["eV", "eV/atom"] = "eV/atom",
         standardize: bool = False,
-        diskcache: bool = False,
+        diskcache: Optional[Path | bool] = None,
     ):
         """Pytorch Dataset for atomistic graphs.
 
@@ -199,8 +201,8 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         self.split = self.split_dataset_by_id(n_train, n_val)
 
-        if diskcache:
-            self.diskcache = get_cachedir()
+        if diskcache is not None:
+            self.diskcache = get_cachedir(diskcache)
         else:
             self.diskcache = None
 
