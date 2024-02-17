@@ -74,13 +74,16 @@ def _load_dataset(dataset_name, cache_dir=None):
     return df
 
 
-def get_cachedir(scratchdir: Path | bool = True):
+def get_cachedir(scratchdir: Path | str | bool = True):
     """Get local scratch directory."""
 
     prefix = "nfflr-"
 
     if isinstance(scratchdir, bool) and scratchdir:
         scratchdir = None
+
+    if isinstance(scratchdir, str):
+        scratchdir = Path(scratchdir)
 
     if "SCRATCH" in os.environ:
         scratchdir = Path(os.environ.get("SCRATCH"))
@@ -146,7 +149,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         n_val: Union[float, int] = 0.1,
         energy_units: Literal["eV", "eV/atom"] = "eV",
         standardize: bool = False,
-        diskcache: Optional[Path | bool] = None,
+        diskcache: Optional[Path | str | bool] = None,
     ):
         """Pytorch Dataset for atomistic graphs.
 
