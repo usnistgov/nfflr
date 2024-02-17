@@ -1,5 +1,6 @@
 """Common training setup utility functions."""
-from typing import Any, Callable, Dict
+from __future__ import annotations
+from typing import Any, Callable, TYPE_CHECKING
 from pathlib import Path
 
 import torch
@@ -7,7 +8,8 @@ from torch import nn
 from ignite.engine import Engine
 import matplotlib.pyplot as plt
 
-import nfflr
+if TYPE_CHECKING:
+    from nfflr.train.config import TrainingConfig
 
 
 def transfer_outputs(x, y, y_pred):
@@ -96,39 +98,39 @@ def group_decay(model):
     ]
 
 
-def setup_optimizer(params, config):
+def setup_optimizer(params, config: TrainingConfig):
     """Set up optimizer for param groups."""
-    if isinstance(config["optimizer"], torch.optim.Optimizer):
-        optimizer = config["optimizer"]
-    if config["optimizer"] == "adamw":
+    if isinstance(config.optimizer, torch.optim.Optimizer):
+        optimizer = config.optimizer
+    if config.optimizer == "adamw":
         optimizer = torch.optim.AdamW(
             params,
-            lr=config["learning_rate"],
-            weight_decay=config["weight_decay"],
+            lr=config.learning_rate,
+            weight_decay=config.weight_decay,
         )
-    elif config["optimizer"] == "sgd":
+    elif config.optimizer == "sgd":
         optimizer = torch.optim.SGD(
             params,
-            lr=config["learning_rate"],
+            lr=config.learning_rate,
             momentum=0.9,
-            weight_decay=config["weight_decay"],
+            weight_decay=config.weight_decay,
         )
     return optimizer
 
 
-def setup_scheduler(config, optimizer, steps_per_epoch: int | float):
+def setup_scheduler(config: TrainingConfig, optimizer, steps_per_epoch: int | float):
     """Configure OneCycle scheduler."""
-    warmup_steps = config.get("warmup_steps", 0.3)
+    warmup_steps = config.warmup_steps
     if warmup_steps < 1:
         # fractional specification
         pct_start = warmup_steps
     else:
-        pct_start = config["warmup_steps"] / (config["epochs"] * steps_per_epoch)
+        pct_start = config.warmup_steps / (config.epochs * steps_per_epoch)
 
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
         optimizer,
-        max_lr=config["learning_rate"],
-        epochs=config["epochs"],
+        max_lr=config.learning_rate,
+        epochs=config.epochs,
         steps_per_epoch=steps_per_epoch,
         pct_start=pct_start,
     )

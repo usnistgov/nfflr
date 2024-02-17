@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 __all__ = ()
 import os
 from pathlib import Path
 from datetime import timedelta
+from typing import TYPE_CHECKING
 
 import torch
 from torch.utils.data import SubsetRandomSampler
@@ -22,6 +25,11 @@ from ray.air import session
 from py_config_runner import ConfigObject
 
 import nfflr
+
+
+if TYPE_CHECKING:
+    from nfflr.train.config import TrainingConfig
+
 from nfflr.train.utils import (
     group_decay,
     select_target,
@@ -63,37 +71,35 @@ def log_console(engine: ignite.engine.Engine, name: str):
         print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
 
 
-def get_dataflow(config):
+def get_dataflow(dataset, config: TrainingConfig):
     """Configure training and validation datasets."""
-
-    dataset = config["dataset"]
 
     train_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
-        batch_size=config["batch_size"],
+        batch_size=config.batch_size,
         sampler=SubsetRandomSampler(dataset.split["train"]),
         drop_last=True,
-        num_workers=config["num_workers"],
-        pin_memory="cuda" in idist.device().type,
+        num_workers=config.dataloader_workers,
+        pin_memory=config.pin_memory,
     )
     val_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
-        batch_size=config["batch_size"],
+        batch_size=config.batch_size,
         sampler=SubsetRandomSampler(dataset.split["val"]),
         drop_last=False,  # True -> possible issue crashing with MP dataset
-        num_workers=config["num_workers"],
-        pin_memory="cuda" in idist.device().type,
+        num_workers=config.dataloader_workers,
+        pin_memory=config.pin_memory,
     )
 
     return train_loader, val_loader
 
 
-def _initialize(config, train_loader):
+def _initialize(model, criterion, train_loader, config: TrainingConfig):
     """Initialize model, criterion, and optimizer."""
-    model = idist.auto_model(config["model"])
-    criterion = idist.auto_model(config["criterion"])
+    model = idist.auto_model(model)
+    criterion = idist.auto_model(criterion)
 
     params = group_decay(model)
     if isinstance(criterion, torch.nn.Module) and len(list(criterion.parameters())) > 0:
@@ -104,29 +110,26 @@ def _initialize(config, train_loader):
 
     if model.config.initialize_bias:
         reset_initial_output_bias(
-            model, train_loader, max_samples=500 / config["batch_size"]
+            model, train_loader, max_samples=500 / config.batch_size
         )
 
     return model, criterion, optimizer
 
 
-def setup_trainer(rank, model, criterion, optimizer, scheduler, config):
+def setup_trainer(
+    model, criterion, optimizer, scheduler, prepare_batch, config: TrainingConfig
+):
     """Create ignite trainer and attach common event handlers."""
     device = idist.device()
 
-    gradient_accumulation_steps = config.get("gradient_accumulation_steps", 1)
     trainer = create_supervised_trainer(
         model,
         optimizer,
         criterion,
-        gradient_accumulation_steps=gradient_accumulation_steps,
-        prepare_batch=config["dataset"].prepare_batch,
+        gradient_accumulation_steps=config.gradient_accumulation_steps,
+        prepare_batch=prepare_batch,
         device=device,
     )
-
-    if config.get("progress", True) and rank == 0:
-        pbar = ProgressBar()
-        pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
     trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
 
@@ -138,7 +141,7 @@ def setup_trainer(rank, model, criterion, optimizer, scheduler, config):
     return trainer
 
 
-def setup_checkpointing(state: dict, config):
+def setup_checkpointing(state: dict, config: TrainingConfig):
     """Configure model and trainer checkpointing.
 
     `state` should contain at least `model`, `optimizer`, and `trainer`.
@@ -146,28 +149,27 @@ def setup_checkpointing(state: dict, config):
 
     checkpoint_handler = Checkpoint(
         state,
-        DiskSaver(config["output_dir"], create_dir=True, require_empty=False),
+        DiskSaver(config.output_dir, create_dir=True, require_empty=False),
         n_saved=1,
         global_step_transform=lambda *_: state["trainer"].state.epoch,
     )
     state["trainer"].add_event_handler(Events.EPOCH_COMPLETED, checkpoint_handler)
 
-    resume_checkpoint = config.get("resume_checkpoint")
-    if resume_checkpoint:
-        checkpoint = torch.load(resume_checkpoint, map_location=idist.device())
+    if config.resume_checkpoint is not None:
+        checkpoint = torch.load(config.resume_checkpoint, map_location=idist.device())
         Checkpoint.load_objects(to_load=state, checkpoint=checkpoint)
 
     return state
 
 
-def setup_evaluators(rank, model, config, metrics, transfer_outputs):
+def setup_evaluators(model, prepare_batch, metrics, transfer_outputs):
     """Configure train and validation evaluators."""
     device = idist.device()
     # create_supervised_evaluator
     train_evaluator = setup_evaluator_with_grad(
         model,
         metrics=metrics,
-        prepare_batch=config["dataset"].prepare_batch,
+        prepare_batch=prepare_batch,
         device=device,
         output_transform=transfer_outputs,
     )
@@ -175,69 +177,75 @@ def setup_evaluators(rank, model, config, metrics, transfer_outputs):
     val_evaluator = setup_evaluator_with_grad(
         model,
         metrics=metrics,
-        prepare_batch=config["dataset"].prepare_batch,
+        prepare_batch=prepare_batch,
         device=device,
         output_transform=transfer_outputs,
     )
-
-    if config["progress"] and rank == 0:
-        vpbar = ProgressBar()
-        vpbar.attach(train_evaluator)
-        vpbar.attach(val_evaluator)
 
     return train_evaluator, val_evaluator
 
 
 def run_train(local_rank: int, config):
     """Nfflr trainer entry point."""
-    rank = idist.get_rank()
-    manual_seed(config["random_seed"] + local_rank)
+    model = config["model"]
+    criterion = config["criterion"]
+    dataset = config["dataset"]
+    config = config["trainer"]
 
-    train_loader, val_loader = get_dataflow(config)
-    model, criterion, optimizer = _initialize(config, train_loader)
+    rank = idist.get_rank()
+    manual_seed(config.random_seed + local_rank)
+
+    train_loader, val_loader = get_dataflow(dataset, config)
+    model, criterion, optimizer = _initialize(model, criterion, train_loader, config)
     scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
-    train_swag = config.get("swag", False)
-    if train_swag:
+    if config.swag:
         swag_handler = SWAGHandler(model)
 
-    trainer = setup_trainer(rank, model, criterion, optimizer, scheduler, config)
+    trainer = setup_trainer(
+        model, criterion, optimizer, scheduler, dataset.prepare_batch, config
+    )
+    if config.progress and rank == 0:
+        pbar = ProgressBar()
+        pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
-    if config.get("checkpoint", True):
+    if config.checkpoint:
         state = dict(model=model, optimizer=optimizer, trainer=trainer)
 
         if scheduler is not None:
             state["scheduler"] = scheduler
         if isinstance(criterion, torch.nn.Module):
             state["criterion"] = criterion
-        if train_swag:
+        if config.swag:
             state["swagmodel"] = swag_handler.swagmodel
 
         setup_checkpointing(state, config)
 
-    if train_swag:
+    if config.swag:
         swag_handler.attach(trainer)
 
     # evaluation
-    metrics = config.get("metrics", {})
-    metrics.update({"loss": Loss(config["criterion"])})
-
-    if isinstance(config["criterion"], nfflr.nn.MultitaskLoss):
+    metrics = {"loss": Loss(criterion)}
+    if isinstance(criterion, nfflr.nn.MultitaskLoss):
         # NOTE: unscaling currently uses a global scale
         # shared across all tasks (intended to scale energy units)
         unscale = None
-        if config["dataset"].standardize:
-            unscale = config["dataset"].scaler.unscale
+        if dataset.standardize:
+            unscale = dataset.scaler.unscale
 
         eval_metrics = {
             f"mae_{task}": MeanAbsoluteError(select_target(task, unscale_fn=unscale))
-            for task in config["criterion"].tasks
+            for task in criterion.tasks
         }
         metrics.update(eval_metrics)
 
     train_evaluator, val_evaluator = setup_evaluators(
-        rank, model, config, metrics, transfer_outputs
+        model, dataset.prepare_batch, metrics, transfer_outputs
     )
+    if config.progress and rank == 0:
+        vpbar = ProgressBar()
+        vpbar.attach(train_evaluator)
+        vpbar.attach(val_evaluator)
 
     history = {
         "train": {m: [] for m in metrics.keys()},
@@ -246,8 +254,7 @@ def run_train(local_rank: int, config):
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def _eval(engine):
-        train_eval_fraction = config.get("train_eval_fraction", 0.1)
-        n_train_eval = int(train_eval_fraction * len(train_loader))
+        n_train_eval = int(config.train_eval_fraction * len(train_loader))
         n_train_eval = max(n_train_eval, 1)  # at least one batch
         train_evaluator.state.training_epoch = engine.state.epoch
         val_evaluator.state.training_epoch = engine.state.epoch
@@ -265,7 +272,7 @@ def run_train(local_rank: int, config):
         train_evaluator.add_event_handler(Events.COMPLETED, log_console, name="train")
         val_evaluator.add_event_handler(Events.COMPLETED, log_console, name="val")
         val_evaluator.add_event_handler(
-            Events.COMPLETED, log_metric_history, Path(config["output_dir"])
+            Events.COMPLETED, log_metric_history, config.output_dir
         )
 
         if ray.tune.is_session_enabled():
@@ -273,7 +280,7 @@ def run_train(local_rank: int, config):
                 Events.COMPLETED, lambda engine: session.report(engine.state.metrics)
             )
 
-    trainer.run(train_loader, max_epochs=config["epochs"])
+    trainer.run(train_loader, max_epochs=config.epochs)
 
     return val_evaluator.state.metrics["loss"]
 
@@ -282,12 +289,19 @@ def run_lr(local_rank: int, config):
     config["checkpoint"] = False
     scheduler = None
 
-    rank = idist.get_rank()
-    manual_seed(config["random_seed"] + local_rank)
+    model = config["model"]
+    criterion = config["criterion"]
+    dataset = config["dataset"]
+    config = config["trainer"]
 
-    train_loader, val_loader = get_dataflow(config)
-    model, criterion, optimizer = _initialize(config, train_loader)
-    trainer = setup_trainer(rank, model, criterion, optimizer, scheduler, config)
+    rank = idist.get_rank()
+    manual_seed(config.random_seed + local_rank)
+
+    train_loader, val_loader = get_dataflow(dataset, config)
+    model, criterion, optimizer = _initialize(model, criterion, train_loader, config)
+    trainer = setup_trainer(
+        model, criterion, optimizer, scheduler, dataset.prepare_batch, config
+    )
 
     lr_finder = FastaiLRFinder()
     to_save = {"model": model, "optimizer": optimizer}
