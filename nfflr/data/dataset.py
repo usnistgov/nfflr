@@ -144,7 +144,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         group_split_token: str = "_",
         n_train: Union[float, int] = 0.8,
         n_val: Union[float, int] = 0.1,
-        energy_units: Literal["eV", "eV/atom"] = "eV/atom",
+        energy_units: Literal["eV", "eV/atom"] = "eV",
         standardize: bool = False,
         diskcache: Optional[Path | bool] = None,
     ):
@@ -201,7 +201,7 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         self.split = self.split_dataset_by_id(n_train, n_val)
 
-        if diskcache is not None:
+        if diskcache is not None and diskcache is not False:
             self.diskcache = get_cachedir(diskcache)
         else:
             self.diskcache = None
