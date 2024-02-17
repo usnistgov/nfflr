@@ -43,8 +43,7 @@ class ALIGNNFFConfig:
     output_features: int = 1
     compute_forces: bool = True
     energy_units: Literal["eV", "eV/atom"] = "eV/atom"
-    reference_energies: Optional[torch.Tensor] = None
-    initialize_bias: bool = False
+    reference_energies: Optional[Literal["fixed", "trainable"]] = None
 
 
 class ALIGNNFF(nn.Module):
@@ -67,12 +66,10 @@ class ALIGNNFF(nn.Module):
                 config.atom_features, d_model=config.hidden_features
             )
 
-        self.reference_energy = None
         if config.reference_energies is not None:
-            self.reference_energy = nn.Embedding(
-                108, embedding_dim=1, _weight=config.reference_energies.view(-1, 1)
+            self.reference_energy = nfflr.nn.AtomicReferenceEnergy(
+                requires_grad=config.reference_energies == "trainable"
             )
-            # self.reference_energy.weight.requires_grad_(False)
 
         self.edge_embedding = nn.Sequential(
             RBFExpansion(vmin=0, vmax=8.0, bins=config.edge_input_features),
@@ -106,6 +103,11 @@ class ALIGNNFF(nn.Module):
             self.readout = SumPooling()
 
         self.fc = nn.Linear(config.hidden_features, config.output_features)
+
+        self.reset_atomic_reference_energies()
+
+    def reset_atomic_reference_energies(self, values: Optional[torch.Tensor] = None):
+        self.reference_energy.reset_parameters(values=values)
 
     @dispatch
     def forward(self, x):
@@ -186,7 +188,7 @@ class ALIGNNFF(nn.Module):
 
         # predict per-atom energy contribution (in eV)
         atomwise_energy = self.fc(x)
-        if self.reference_energy is not None:
+        if hasattr(self, "reference_energy"):
             atomwise_energy += self.reference_energy(atomic_number)
 
         # total energy prediction

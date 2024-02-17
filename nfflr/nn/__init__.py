@@ -1,4 +1,5 @@
 """NFFLr modeling primitives"""
+# ruff: noqa: F401
 __all__ = (
     "PeriodicRadiusGraph",
     "PeriodicKShellGraph",
@@ -28,4 +29,5 @@ from .layers.atomfeatures import (
     AttributeEmbedding,
     AtomicNumberEmbedding,
     PeriodicTableEmbedding,
+    AtomicReferenceEnergy,
 )

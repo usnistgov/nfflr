@@ -1,3 +1,5 @@
+"""Dataset constructors."""
+# ruff: noqa: F401
 __all__ = ()
 
 from .datasets.mlearn import mlearn_dataset

@@ -17,7 +17,7 @@ from nfflr.nn import (
     AttributeEmbedding,
     PeriodicTableEmbedding,
     PeriodicRadiusGraph,
-    XPLOR,
+    Cosine,
 )
 
 
@@ -121,7 +121,7 @@ class SchNetConfig:
     """Hyperparameter schema for nfflr.models.gnn.alignn."""
 
     transform: Callable = PeriodicRadiusGraph(cutoff=5.0)
-    cutoff: torch.nn.Module = XPLOR(7.5, 8.0)
+    cutoff: torch.nn.Module = Cosine(5.0)
     layers: int = 4
     norm: Optional[Literal["batchnorm", "layernorm"]] = None
     atom_features: str | torch.nn.Module = "cgcnn"
@@ -129,9 +129,8 @@ class SchNetConfig:
     d_model: int = 128
     output_features: int = 1
     compute_forces: bool = False
-    energy_units: Literal["eV", "eV/atom"] = "eV/atom"
-    reference_energies: Optional[torch.Tensor] = None
-    initialize_bias: bool = False
+    energy_units: Literal["eV", "eV/atom"] = "eV"
+    reference_energies: Optional[Literal["fixed", "trainable"]] = None
 
 
 class SchNet(torch.nn.Module):
@@ -148,12 +147,10 @@ class SchNet(torch.nn.Module):
                 config.atom_features, config.d_model
             )
 
-        self.reference_energy = None
         if config.reference_energies is not None:
-            self.reference_energy = torch.nn.Embedding(
-                108, embedding_dim=1, _weight=config.reference_energies.view(-1, 1)
+            self.reference_energy = nfflr.nn.AtomicReferenceEnergy(
+                requires_grad=config.reference_energies == "trainable"
             )
-            # self.reference_energy.weight.requires_grad_(False)
 
         self.edge_basis = RBFExpansion(
             vmin=0,
@@ -183,6 +180,10 @@ class SchNet(torch.nn.Module):
 
         self.fc = torch.nn.Linear(config.d_model, config.output_features)
         self.reset_parameters()
+        self.reset_atomic_reference_energies()
+
+    def reset_atomic_reference_energies(self, values: Optional[torch.Tensor] = None):
+        self.reference_energy.reset_parameters(values=values)
 
     def reset_parameters(self):
         torch.nn.init.kaiming_normal_(
@@ -218,7 +219,7 @@ class SchNet(torch.nn.Module):
             x = self.postnorm(x)
         x = self.fc(x)
 
-        if self.reference_energy is not None:
+        if hasattr(self, "reference_energy"):
             x += self.reference_energy(g.ndata["atomic_number"])
 
         output = torch.squeeze(self.readout(g, x))

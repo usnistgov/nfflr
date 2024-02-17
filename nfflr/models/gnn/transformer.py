@@ -62,7 +62,7 @@ def edge_attention_graph(g, shared: bool = False):
     # node ids are bond ids
     srcbond, dstbond = lg.edges()
 
-    # so look up reverse edges of dstbond - this might be messy for periodic systems though...
+    # so look up reverse edges of dstbond - this might be messy for periodic systems...
     # ids should be swapped and displacement vectors should point in opposite directions
 
     # one idea: sort the graph edges somehow beforehand to make search easier?
@@ -93,8 +93,7 @@ class TFMConfig:
     output_features: int = 1
     compute_forces: bool = False
     energy_units: Literal["eV", "eV/atom"] = "eV/atom"
-    reference_energies: Optional[torch.Tensor] = None
-    initialize_bias: bool = False
+    reference_energies: Optional[Literal["fixed", "trainable"]] = None
 
 
 class TersoffAttention(nn.Module):
@@ -186,12 +185,10 @@ class TFM(nn.Module):
 
         self.bond_encoder = RBFExpansion(vmin=0, vmax=8.0, bins=config.d_model)
 
-        self.reference_energy = None
         if config.reference_energies is not None:
-            self.reference_energy = nn.Embedding(
-                108, embedding_dim=1, _weight=config.reference_energies.view(-1, 1)
+            self.reference_energy = nfflr.nn.AtomicReferenceEnergy(
+                requires_grad=config.reference_energies == "trainable"
             )
-            # self.reference_energy.weight.requires_grad_(False)
 
         self.layers = nn.ModuleList(
             [
@@ -206,6 +203,11 @@ class TFM(nn.Module):
             self.readout = SumPooling()
 
         self.fc = nn.Linear(config.d_model, config.output_features)
+
+        self.reset_atomic_reference_energies()
+
+    def reset_atomic_reference_energies(self, values: Optional[torch.Tensor] = None):
+        self.reference_energy.reset_parameters(values=values)
 
     @dispatch
     def forward(self, x):
@@ -258,7 +260,7 @@ class TFM(nn.Module):
 
         # predict per-atom energy contribution (in eV)
         atomwise_energy = self.fc(x)
-        if self.reference_energy is not None:
+        if hasattr(self, "reference_energy"):
             atomwise_energy += self.reference_energy(atomic_number)
 
         # total energy prediction

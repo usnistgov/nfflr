@@ -208,3 +208,29 @@ class PeriodicTableEmbedding(torch.nn.Module):
         row = self.rows[zs - 1]
         col = self.cols[zs - 1]
         return self.row_embedding(row) + self.col_embedding(col)
+
+
+class AtomicReferenceEnergy(torch.nn.Module):
+    """Atomic reference contribution to total energy.
+
+    Examples
+    --------
+    >>> ref = nfflr.nn.AtomicReferenceEnergy()
+    >>> ref.reset_parameters(dataset.estimate_reference_energies())
+    """
+
+    def __init__(self, values: torch.Tensor = None, requires_grad: bool = True):
+        super().__init__()
+        self.reference_energy = torch.nn.Embedding(118, embedding_dim=1)
+        self.reference_energy.weight.requires_grad_(requires_grad)
+        self.reset_parameters()
+
+    def reset_parameters(self, values: torch.Tensor = None):
+        if values is not None:
+            n = values.size(0)
+            self.reference_energy.weight.data[:n] = values.view(-1, 1)
+        else:
+            torch.nn.init.zeros_(self.reference_energy.weight)
+
+    def forward(self, zs: torch.Tensor):
+        return self.reference_energy(zs)

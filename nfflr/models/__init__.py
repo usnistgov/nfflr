@@ -1,4 +1,6 @@
 """NFFLR models"""
+# ruff: noqa: F401
+
 __all__ = (
     "ALIGNNConfig",
     "ALIGNN",

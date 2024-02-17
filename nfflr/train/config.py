@@ -28,6 +28,10 @@ class TrainingConfig:
     warmup_steps: float | int = 0.3
     swag: bool = False
     checkpoint: bool = True
+
+    # model initialization
+    initialize_bias: bool = False
+    initialize_estimated_reference_energies: bool = False
     resume_checkpoint: Optional[Path] = None
 
     # evaluation

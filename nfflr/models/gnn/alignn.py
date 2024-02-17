@@ -46,8 +46,7 @@ class ALIGNNConfig:
     output_features: int = 1
     compute_forces: bool = False
     energy_units: Literal["eV", "eV/atom"] = "eV/atom"
-    reference_energies: Optional[torch.Tensor] = None
-    initialize_bias: bool = False
+    reference_energies: Optional[Literal["fixed", "trainable"]] = None
 
 
 class ALIGNN(torch.nn.Module):
@@ -71,10 +70,9 @@ class ALIGNN(torch.nn.Module):
                 config.atom_features, d_model=config.hidden_features
             )
 
-        self.reference_energy = None
         if config.reference_energies is not None:
-            self.reference_energy = torch.nn.Embedding(
-                108, embedding_dim=1, _weight=config.reference_energies.view(-1, 1)
+            self.reference_energy = nfflr.nn.AtomicReferenceEnergy(
+                requires_grad=config.reference_energies == "trainable"
             )
 
         self.edge_embedding = torch.nn.Sequential(
@@ -129,6 +127,10 @@ class ALIGNN(torch.nn.Module):
             self.readout = SumPooling()
 
         self.fc = nn.Linear(config.hidden_features, config.output_features)
+        self.reset_atomic_reference_energies()
+
+    def reset_atomic_reference_energies(self, values: Optional[torch.Tensor] = None):
+        self.reference_energy.reset_parameters(values=values)
 
     @dispatch
     def forward(self, x):
@@ -192,7 +194,10 @@ class ALIGNN(torch.nn.Module):
 
         # norm-activation-pool-classify
         h = self.readout(g, x)
-        output = torch.squeeze(self.fc(h))
+        atomwise_output = self.fc(h)
+        if hasattr(self, "reference_energy"):
+            atomwise_output += self.reference_energy(atomic_number)
+        output = torch.squeeze(atomwise_output)
 
         if config.compute_forces:
             forces, stress = nfflr.autograd_forces(

@@ -96,7 +96,12 @@ def get_dataflow(dataset, config: TrainingConfig):
     return train_loader, val_loader
 
 
-def _initialize(model, criterion, train_loader, config: TrainingConfig):
+def _initialize(
+    model: torch.nn.Module,
+    criterion: torch.nn.Module,
+    dataset: nfflr.AtomsDataset,
+    config: TrainingConfig,
+):
     """Initialize model, criterion, and optimizer."""
     model = idist.auto_model(model)
     criterion = idist.auto_model(criterion)
@@ -108,7 +113,11 @@ def _initialize(model, criterion, train_loader, config: TrainingConfig):
     optimizer = setup_optimizer(params, config)
     optimizer = idist.auto_optim(optimizer)
 
-    if model.config.initialize_bias:
+    if config.initialize_estimated_reference_energies:
+        model.reset_atomic_reference_energies(dataset.estimate_reference_energies())
+
+    if config.initialize_bias:
+        train_loader, _ = get_dataflow(dataset, config)
         reset_initial_output_bias(
             model, train_loader, max_samples=500 / config.batch_size
         )
@@ -196,7 +205,7 @@ def run_train(local_rank: int, config):
     manual_seed(config.random_seed + local_rank)
 
     train_loader, val_loader = get_dataflow(dataset, config)
-    model, criterion, optimizer = _initialize(model, criterion, train_loader, config)
+    model, criterion, optimizer = _initialize(model, criterion, dataset, config)
     scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
     if config.swag:
@@ -298,7 +307,7 @@ def run_lr(local_rank: int, config):
     manual_seed(config.random_seed + local_rank)
 
     train_loader, val_loader = get_dataflow(dataset, config)
-    model, criterion, optimizer = _initialize(model, criterion, train_loader, config)
+    model, criterion, optimizer = _initialize(model, criterion, dataset, config)
     trainer = setup_trainer(
         model, criterion, optimizer, scheduler, dataset.prepare_batch, config
     )

@@ -18,7 +18,6 @@ from nfflr.nn import (
     EdgeGatedGraphConv,
     AttributeEmbedding,
     PeriodicRadiusGraph,
-    XPLOR,
 )
 
 
@@ -26,8 +25,8 @@ from nfflr.nn import (
 class TFMConfig:
     """Hyperparameter schema for nfflr.models.gnn.tfm"""
 
-    transform: Callable = PeriodicRadiusGraph(cutoff=8.0)
-    cutoff: torch.nn.Module = XPLOR(7.5, 8.0)
+    transform: Callable = PeriodicRadiusGraph(cutoff=5.0)
+    cutoff: torch.nn.Module = nfflr.nn.Cosine(5.0)
     layers: int = 3
     norm: Literal["layernorm", "instancenorm"] = "layernorm"
     atom_features: str = "embedding"
@@ -36,8 +35,8 @@ class TFMConfig:
     hidden_features: int = 256
     output_features: int = 1
     compute_forces: bool = False
-    energy_units: Literal["eV", "eV/atom"] = "eV/atom"
-    reference_energies: Optional[torch.Tensor] = None
+    energy_units: Literal["eV", "eV/atom"] = "eV"
+    reference_energies: Optional[Literal["fixed", "trainable"]] = None
 
 
 class FeedForward(nn.Module):
@@ -162,12 +161,10 @@ class TFM(nn.Module):
             vmin=0, vmax=8.0, bins=config.hidden_features
         )
 
-        self.reference_energy = None
         if config.reference_energies is not None:
-            self.reference_energy = nn.Embedding(
-                108, embedding_dim=1, _weight=config.reference_energies.view(-1, 1)
+            self.reference_energy = nfflr.nn.AtomicReferenceEnergy(
+                requires_grad=config.reference_energies == "trainable"
             )
-            # self.reference_energy.weight.requires_grad_(False)
 
         width = config.hidden_features
 
@@ -184,6 +181,11 @@ class TFM(nn.Module):
             # nn.LayerNorm(config.hidden_features),
             nn.Linear(config.hidden_features, config.output_features)
         )
+
+        self.reset_atomic_reference_energies()
+
+    def reset_atomic_reference_energies(self, values: Optional[torch.Tensor] = None):
+        self.reference_energy.reset_parameters(values=values)
 
     @dispatch
     def forward(self, x):
@@ -233,7 +235,7 @@ class TFM(nn.Module):
 
         # predict per-atom energy contribution (in eV)
         atomwise_energy = self.fc(x)
-        if self.reference_energy is not None:
+        if hasattr(self, "reference_energy"):
             atomwise_energy += self.reference_energy(atomic_number)
 
         # total energy prediction
