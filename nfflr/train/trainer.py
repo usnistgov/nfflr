@@ -71,8 +71,18 @@ def log_console(engine: ignite.engine.Engine, name: str):
         print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
 
 
-def get_dataflow(dataset, config: TrainingConfig):
-    """Configure training and validation datasets."""
+def get_dataflow(dataset: nfflr.AtomsDataset, config: TrainingConfig):
+    """Configure training and validation datasets.
+
+    Wraps `train` and `val` splits of `dataset` in ignite's
+    :py:func:`auto_dataloader <ignite.distributed.auto.auto_dataloader>`.
+
+
+    Parameters
+    ----------
+    dataset : nfflr.AtomsDataset
+    config : nfflr.train.TrainingConfig
+    """
 
     train_loader = idist.auto_dataloader(
         dataset,
@@ -96,15 +106,14 @@ def get_dataflow(dataset, config: TrainingConfig):
     return train_loader, val_loader
 
 
-def _initialize(
+def setup_model_and_optimizer(
     model: torch.nn.Module,
-    criterion: torch.nn.Module,
     dataset: nfflr.AtomsDataset,
     config: TrainingConfig,
 ):
     """Initialize model, criterion, and optimizer."""
     model = idist.auto_model(model)
-    criterion = idist.auto_model(criterion)
+    criterion = idist.auto_model(config.criterion)
 
     params = group_decay(model)
     if isinstance(criterion, torch.nn.Module) and len(list(criterion.parameters())) > 0:
@@ -194,18 +203,26 @@ def setup_evaluators(model, prepare_batch, metrics, transfer_outputs):
     return train_evaluator, val_evaluator
 
 
-def run_train(local_rank: int, config):
-    """Nfflr trainer entry point."""
-    model = config["model"]
-    criterion = config["criterion"]
-    dataset = config["dataset"]
-    config = config["trainer"]
+def train(
+    model: torch.nn.Module,
+    dataset: nfflr.AtomsDataset,
+    config: nfflr.train.TrainingConfig,
+    local_rank: int = 0,
+):
+    """NFFLr trainer entry point.
 
+    Parameters
+    ----------
+    model : torch.nn.Module
+    dataset : nfflr.AtomsDataset
+    config : nfflr.train.TrainingConfig
+    local_rank : int, optional
+    """
     rank = idist.get_rank()
     manual_seed(config.random_seed + local_rank)
 
     train_loader, val_loader = get_dataflow(dataset, config)
-    model, criterion, optimizer = _initialize(model, criterion, dataset, config)
+    model, criterion, optimizer = setup_model_and_optimizer(model, dataset, config)
     scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
     if config.swag:
@@ -294,23 +311,39 @@ def run_train(local_rank: int, config):
     return val_evaluator.state.metrics["loss"]
 
 
-def run_lr(local_rank: int, config):
-    config["checkpoint"] = False
-    scheduler = None
+def lr(
+    model: torch.nn.Module,
+    dataset: nfflr.AtomsDataset,
+    config: nfflr.train.TrainingConfig,
+    local_rank: int = 0,
+):
+    """NFFLr learning rate finder entry point.
 
-    model = config["model"]
-    criterion = config["criterion"]
-    dataset = config["dataset"]
-    config = config["trainer"]
+    Runs the Fast.ai learning rate finder
+    :py:class:`ignite.handlers.lr_finder.FastaiLRFinder`
+    for `model`, `dataset`, and `config`.
 
+    Parameters
+    ----------
+    model : torch.nn.Module
+    dataset : nfflr.AtomsDataset
+    config : nfflr.train.TrainingConfig
+    local_rank : int, optional
+    """
     rank = idist.get_rank()
     manual_seed(config.random_seed + local_rank)
+    config.checkpoint = False
+    scheduler = None
 
     train_loader, val_loader = get_dataflow(dataset, config)
-    model, criterion, optimizer = _initialize(model, criterion, dataset, config)
+    model, criterion, optimizer = setup_model_and_optimizer(model, dataset, config)
     trainer = setup_trainer(
         model, criterion, optimizer, scheduler, dataset.prepare_batch, config
     )
+
+    if config.progress and rank == 0:
+        pbar = ProgressBar()
+        pbar.attach(trainer, output_transform=lambda x: {"loss": x})
 
     lr_finder = FastaiLRFinder()
     to_save = {"model": model, "optimizer": optimizer}
@@ -327,18 +360,23 @@ def run_lr(local_rank: int, config):
         ax.figure.savefig("lr.png")
 
 
-@cli.command()
-def train(config_path: Path, verbose: bool = False):
+@cli.command("train")
+def cli_train(config_path: Path, verbose: bool = False):
     """NFF training entry point."""
     with idist.Parallel(**spawn_kwargs) as parallel:
         config = ConfigObject(config_path)
         if verbose:
             print(config)
-        parallel.run(run_train, config)
+
+        # wrap train entry point for idist.Parallel
+        def train_wrapper(local_rank, model, dataset, args):
+            return train(model, dataset, args, local_rank=local_rank)
+
+        parallel.run(train_wrapper, config.model, config.dataset, config.args)
 
 
-@cli.command()
-def lr(config_path: Path, verbose: bool = False):
+@cli.command("lr")
+def cli_lr(config_path: Path, verbose: bool = False):
     """NFF Learning rate finder entry point."""
     with idist.Parallel(**spawn_kwargs) as parallel:
         if verbose:
@@ -350,7 +388,11 @@ def lr(config_path: Path, verbose: bool = False):
         if verbose:
             print(config)
 
-        parallel.run(run_lr, config)
+        # wrap lr entry point for idist.Parallel
+        def lr_wrapper(local_rank, model, dataset, args):
+            return lr(model, dataset, args, local_rank=local_rank)
+
+        parallel.run(lr_wrapper, config.model, config.dataset, config.args)
 
 
 if __name__ == "__main__":

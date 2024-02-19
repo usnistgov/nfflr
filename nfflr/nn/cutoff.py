@@ -27,6 +27,28 @@ def xplor_cutoff(r, r_onset=3.5, r_cutoff=4):
 
 
 class XPLOR(torch.nn.Module):
+    """XPLOR cutoff profile.
+
+    Parameters
+    ----------
+    r_onset : float
+        inner cutoff radius
+    r_cutoff : float
+        cutoff radius
+
+    Examples
+    --------
+    .. plot::
+
+        rs = torch.linspace(0, 5, 100)
+        cut = nfflr.nn.XPLOR(3.5, 4.0)
+        plt.plot(rs, cut(rs))
+        plt.xlabel("r")
+        plt.ylabel("$f_{cut}$")
+        plt.xlim(0, 5)
+        plt.show()
+    """
+
     def __init__(self, r_onset: float = 3.5, r_cutoff: float = 4):
         super().__init__()
         self.r_onset = r_onset
@@ -53,6 +75,29 @@ def cosine_cutoff(r: torch.Tensor, r_cutoff: float = 4):
 
 
 class Cosine(torch.nn.Module):
+    r"""Cosine cutoff profile.
+
+    .. math::
+        f(r) = 0.5 \left(1 + \cos(\pi \frac{r}{r_{cut}})\right)
+
+    Parameters
+    ----------
+    r_cutoff : float
+        cutoff radius
+
+    Examples
+    --------
+    .. plot::
+
+        rs = torch.linspace(0, 5, 100)
+        cut = nfflr.nn.Cosine(4.0)
+        plt.plot(rs, cut(rs))
+        plt.xlabel("r")
+        plt.ylabel("$f_{cut}$")
+        plt.xlim(0, 5)
+        plt.show()
+    """
+
     def __init__(self, r_cutoff: float = 4):
         super().__init__()
         self.r_cutoff = r_cutoff

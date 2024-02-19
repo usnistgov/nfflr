@@ -11,14 +11,33 @@ from nfflr.nn import Norm
 
 
 class EdgeGatedGraphConv(torch.nn.Module):
-    """Edge gated graph convolution from arxiv:1711.07553.
+    """Edge gated graph convolution
 
-    see also https://www.jmlr.org/papers/v24/22-0567.html
+    See `Bresson and Laurent <https://arxiv.org/abs/1711.07553>`_
+    :footcite:p:`bresson2018residual` for reference,
+    and refer to `Dwivedi et al. <https://www.jmlr.org/papers/v24/22-0567.html>`_
+    :footcite:p:`dwivedi2022` for detailed discussion.
+
+    .. math ::
+        x_i^{l+1} = SiLU ( U x_i^l + \sum_{j \in \mathcal{N}(i)} \eta_{ij} ⊙ V x_j^l)
 
 
-    This is similar to CGCNN, but edge features only go into
-    the soft attention / edge gating function, and the primary
-    node update function is W cat(u, v) + b
+    This is similar to the interaction from
+    `CGCNN <https://dx.doi.org/10.1103/physrevlett.120.145301>`_ :footcite:p:`cgcnn`,
+    but edge features only go into the soft attention / edge gating function,
+    and the primary node update function is W cat(u, v) + b
+
+    .. footbibliography::
+
+    Parameters
+    ----------
+    input_features : int
+    output_features : int
+    residual : bool,  default=True
+        add skip connection for both node and edge features
+    norm : {"layernorm", "batchnorm", "instancenorm"}, optional
+    skip_edgenorm : bool default=False
+        omit normalization of edge features
     """
 
     def __init__(
@@ -58,10 +77,22 @@ class EdgeGatedGraphConv(torch.nn.Module):
         g: dgl.DGLGraph,
         node_feats: torch.Tensor,
         edge_feats: torch.Tensor,
-    ) -> torch.Tensor:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Edge-gated graph convolution.
 
-        h_i^l+1 = ReLU(U h_i + sum_{j->i} eta_{ij} ⊙ V h_j)
+        Parameters
+        ----------
+        g : dgl.DGLGraph
+            input graph
+        node_feats : torch.Tensor
+            input node features
+        edge_feats : torch.Tensor
+            input edge features
+
+        Returns
+        -------
+        node_features : torch.Tensor
+        edge_features : torch.Tensor
         """
         g = g.local_var()
 

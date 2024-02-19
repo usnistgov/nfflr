@@ -38,6 +38,7 @@
    :nosignatures:
    :template: classtemplate.rst
 
+   Cosine
    XPLOR
 ```
 

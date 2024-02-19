@@ -33,21 +33,30 @@ def jarvis_load_atoms(path: Path):
 
 
 class Atoms:
-    """Atoms: a basic crystal structure data class.
-
-    nfflr.Atoms consists of:
-    - cell (lattice parameters / cell matrix)
-    - positions (Cartesian coordinates)
-    - numbers (atom identities / fractional site occupancies)
-    - batching information
+    """Atoms: basic atomistic data structure supporting batching
 
     The goal is to make it easy to work with a common representation,
-    and transform it as needed to other formats:
+    and transform it as needed to other formats.
 
     - DGLGraph
     - ALIGNNGraphTuple
     - PyG format
     - ...
+
+    Parameters
+    ----------
+    cell : torch.Tensor
+        cell matrix / lattice parameters
+    positions : torch.Tensor
+        Cartesian coordinates
+    numbers : torch.Tensor
+        atomic numbers
+
+    Other Parameters
+    ----------------
+    batch_num_atoms : Iterable[int], optional
+        batch size for struct-of-arrays batched Atoms
+
 
     """
 
@@ -92,6 +101,7 @@ class Atoms:
         return [self.positions.shape[0]]
 
     def batched(self) -> bool:
+        """Determine if multiple structures are batched together."""
         return self.cell.ndim == 3
 
     def __repr__(self):
@@ -107,10 +117,25 @@ class Atoms:
                 "__len__ not defined for batched atoms. use batch_num_atoms instead."
             )
 
-    def scaled_positions(self):
+    def scaled_positions(self) -> torch.Tensor:
+        """Convert cartesian coordinates to fractional coordinates.
+
+        Returns
+        -------
+        scaled_positions : torch.Tensor
+        """
         return self.positions @ torch.linalg.inv(self.cell)
 
     def to(self, device, non_blocking: bool = False):
+        """Transfer atoms data to compute device.
+
+        Parameters
+        ----------
+        device : torch.device
+            compute device, e.g. "cpu", "cuda", "mps"
+        non_blocking : bool, optional
+            attempt asynchronous transfer.
+        """
         self.cell = self.cell.to(device, non_blocking=non_blocking)
         self.positions = self.positions.to(device, non_blocking=non_blocking)
         self.numbers = self.numbers.to(device, non_blocking=non_blocking)

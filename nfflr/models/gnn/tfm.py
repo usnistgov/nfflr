@@ -185,7 +185,8 @@ class TFM(nn.Module):
         self.reset_atomic_reference_energies()
 
     def reset_atomic_reference_energies(self, values: Optional[torch.Tensor] = None):
-        self.reference_energy.reset_parameters(values=values)
+        if hasattr(self, "reference_energy"):
+            self.reference_energy.reset_parameters(values=values)
 
     @dispatch
     def forward(self, x):

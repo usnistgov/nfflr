@@ -3,4 +3,5 @@ myst-nb
 numpydoc
 myst-parser
 sphinx-book-theme
+sphinxcontrib-bibtex
 -e .

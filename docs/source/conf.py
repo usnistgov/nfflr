@@ -25,10 +25,14 @@ extensions = [
     "numpydoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
-    # "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
+    "sphinxcontrib.bibtex",
+    "matplotlib.sphinxext.plot_directive",
 ]
+
+bibtex_bibfiles = ["refs.bib"]
+
 autosummary_generate = True
 autodoc_inherit_docstrings = False
 autodoc_member_order = "bysource"
@@ -65,9 +69,44 @@ myst_url_schemes = ("http", "https", "mailto")
 numpydoc_show_class_members = True
 numpydoc_show_inherited_class_members = False
 numpydoc_xref_param_type = True
+numpydoc_use_plots = True
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3.10", None),
     "torch": ("https://pytorch.org/docs/master/", None),
+    "ignite": ("https://pytorch.org/ignite/", None),
     "dgl": ("https://docs.dgl.ai/en/latest/", None),
+}
+
+# matplotlib style
+plot_include_source = True
+plot_html_show_source_link = False
+plot_html_show_formats = False
+plot_pre_code = """
+import numpy as np
+from matplotlib import pyplot as plt
+import torch
+import nfflr
+"""
+
+# style from scipy docs
+import math  # noqa: E402
+
+phi = (math.sqrt(5) + 1) / 2
+font_size = 13 * 72 / 96.0  # 13 px
+
+plot_rcparams = {
+    "font.size": font_size,
+    "axes.titlesize": font_size,
+    "axes.labelsize": font_size,
+    "xtick.labelsize": font_size,
+    "ytick.labelsize": font_size,
+    "legend.fontsize": font_size,
+    "figure.figsize": (3 * phi, 3),
+    "figure.subplot.bottom": 0.2,
+    "figure.subplot.left": 0.2,
+    "figure.subplot.right": 0.9,
+    "figure.subplot.top": 0.85,
+    "figure.subplot.wspace": 0.4,
+    "text.usetex": False,
 }

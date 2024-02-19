@@ -1,13 +1,18 @@
 # nfflr.AtomsDataset
 
-This document describes the top-level nfflr API.
+## AtomsDataset
 
 ```{eval-rst}
 .. module:: nfflr
 .. currentmodule:: nfflr
-.. autoclass:: nfflr.AtomsDataset
+.. autosummary::
+   :toctree: generated
+   :template: classtemplate.rst
 
+   AtomsDataset
 ```
+
+
 
 ## pre-packaged datasets
 
@@ -21,4 +26,5 @@ This document describes the top-level nfflr API.
 
    mlearn_dataset
    deepmd_hea_dataset
+   vasprun_dataset
 ```

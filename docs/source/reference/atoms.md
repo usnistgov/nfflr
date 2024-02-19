@@ -1,49 +1,19 @@
 # nfflr.Atoms
 
-This document describes the top-level nfflr API.
+## Atoms
 
 ```{eval-rst}
 .. module:: nfflr
+   :no-index:
 .. currentmodule:: nfflr
-.. autoclass:: nfflr.Atoms
-
-```
-
-## Graph construction
-
-```{eval-rst}
-.. module:: nfflr.nn
-.. currentmodule:: nfflr.nn
-```
-
-```{eval-rst}
 .. autosummary::
    :toctree: generated
-   :nosignatures:
-   :template: newclass.rst
+   :template: classtemplate.rst
 
-   PeriodicRadiusGraph
-   PeriodicKShellGraph
-   PeriodicAdaptiveRadiusGraph
+   Atoms
 ```
 
-## atom representations
-
-```{eval-rst}
-.. autosummary::
-   :toctree: generated
-   :nosignatures:
-   :template: newclass.rst
-
-   AtomType
-   AtomPairType
-   AttributeEmbedding
-   AtomicNumberEmbedding
-   PeriodicTableEmbedding
-
-```
-
-## batching
+### batching
 
 ```{eval-rst}
 .. currentmodule:: nfflr
@@ -56,7 +26,7 @@ This document describes the top-level nfflr API.
 ```
 
 
-## conversion to other formats
+### conversion to other formats
 
 ```{eval-rst}
 .. currentmodule:: nfflr
@@ -67,4 +37,41 @@ This document describes the top-level nfflr API.
 
    spglib_cell
    to_ase
+```
+
+## Graph construction
+
+```{eval-rst}
+.. module:: nfflr.nn
+   :no-index:
+.. currentmodule:: nfflr.nn
+```
+
+```{eval-rst}
+.. currentmodule:: nfflr.nn.transform
+.. autosummary::
+   :toctree: generated
+   :nosignatures:
+   :template: classtemplate.rst
+
+   PeriodicRadiusGraph
+   PeriodicKShellGraph
+   PeriodicAdaptiveRadiusGraph
+```
+
+## atom representations
+
+```{eval-rst}
+.. currentmodule:: nfflr.nn
+.. autosummary::
+   :toctree: generated
+   :nosignatures:
+   :template: classtemplate.rst
+
+   AtomType
+   AtomPairType
+   AttributeEmbedding
+   AtomicNumberEmbedding
+   PeriodicTableEmbedding
+
 ```

@@ -20,9 +20,9 @@ The primary components of NFFLr are:
 
 1. a [general atomistic representation](#nfflr.Atoms) that is easy to work with, supports efficient batching, and can be easily converted to input formats of various machine learning models.
 
-2. a [consistent modeling interface](reference/nfflr.models), regardless of backend or material representation.
+2. a [consistent modeling interface](reference/models), regardless of backend or material representation.
 
-3. **high-level training utilities** that can be used regardless of the model and/or backend.
+3. a [trainer](reference/trainer) (based on [ignite](#ignite))that can be used regardless of the model and/or backend.
 
 
 
