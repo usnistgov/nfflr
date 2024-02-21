@@ -3,5 +3,6 @@ myst-nb
 numpydoc
 myst-parser
 sphinx-book-theme
+sphinx-togglebutton
 sphinxcontrib-bibtex
 -e .

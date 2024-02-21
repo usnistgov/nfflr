@@ -9,7 +9,7 @@
 project = "nfflr"
 copyright = "2024, Brian DeCost"
 author = "Brian DeCost"
-release = "0.2.1"
+release = "0.3.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -23,6 +23,7 @@ exclude_patterns = []
 extensions = [
     "myst_nb",
     "numpydoc",
+    "sphinx_togglebutton",
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
