@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Atoms &#8212; nfflr 0.2.1 documentation</title>
+    <title>Atoms &#8212; nfflr 0.3.0 documentation</title>
   
   
   
@@ -31,6 +31,8 @@
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -38,10 +40,16 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=c480a563"></script>
+    <script src="../_static/documentation_options.js?v=83a61292"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/atoms';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -161,7 +169,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.2.1 documentation</p>
+    <p class="title logo__title">nfflr 0.3.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -187,31 +195,33 @@ $(document).ready(function(){
 <li class="toctree-l1 has-children"><a class="reference internal" href="../howto/index.html">How-to guides</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../howto/property-regression.html">Property regression example</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../howto/eam-forces.html">Check autograd forces against analytical forces</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Force field example</a></li>
-
+<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Train a force field from scratch</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.Atoms.html">Atoms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.batch.html">nfflr.batch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.transform.PeriodicRadiusGraph.html">PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.transform.PeriodicKShellGraph.html">PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.transform.PeriodicAdaptiveRadiusGraph.html">PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomType.html">AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomPairType.html">AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AttributeEmbedding.html">AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">PeriodicTableEmbedding</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.vasprun_dataset.html">nfflr.data.vasprun_dataset</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -220,6 +230,7 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.Cosine.html">Cosine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
@@ -231,6 +242,17 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/trainer.html">trainer</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.TrainingConfig.html">TrainingConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.train.html">nfflr.train.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.lr.html">nfflr.train.lr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.get_dataflow.html">nfflr.train.trainer.get_dataflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.setup_model_and_optimizer.html">nfflr.train.trainer.setup_model_and_optimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.setup_trainer.html">nfflr.train.trainer.setup_trainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.setup_checkpointing.html">nfflr.train.trainer.setup_checkpointing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.setup_evaluators.html">nfflr.train.trainer.setup_evaluators</a></li>
 </ul>
 </li>
 </ul>
@@ -400,6 +422,16 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from .autonotebook import tqdm as notebook_tqdm
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-02-21 21:26:57,269	INFO util.py:154 -- Missing packages: [&#39;ipywidgets&#39;]. Run `pip install -U ipywidgets`, then restart the notebook server for rich notebook output.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-02-21 21:26:57,438	INFO util.py:154 -- Missing packages: [&#39;ipywidgets&#39;]. Run `pip install -U ipywidgets`, then restart the notebook server for rich notebook output.
+</pre></div>
+</div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Atoms(cell=tensor([[4.1000, 0.0000, 0.0000],
         [0.0000, 4.1000, 0.0000],
         [0.0000, 0.0000, 4.1000]]), positions=tensor([[0.0000, 0.0000, 0.0000],
@@ -410,7 +442,7 @@ document.write(`
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span> <span class="k">as</span> <span class="n">AseAtoms</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase</span>
 <span class="kn">from</span> <span class="nn">ase.data.colors</span> <span class="kn">import</span> <span class="n">jmol_colors</span>
 <span class="kn">from</span> <span class="nn">ase.visualize.plot</span> <span class="kn">import</span> <span class="n">plot_atoms</span>
 
@@ -418,26 +450,14 @@ document.write(`
 <span class="o">%</span><span class="k">matplotlib</span> inline
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">AseAtoms</span><span class="p">(</span><span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">)</span>
+<span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">to_ase</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 <span class="n">plot_atoms</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">radii</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;10x,20y,0z&quot;</span><span class="p">),</span> <span class="n">show_unit_cell</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">9</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">get_ipython</span><span class="p">()</span><span class="o">.</span><span class="n">run_line_magic</span><span class="p">(</span><span class="s1">&#39;matplotlib&#39;</span><span class="p">,</span> <span class="s1">&#39;inline&#39;</span><span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-<span class="ne">----&gt; </span><span class="mi">9</span> <span class="n">ase_atoms</span> <span class="o">=</span> <span class="n">AseAtoms</span><span class="p">(</span><span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="o">=</span><span class="n">numbers</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">cell</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="n">plot_atoms</span><span class="p">(</span><span class="n">ase_atoms</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">radii</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;10x,20y,0z&quot;</span><span class="p">),</span> <span class="n">show_unit_cell</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">);</span>
-
-<span class="ne">NameError</span>: name &#39;positions&#39; is not defined
-</pre></div>
-</div>
-<img alt="../_images/a5729cd14919a8de917de0663c9c4c2daa4670b47317d3fbb51a8d253ba1d977.png" src="../_images/a5729cd14919a8de917de0663c9c4c2daa4670b47317d3fbb51a8d253ba1d977.png" />
+<img alt="../_images/3b970b3bc64ef7387e0f54f26e115b24f34defa7cb798d9fb399de5d2993671f.png" src="../_images/3b970b3bc64ef7387e0f54f26e115b24f34defa7cb798d9fb399de5d2993671f.png" />
 </div>
 </div>
 </section>

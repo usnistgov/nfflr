@@ -1,0 +1,903 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nfflr.train.trainer &#8212; nfflr 0.3.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../../../_static/documentation_options.js?v=83a61292"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/nfflr/train/trainer';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<!-- <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css"> -->
+
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+<script async type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NIST&subagency=github&pua=UA-66610693-1&yt=true&exts=ppsx,pps,f90,sch,rtf,wrl,txz,m1v,xlsm,msi,xsd,f,tif,eps,mpg,xml,pl,xlt,c">
+</script>
+
+
+<script type="text/javascript" src="https://pages.nist.gov/leaveNotice/js/jquery.leaveNotice-nist.min.js"></script>
+<script>
+$(document).ready(function(){
+  // Mark external (non-nist.gov) A tags with class "external"
+  //If the adress start with https and ends with nist.gov
+  var re_nist = new RegExp('^https?:\/\/((^\/)*\.)*nist\\.gov(\/|$)');
+  //Regex to find address that start with https
+  var re_absolute_address = new RegExp('^((https?:)?\/\/)');
+  $("a").each(function(){
+    var url=$(this).attr('href');
+    if(re_nist.test(url) || !re_absolute_address.test(url)){
+      $(this).addClass('local');
+    }else{
+      //This a href appears to be external, so tag it
+      $(this).addClass('external');
+    }
+  });
+  // Add leaveNotice to external A elements
+  $('a.external').leaveNotice();
+});
+</script>
+<link rel="stylesheet" type="text/css" href="https://pages.nist.gov/leaveNotice/css/jquery.leaveNotice.css" />
+
+
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">nfflr 0.3.0 documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/quickstart.html">Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/atoms.html">Atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../howto/index.html">How-to guides</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../howto/property-regression.html">Property regression example</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../howto/eam-forces.html">Check autograd forces against analytical forces</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../../../howto/force-field-training.html">Train a force field from scratch</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.Atoms.html">Atoms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.batch.html">nfflr.batch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.transform.PeriodicRadiusGraph.html">PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.transform.PeriodicKShellGraph.html">PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.transform.PeriodicAdaptiveRadiusGraph.html">PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomType.html">AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomPairType.html">AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AttributeEmbedding.html">AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">PeriodicTableEmbedding</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.vasprun_dataset.html">nfflr.data.vasprun_dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.RBFExpansion.html">RBFExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.ChebyshevExpansion.html">ChebyshevExpansion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.Cosine.html">Cosine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.Norm.html">Norm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.InstanceNorm.html">InstanceNorm</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/models.html">nfflr.models</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/trainer.html">trainer</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.TrainingConfig.html">TrainingConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.train.html">nfflr.train.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.lr.html">nfflr.train.lr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.get_dataflow.html">nfflr.train.trainer.get_dataflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.setup_model_and_optimizer.html">nfflr.train.trainer.setup_model_and_optimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.setup_trainer.html">nfflr.train.trainer.setup_trainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.setup_checkpointing.html">nfflr.train.trainer.setup_checkpointing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.setup_evaluators.html">nfflr.train.trainer.setup_evaluators</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/usnistgov/nfflr/issues/new?title=Issue%20on%20page%20%2F_modules/nfflr/train/trainer.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for nfflr.train.trainer</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">()</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">SubsetRandomSampler</span>
+
+<span class="kn">import</span> <span class="nn">typer</span>
+<span class="kn">import</span> <span class="nn">ignite</span>
+<span class="kn">import</span> <span class="nn">ignite.distributed</span> <span class="k">as</span> <span class="nn">idist</span>
+<span class="kn">from</span> <span class="nn">ignite.utils</span> <span class="kn">import</span> <span class="n">manual_seed</span>
+<span class="kn">from</span> <span class="nn">ignite.metrics</span> <span class="kn">import</span> <span class="n">Loss</span><span class="p">,</span> <span class="n">MeanAbsoluteError</span>
+<span class="kn">from</span> <span class="nn">ignite.contrib.handlers.tqdm_logger</span> <span class="kn">import</span> <span class="n">ProgressBar</span>
+<span class="kn">from</span> <span class="nn">ignite.handlers</span> <span class="kn">import</span> <span class="n">Checkpoint</span><span class="p">,</span> <span class="n">DiskSaver</span><span class="p">,</span> <span class="n">FastaiLRFinder</span><span class="p">,</span> <span class="n">TerminateOnNan</span>
+<span class="kn">from</span> <span class="nn">ignite.engine</span> <span class="kn">import</span> <span class="n">Events</span><span class="p">,</span> <span class="n">create_supervised_trainer</span>
+
+<span class="kn">import</span> <span class="nn">ray</span>
+<span class="kn">import</span> <span class="nn">ray.tune</span>
+<span class="kn">from</span> <span class="nn">ray.air</span> <span class="kn">import</span> <span class="n">session</span>
+
+<span class="kn">from</span> <span class="nn">py_config_runner</span> <span class="kn">import</span> <span class="n">ConfigObject</span>
+
+<span class="kn">import</span> <span class="nn">nfflr</span>
+
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">nfflr.train.config</span> <span class="kn">import</span> <span class="n">TrainingConfig</span>
+
+<span class="kn">from</span> <span class="nn">nfflr.train.utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">group_decay</span><span class="p">,</span>
+    <span class="n">select_target</span><span class="p">,</span>
+    <span class="n">setup_evaluator_with_grad</span><span class="p">,</span>
+    <span class="n">setup_optimizer</span><span class="p">,</span>
+    <span class="n">setup_scheduler</span><span class="p">,</span>
+    <span class="n">transfer_outputs</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nfflr.train.swag</span> <span class="kn">import</span> <span class="n">SWAGHandler</span>
+<span class="kn">from</span> <span class="nn">nfflr.models.utils</span> <span class="kn">import</span> <span class="n">reset_initial_output_bias</span>
+
+<span class="n">cli</span> <span class="o">=</span> <span class="n">typer</span><span class="o">.</span><span class="n">Typer</span><span class="p">()</span>
+
+<span class="c1"># set up multi-GPU training, if available</span>
+<span class="n">gpus</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CUDA_VISIBLE_DEVICES&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span>
+<span class="n">num_gpus</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gpus</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span>
+
+<span class="n">backend</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">nproc_per_node</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">if</span> <span class="n">num_gpus</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">backend</span> <span class="o">==</span> <span class="s2">&quot;nccl&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">is_nccl_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;gloo&quot;</span>
+    <span class="n">nproc_per_node</span> <span class="o">=</span> <span class="n">num_gpus</span>
+
+<span class="n">spawn_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="n">backend</span><span class="p">,</span>
+    <span class="s2">&quot;nproc_per_node&quot;</span><span class="p">:</span> <span class="n">nproc_per_node</span><span class="p">,</span>
+    <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">60</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">log_console</span><span class="p">(</span><span class="n">engine</span><span class="p">:</span> <span class="n">ignite</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">Engine</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Log evaluation stats to console.&quot;&quot;&quot;</span>
+    <span class="n">epoch</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">training_epoch</span>  <span class="c1"># custom state field</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">metrics</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> results - Epoch: </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">  Avg loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;mae_forces&quot;</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;energy: </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;mae_energy&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">  force: </span><span class="si">{</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;mae_forces&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_dataflow">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.train.trainer.get_dataflow.html#nfflr.train.get_dataflow">[docs]</a>
+<span class="k">def</span> <span class="nf">get_dataflow</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TrainingConfig</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configure training and validation datasets.</span>
+
+<span class="sd">    Wraps `train` and `val` splits of `dataset` in ignite&#39;s</span>
+<span class="sd">    :py:func:`auto_dataloader &lt;ignite.distributed.auto.auto_dataloader&gt;`.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : nfflr.AtomsDataset</span>
+<span class="sd">    config : nfflr.train.TrainingConfig</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">train_loader</span> <span class="o">=</span> <span class="n">idist</span><span class="o">.</span><span class="n">auto_dataloader</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="p">,</span>
+        <span class="n">collate_fn</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">collate</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="n">sampler</span><span class="o">=</span><span class="n">SubsetRandomSampler</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]),</span>
+        <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_workers</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dataloader_workers</span><span class="p">,</span>
+        <span class="n">pin_memory</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">val_loader</span> <span class="o">=</span> <span class="n">idist</span><span class="o">.</span><span class="n">auto_dataloader</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="p">,</span>
+        <span class="n">collate_fn</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">collate</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+        <span class="n">sampler</span><span class="o">=</span><span class="n">SubsetRandomSampler</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;val&quot;</span><span class="p">]),</span>
+        <span class="n">drop_last</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># True -&gt; possible issue crashing with MP dataset</span>
+        <span class="n">num_workers</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">dataloader_workers</span><span class="p">,</span>
+        <span class="n">pin_memory</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">val_loader</span></div>
+
+
+
+<div class="viewcode-block" id="setup_model_and_optimizer">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.train.trainer.setup_model_and_optimizer.html#nfflr.train.setup_model_and_optimizer">[docs]</a>
+<span class="k">def</span> <span class="nf">setup_model_and_optimizer</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">TrainingConfig</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize model, criterion, and optimizer.&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">idist</span><span class="o">.</span><span class="n">auto_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">idist</span><span class="o">.</span><span class="n">auto_model</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">criterion</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">criterion</span><span class="p">,</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MultitaskLoss</span><span class="p">):</span>
+        <span class="c1"># auto_model won&#39;t transfer buffers...?</span>
+        <span class="n">criterion</span> <span class="o">=</span> <span class="n">criterion</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">idist</span><span class="o">.</span><span class="n">device</span><span class="p">())</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="n">group_decay</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">criterion</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">criterion</span><span class="o">.</span><span class="n">parameters</span><span class="p">()))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="n">criterion</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="s2">&quot;weight_decay&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">setup_optimizer</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">idist</span><span class="o">.</span><span class="n">auto_optim</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">initialize_estimated_reference_energies</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">reset_atomic_reference_energies</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">estimate_reference_energies</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">initialize_bias</span><span class="p">:</span>
+        <span class="n">train_loader</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_dataflow</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+        <span class="n">reset_initial_output_bias</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">max_samples</span><span class="o">=</span><span class="mi">500</span> <span class="o">/</span> <span class="n">config</span><span class="o">.</span><span class="n">batch_size</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span></div>
+
+
+
+<div class="viewcode-block" id="setup_trainer">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.train.trainer.setup_trainer.html#nfflr.train.setup_trainer">[docs]</a>
+<span class="k">def</span> <span class="nf">setup_trainer</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">prepare_batch</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TrainingConfig</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create ignite trainer and attach common event handlers.&quot;&quot;&quot;</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">idist</span><span class="o">.</span><span class="n">device</span><span class="p">()</span>
+
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">create_supervised_trainer</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">,</span>
+        <span class="n">criterion</span><span class="p">,</span>
+        <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span><span class="p">,</span>
+        <span class="n">prepare_batch</span><span class="o">=</span><span class="n">prepare_batch</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">trainer</span><span class="o">.</span><span class="n">add_event_handler</span><span class="p">(</span><span class="n">Events</span><span class="o">.</span><span class="n">EPOCH_COMPLETED</span><span class="p">,</span> <span class="n">TerminateOnNan</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">trainer</span><span class="o">.</span><span class="n">add_event_handler</span><span class="p">(</span>
+            <span class="n">Events</span><span class="o">.</span><span class="n">ITERATION_COMPLETED</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">engine</span><span class="p">:</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">trainer</span></div>
+
+
+
+<div class="viewcode-block" id="setup_checkpointing">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.train.trainer.setup_checkpointing.html#nfflr.train.setup_checkpointing">[docs]</a>
+<span class="k">def</span> <span class="nf">setup_checkpointing</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">TrainingConfig</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configure model and trainer checkpointing.</span>
+
+<span class="sd">    `state` should contain at least `model`, `optimizer`, and `trainer`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">checkpoint_handler</span> <span class="o">=</span> <span class="n">Checkpoint</span><span class="p">(</span>
+        <span class="n">state</span><span class="p">,</span>
+        <span class="n">DiskSaver</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">create_dir</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">require_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="n">n_saved</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">global_step_transform</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;trainer&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">epoch</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">state</span><span class="p">[</span><span class="s2">&quot;trainer&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add_event_handler</span><span class="p">(</span><span class="n">Events</span><span class="o">.</span><span class="n">EPOCH_COMPLETED</span><span class="p">,</span> <span class="n">checkpoint_handler</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">resume_checkpoint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">resume_checkpoint</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="n">idist</span><span class="o">.</span><span class="n">device</span><span class="p">())</span>
+        <span class="n">Checkpoint</span><span class="o">.</span><span class="n">load_objects</span><span class="p">(</span><span class="n">to_load</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">checkpoint</span><span class="o">=</span><span class="n">checkpoint</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">state</span></div>
+
+
+
+<div class="viewcode-block" id="setup_evaluators">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.train.trainer.setup_evaluators.html#nfflr.train.setup_evaluators">[docs]</a>
+<span class="k">def</span> <span class="nf">setup_evaluators</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">prepare_batch</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">transfer_outputs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configure train and validation evaluators.&quot;&quot;&quot;</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">idist</span><span class="o">.</span><span class="n">device</span><span class="p">()</span>
+    <span class="c1"># create_supervised_evaluator</span>
+    <span class="n">train_evaluator</span> <span class="o">=</span> <span class="n">setup_evaluator_with_grad</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+        <span class="n">prepare_batch</span><span class="o">=</span><span class="n">prepare_batch</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+        <span class="n">output_transform</span><span class="o">=</span><span class="n">transfer_outputs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">val_evaluator</span> <span class="o">=</span> <span class="n">setup_evaluator_with_grad</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+        <span class="n">prepare_batch</span><span class="o">=</span><span class="n">prepare_batch</span><span class="p">,</span>
+        <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+        <span class="n">output_transform</span><span class="o">=</span><span class="n">transfer_outputs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">train_evaluator</span><span class="p">,</span> <span class="n">val_evaluator</span></div>
+
+
+
+<div class="viewcode-block" id="train">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.train.train.html#nfflr.train.train">[docs]</a>
+<span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">TrainingConfig</span><span class="p">,</span>
+    <span class="n">local_rank</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NFFLr trainer entry point.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : torch.nn.Module</span>
+<span class="sd">    dataset : nfflr.AtomsDataset</span>
+<span class="sd">    config : nfflr.train.TrainingConfig</span>
+<span class="sd">    local_rank : int, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="n">idist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
+    <span class="n">manual_seed</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">random_seed</span> <span class="o">+</span> <span class="n">local_rank</span><span class="p">)</span>
+
+    <span class="n">train_loader</span><span class="p">,</span> <span class="n">val_loader</span> <span class="o">=</span> <span class="n">get_dataflow</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span> <span class="o">=</span> <span class="n">setup_model_and_optimizer</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">scheduler</span> <span class="o">=</span> <span class="n">setup_scheduler</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_loader</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">swag</span><span class="p">:</span>
+        <span class="n">swag_handler</span> <span class="o">=</span> <span class="n">SWAGHandler</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">setup_trainer</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">prepare_batch</span><span class="p">,</span> <span class="n">config</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">progress</span> <span class="ow">and</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">pbar</span> <span class="o">=</span> <span class="n">ProgressBar</span><span class="p">()</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">trainer</span><span class="p">,</span> <span class="n">output_transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">})</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">trainer</span><span class="o">=</span><span class="n">trainer</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">state</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scheduler</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">criterion</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+            <span class="n">state</span><span class="p">[</span><span class="s2">&quot;criterion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">criterion</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">swag</span><span class="p">:</span>
+            <span class="n">state</span><span class="p">[</span><span class="s2">&quot;swagmodel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">swag_handler</span><span class="o">.</span><span class="n">swagmodel</span>
+
+        <span class="n">setup_checkpointing</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">swag</span><span class="p">:</span>
+        <span class="n">swag_handler</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">trainer</span><span class="p">)</span>
+
+    <span class="c1"># evaluation</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">Loss</span><span class="p">(</span><span class="n">criterion</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">criterion</span><span class="p">,</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MultitaskLoss</span><span class="p">):</span>
+        <span class="c1"># NOTE: unscaling currently uses a global scale</span>
+        <span class="c1"># shared across all tasks (intended to scale energy units)</span>
+        <span class="n">unscale</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">standardize</span><span class="p">:</span>
+            <span class="n">unscale</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">unscale</span>
+
+        <span class="n">eval_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sa">f</span><span class="s2">&quot;mae_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">MeanAbsoluteError</span><span class="p">(</span><span class="n">select_target</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">unscale_fn</span><span class="o">=</span><span class="n">unscale</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">criterion</span><span class="o">.</span><span class="n">tasks</span>
+        <span class="p">}</span>
+        <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">eval_metrics</span><span class="p">)</span>
+
+    <span class="n">train_evaluator</span><span class="p">,</span> <span class="n">val_evaluator</span> <span class="o">=</span> <span class="n">setup_evaluators</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">prepare_batch</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">transfer_outputs</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">progress</span> <span class="ow">and</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">vpbar</span> <span class="o">=</span> <span class="n">ProgressBar</span><span class="p">()</span>
+        <span class="n">vpbar</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">train_evaluator</span><span class="p">)</span>
+        <span class="n">vpbar</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">val_evaluator</span><span class="p">)</span>
+
+    <span class="n">history</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">m</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">()},</span>
+        <span class="s2">&quot;validation&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">m</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">()},</span>
+    <span class="p">}</span>
+
+    <span class="nd">@trainer</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="n">Events</span><span class="o">.</span><span class="n">EPOCH_COMPLETED</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_eval</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+        <span class="n">n_train_eval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">train_eval_fraction</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_loader</span><span class="p">))</span>
+        <span class="n">n_train_eval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">n_train_eval</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># at least one batch</span>
+        <span class="n">train_evaluator</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">training_epoch</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">epoch</span>
+        <span class="n">val_evaluator</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">training_epoch</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">epoch</span>
+        <span class="n">train_evaluator</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">epoch_length</span><span class="o">=</span><span class="n">n_train_eval</span><span class="p">,</span> <span class="n">max_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">val_evaluator</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">val_loader</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">log_metric_history</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="n">phases</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="n">train_evaluator</span><span class="p">,</span> <span class="s2">&quot;validation&quot;</span><span class="p">:</span> <span class="n">val_evaluator</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">phase</span><span class="p">,</span> <span class="n">evaluator</span> <span class="ow">in</span> <span class="n">phases</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">history</span><span class="p">[</span><span class="n">phase</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;metric_history.pkl&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">train_evaluator</span><span class="o">.</span><span class="n">add_event_handler</span><span class="p">(</span><span class="n">Events</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">,</span> <span class="n">log_console</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+        <span class="n">val_evaluator</span><span class="o">.</span><span class="n">add_event_handler</span><span class="p">(</span><span class="n">Events</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">,</span> <span class="n">log_console</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;val&quot;</span><span class="p">)</span>
+        <span class="n">val_evaluator</span><span class="o">.</span><span class="n">add_event_handler</span><span class="p">(</span>
+            <span class="n">Events</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">,</span> <span class="n">log_metric_history</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">output_dir</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ray</span><span class="o">.</span><span class="n">tune</span><span class="o">.</span><span class="n">is_session_enabled</span><span class="p">():</span>
+            <span class="n">val_evaluator</span><span class="o">.</span><span class="n">add_event_handler</span><span class="p">(</span>
+                <span class="n">Events</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">engine</span><span class="p">:</span> <span class="n">session</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">metrics</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="n">trainer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">train_loader</span><span class="p">,</span> <span class="n">max_epochs</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">epochs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">val_evaluator</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="lr">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.train.lr.html#nfflr.train.lr">[docs]</a>
+<span class="k">def</span> <span class="nf">lr</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">AtomsDataset</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">nfflr</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">TrainingConfig</span><span class="p">,</span>
+    <span class="n">local_rank</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NFFLr learning rate finder entry point.</span>
+
+<span class="sd">    Runs the Fast.ai learning rate finder</span>
+<span class="sd">    :py:class:`ignite.handlers.lr_finder.FastaiLRFinder`</span>
+<span class="sd">    for `model`, `dataset`, and `config`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : torch.nn.Module</span>
+<span class="sd">    dataset : nfflr.AtomsDataset</span>
+<span class="sd">    config : nfflr.train.TrainingConfig</span>
+<span class="sd">    local_rank : int, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rank</span> <span class="o">=</span> <span class="n">idist</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
+    <span class="n">manual_seed</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">random_seed</span> <span class="o">+</span> <span class="n">local_rank</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">scheduler</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">train_loader</span><span class="p">,</span> <span class="n">val_loader</span> <span class="o">=</span> <span class="n">get_dataflow</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span> <span class="o">=</span> <span class="n">setup_model_and_optimizer</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">setup_trainer</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">prepare_batch</span><span class="p">,</span> <span class="n">config</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">progress</span> <span class="ow">and</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">pbar</span> <span class="o">=</span> <span class="n">ProgressBar</span><span class="p">()</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">trainer</span><span class="p">,</span> <span class="n">output_transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">})</span>
+
+    <span class="n">lr_finder</span> <span class="o">=</span> <span class="n">FastaiLRFinder</span><span class="p">()</span>
+    <span class="n">to_save</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">optimizer</span><span class="p">}</span>
+    <span class="k">with</span> <span class="n">lr_finder</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span>
+        <span class="n">trainer</span><span class="p">,</span> <span class="n">to_save</span><span class="p">,</span> <span class="n">start_lr</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">end_lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">diverge_th</span><span class="o">=</span><span class="mf">1e9</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">finder</span><span class="p">:</span>
+        <span class="n">finder</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># print(&quot;Suggested LR&quot;, lr_finder.lr_suggestion())</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">lr_finder</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">display_suggestion</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;lr.png&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="nd">@cli</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">cli_train</span><span class="p">(</span><span class="n">config_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NFF training entry point.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">idist</span><span class="o">.</span><span class="n">Parallel</span><span class="p">(</span><span class="o">**</span><span class="n">spawn_kwargs</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigObject</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="c1"># wrap train entry point for idist.Parallel</span>
+        <span class="k">def</span> <span class="nf">train_wrapper</span><span class="p">(</span><span class="n">local_rank</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">local_rank</span><span class="o">=</span><span class="n">local_rank</span><span class="p">)</span>
+
+        <span class="n">parallel</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">train_wrapper</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="nd">@cli</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="s2">&quot;lr&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">cli_lr</span><span class="p">(</span><span class="n">config_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;NFF Learning rate finder entry point.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">idist</span><span class="o">.</span><span class="n">Parallel</span><span class="p">(</span><span class="o">**</span><span class="n">spawn_kwargs</span><span class="p">)</span> <span class="k">as</span> <span class="n">parallel</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">spawn_kwargs</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;loading config&quot;</span><span class="p">)</span>
+
+        <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigObject</span><span class="p">(</span><span class="n">config_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="c1"># wrap lr entry point for idist.Parallel</span>
+        <span class="k">def</span> <span class="nf">lr_wrapper</span><span class="p">(</span><span class="n">local_rank</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">lr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">local_rank</span><span class="o">=</span><span class="n">local_rank</span><span class="p">)</span>
+
+        <span class="n">parallel</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">lr_wrapper</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">cli</span><span class="p">()</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Brian DeCost
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Brian DeCost.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

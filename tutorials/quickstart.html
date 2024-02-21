@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Quickstart &#8212; nfflr 0.2.1 documentation</title>
+    <title>Quickstart &#8212; nfflr 0.3.0 documentation</title>
   
   
   
@@ -31,6 +31,8 @@
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -38,10 +40,16 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=c480a563"></script>
+    <script src="../_static/documentation_options.js?v=83a61292"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/quickstart';</script>
@@ -163,7 +171,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.2.1 documentation</p>
+    <p class="title logo__title">nfflr 0.3.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -189,31 +197,33 @@ $(document).ready(function(){
 <li class="toctree-l1 has-children"><a class="reference internal" href="../howto/index.html">How-to guides</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../howto/property-regression.html">Property regression example</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../howto/eam-forces.html">Check autograd forces against analytical forces</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Force field example</a></li>
-
+<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Train a force field from scratch</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.Atoms.html">Atoms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.batch.html">nfflr.batch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.transform.PeriodicRadiusGraph.html">PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.transform.PeriodicKShellGraph.html">PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.transform.PeriodicAdaptiveRadiusGraph.html">PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomType.html">AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomPairType.html">AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AttributeEmbedding.html">AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">PeriodicTableEmbedding</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.data.vasprun_dataset.html">nfflr.data.vasprun_dataset</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -222,6 +232,7 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.Cosine.html">Cosine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
@@ -233,6 +244,17 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/trainer.html">trainer</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.TrainingConfig.html">TrainingConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.train.html">nfflr.train.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.lr.html">nfflr.train.lr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.get_dataflow.html">nfflr.train.trainer.get_dataflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.setup_model_and_optimizer.html">nfflr.train.trainer.setup_model_and_optimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.setup_trainer.html">nfflr.train.trainer.setup_trainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.setup_checkpointing.html">nfflr.train.trainer.setup_checkpointing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../reference/generated/nfflr.train.trainer.setup_evaluators.html">nfflr.train.trainer.setup_evaluators</a></li>
 </ul>
 </li>
 </ul>
@@ -433,6 +455,16 @@ This represents an atomistic system in the same way as <a class="reference exter
 </div>
 </div>
 <div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from .autonotebook import tqdm as notebook_tqdm
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-02-21 21:27:06,631	INFO util.py:154 -- Missing packages: [&#39;ipywidgets&#39;]. Run `pip install -U ipywidgets`, then restart the notebook server for rich notebook output.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-02-21 21:27:06,800	INFO util.py:154 -- Missing packages: [&#39;ipywidgets&#39;]. Run `pip install -U ipywidgets`, then restart the notebook server for rich notebook output.
+</pre></div>
+</div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Atoms(cell=tensor([[4.1000, 0.0000, 0.0000],
         [0.0000, 4.1000, 0.0000],
         [0.0000, 0.0000, 4.1000]]), positions=tensor([[0.0000, 0.0000, 0.0000],
@@ -457,7 +489,7 @@ This represents an atomistic system in the same way as <a class="reference exter
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/9b323fc1a569c31530ffae79a7604e693026288687ba5f9410dbcedcabd6de81.png" src="../_images/9b323fc1a569c31530ffae79a7604e693026288687ba5f9410dbcedcabd6de81.png" />
+<img alt="../_images/3b970b3bc64ef7387e0f54f26e115b24f34defa7cb798d9fb399de5d2993671f.png" src="../_images/3b970b3bc64ef7387e0f54f26e115b24f34defa7cb798d9fb399de5d2993671f.png" />
 </div>
 </div>
 </section>
@@ -484,7 +516,7 @@ warning: could not load CGCNN features for 101
 Setting it to max atomic number available here, 103
 warning: could not load CGCNN features for 102
 Setting it to max atomic number available here, 103
-tensor(0.4290)
+tensor(0.4635)
 </pre></div>
 </div>
 </div>
@@ -501,7 +533,7 @@ For example, calling <code class="docutils literal notranslate"><span class="pre
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>convert
-tensor(0.4290)
+tensor(0.4635)
 </pre></div>
 </div>
 </div>
@@ -524,12 +556,12 @@ and its (negative) gradient with respect to the (cartesian) atomic coordinates -
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.2780, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[ 9.2387e-07,  1.6317e-06, -3.1292e-07],
-         [-9.0897e-07, -1.7658e-06,  4.0233e-07]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[-1.5395e+01,  2.7865e-06, -8.6427e-07],
-          [ 2.4587e-06, -1.5395e+01, -9.5367e-07],
-          [-9.2387e-07, -1.0133e-06, -1.5395e+01]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(0.5623, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[ 1.9372e-07,  5.2899e-07, -8.3447e-07],
+         [-5.3644e-07, -5.7369e-07,  9.6112e-07]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[-3.9442e-01, -1.3709e-06,  5.3644e-07],
+          [-1.1623e-06, -3.9442e-01, -3.7253e-08],
+          [ 4.7684e-07, -1.4156e-07, -3.9442e-01]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
@@ -564,12 +596,12 @@ For example, <code class="docutils literal notranslate"><span class="pre">ALIGNN
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;total_energy&#39;: tensor(-0.2449, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[-6.7949e-06, -1.0997e-05,  1.5899e-05],
-         [ 7.2122e-06,  1.0908e-05, -1.6033e-05]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[-2.7756e+01,  3.9935e-06,  2.0266e-06],
-          [ 3.9935e-06, -2.7756e+01, -7.3314e-06],
-          [ 2.0266e-06, -7.3314e-06, -2.7756e+01]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(0.4977, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[-1.4305e-06, -2.3842e-07,  5.9600e-07],
+         [ 1.2219e-06,  2.8312e-07, -5.0698e-07]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[-1.7245e+00,  3.2783e-06, -1.3113e-06],
+          [ 3.2783e-06, -1.7245e+00, -2.0266e-06],
+          [-1.3113e-06, -2.0266e-06, -1.7245e+00]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
@@ -750,13 +782,34 @@ For example, <code class="docutils literal notranslate"><span class="pre">dft_3d
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>dataset_name=&#39;mlearn&#39;
 Obtaining mlearn dataset 1730...
 Reference:https://github.com/materialsvirtuallab/mlearn
-Loading the zipfile...
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loading completed.
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 0.00/2.57M [00:00&lt;?, ?iB/s]
 </pre></div>
 </div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(-64656.0625),
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  2%|▏         | 52.2k/2.57M [00:00&lt;00:08, 293kiB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  8%|▊         | 209k/2.57M [00:00&lt;00:03, 645kiB/s] 
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 35%|███▌      | 905k/2.57M [00:00&lt;00:00, 2.45MiB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 73%|███████▎  | 1.88M/2.57M [00:00&lt;00:00, 4.24MiB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 2.57M/2.57M [00:00&lt;00:00, 4.15MiB/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loading the zipfile...
+Loading completed.
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(-604.2623),
  &#39;forces&#39;: tensor([[-1.9282e-01, -1.8793e+00, -6.6374e-01],
          [-8.2543e-03, -2.0313e-01,  3.6808e-01],
          [-5.5372e-01, -1.4736e+00,  1.2997e+00],
@@ -864,9 +917,6 @@ Loading the zipfile...
          [-1.1271e+00,  7.7508e-02,  9.2828e-01],
          [-1.0157e+00,  5.2795e-01, -1.9179e-01],
          [ 4.6428e-01, -1.5829e-01,  7.1079e-01]]),
- &#39;stresses&#39;: tensor([[41.4064,  5.9450, -4.7715],
-         [ 5.9450, 41.1876,  1.0425],
-         [-4.7715,  1.0425, 51.0653]]),
  &#39;volume&#39;: tensor(1165.6177)}
 </pre></div>
 </div>

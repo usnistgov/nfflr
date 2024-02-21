@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>nfflr.nn.AtomPairType &#8212; nfflr 0.2.1 documentation</title>
+    <title>AtomPairType &#8212; nfflr 0.3.0 documentation</title>
   
   
   
@@ -31,6 +31,8 @@
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -38,15 +40,21 @@
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../_static/documentation_options.js?v=c480a563"></script>
+    <script src="../../_static/documentation_options.js?v=83a61292"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'reference/generated/nfflr.nn.AtomPairType';</script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="nfflr.nn.AttributeEmbedding" href="nfflr.nn.AttributeEmbedding.html" />
-    <link rel="prev" title="nfflr.nn.AtomType" href="nfflr.nn.AtomType.html" />
+    <link rel="next" title="AttributeEmbedding" href="nfflr.nn.AttributeEmbedding.html" />
+    <link rel="prev" title="AtomType" href="nfflr.nn.AtomType.html" />
 <!-- <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css"> -->
 
 <script src="https://code.jquery.com/jquery-1.12.4.min.js" type="text/javascript"></script>
@@ -161,7 +169,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.2.1 documentation</p>
+    <p class="title logo__title">nfflr 0.3.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -187,31 +195,33 @@ $(document).ready(function(){
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../howto/index.html">How-to guides</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../howto/property-regression.html">Property regression example</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../howto/eam-forces.html">Check autograd forces against analytical forces</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../../howto/force-field-training.html">Force field example</a></li>
-
+<li class="toctree-l2"><a class="reference internal" href="../../howto/force-field-training.html">Train a force field from scratch</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2 current active has-children"><a class="reference internal" href="../atoms.html">nfflr.Atoms</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
-<li class="toctree-l3 current active"><a class="current reference internal" href="#">nfflr.nn.AtomPairType</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.Atoms.html">Atoms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.batch.html">nfflr.batch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.unbatch.html">nfflr.unbatch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.to_ase.html">nfflr.to_ase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.transform.PeriodicRadiusGraph.html">PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.transform.PeriodicKShellGraph.html">PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.transform.PeriodicAdaptiveRadiusGraph.html">PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AtomType.html">AtomType</a></li>
+<li class="toctree-l3 current active"><a class="current reference internal" href="#">AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AttributeEmbedding.html">AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.AtomicNumberEmbedding.html">AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.PeriodicTableEmbedding.html">PeriodicTableEmbedding</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.AtomsDataset.html">AtomsDataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.data.vasprun_dataset.html">nfflr.data.vasprun_dataset</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -220,6 +230,7 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.nn.Cosine.html">Cosine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.nn.XPLOR.html">XPLOR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.nn.FeedForward.html">FeedForward</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.nn.MLPLayer.html">MLPLayer</a></li>
@@ -231,6 +242,17 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../trainer.html">trainer</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.train.TrainingConfig.html">TrainingConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.train.train.html">nfflr.train.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.train.lr.html">nfflr.train.lr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.train.trainer.get_dataflow.html">nfflr.train.trainer.get_dataflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.train.trainer.setup_model_and_optimizer.html">nfflr.train.trainer.setup_model_and_optimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.train.trainer.setup_trainer.html">nfflr.train.trainer.setup_trainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.train.trainer.setup_checkpointing.html">nfflr.train.trainer.setup_checkpointing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nfflr.train.trainer.setup_evaluators.html">nfflr.train.trainer.setup_evaluators</a></li>
 </ul>
 </li>
 </ul>
@@ -372,7 +394,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>nfflr.nn.AtomPairType</h1>
+    <h1>AtomPairType</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -394,8 +416,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="nfflr-nn-atompairtype">
-<h1>nfflr.nn.AtomPairType<a class="headerlink" href="#nfflr-nn-atompairtype" title="Link to this heading">#</a></h1>
+  <section id="atompairtype">
+<h1>AtomPairType<a class="headerlink" href="#atompairtype" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="nfflr.nn.AtomPairType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nfflr.nn.</span></span><span class="sig-name descname"><span class="pre">AtomPairType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (2.1.0a0+gitbe0b12e ))"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">one_hot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/nfflr/nn/layers/atomfeatures.html#AtomPairType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nfflr.nn.AtomPairType" title="Link to this definition">#</a></dt>
@@ -429,7 +451,7 @@ document.write(`
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">nfflr.nn.AtomType</p>
+        <p class="prev-next-title">AtomType</p>
       </div>
     </a>
     <a class="right-next"
@@ -437,7 +459,7 @@ document.write(`
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">nfflr.nn.AttributeEmbedding</p>
+        <p class="prev-next-title">AttributeEmbedding</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

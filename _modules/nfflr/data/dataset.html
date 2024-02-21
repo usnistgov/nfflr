@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nfflr.data.dataset &#8212; nfflr 0.2.1 documentation</title>
+    <title>nfflr.data.dataset &#8212; nfflr 0.3.0 documentation</title>
   
   
   
@@ -30,6 +30,8 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -37,10 +39,16 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=c480a563"></script>
+    <script src="../../../_static/documentation_options.js?v=83a61292"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/nfflr/data/dataset';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -160,7 +168,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.2.1 documentation</p>
+    <p class="title logo__title">nfflr 0.3.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -186,31 +194,33 @@ $(document).ready(function(){
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../howto/index.html">How-to guides</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../howto/property-regression.html">Property regression example</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../../../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../howto/eam-forces.html">Check autograd forces against analytical forces</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../../../howto/force-field-training.html">Force field example</a></li>
-
+<li class="toctree-l2"><a class="reference internal" href="../../../howto/force-field-training.html">Train a force field from scratch</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../reference/index.html">Reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/atoms.html">nfflr.Atoms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.Atoms.html">Atoms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.batch.html">nfflr.batch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.transform.PeriodicRadiusGraph.html">PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.transform.PeriodicKShellGraph.html">PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.transform.PeriodicAdaptiveRadiusGraph.html">PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomType.html">AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomPairType.html">AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AttributeEmbedding.html">AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.AtomicNumberEmbedding.html">AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.PeriodicTableEmbedding.html">PeriodicTableEmbedding</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.data.vasprun_dataset.html">nfflr.data.vasprun_dataset</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -219,6 +229,7 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.Cosine.html">Cosine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
@@ -230,6 +241,17 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../reference/trainer.html">trainer</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.TrainingConfig.html">TrainingConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.train.html">nfflr.train.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.lr.html">nfflr.train.lr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.get_dataflow.html">nfflr.train.trainer.get_dataflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.setup_model_and_optimizer.html">nfflr.train.trainer.setup_model_and_optimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.setup_trainer.html">nfflr.train.trainer.setup_trainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.setup_checkpointing.html">nfflr.train.trainer.setup_checkpointing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../reference/generated/nfflr.train.trainer.setup_evaluators.html">nfflr.train.trainer.setup_evaluators</a></li>
 </ul>
 </li>
 </ul>
@@ -402,6 +424,9 @@ document.write(`
 <span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">default_rng</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
+<span class="kn">from</span> <span class="nn">nfflr.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span><span class="p">,</span> <span class="n">jarvis_load_atoms</span>  <span class="c1"># noqa:E402</span>
+<span class="kn">from</span> <span class="nn">nfflr.models.utils</span> <span class="kn">import</span> <span class="n">EnergyScaling</span>
+
 <span class="kn">from</span> <span class="nn">jarvis.core.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span> <span class="k">as</span> <span class="n">jAtoms</span>
 
 <span class="c1"># make sure jarvis-tools doesn&#39;t override matplotlib backend</span>
@@ -409,8 +434,6 @@ document.write(`
 <span class="kn">from</span> <span class="nn">jarvis.db.figshare</span> <span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">jdata</span>  <span class="c1"># noqa:E402</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">switch_backend</span><span class="p">(</span><span class="n">mpl_backend</span><span class="p">)</span>
-
-<span class="kn">from</span> <span class="nn">nfflr.data.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span><span class="p">,</span> <span class="n">jarvis_load_atoms</span>  <span class="c1"># noqa:E402</span>
 
 
 <span class="k">def</span> <span class="nf">_load_dataset_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -459,22 +482,44 @@ document.write(`
     <span class="k">return</span> <span class="n">df</span>
 
 
-<span class="k">def</span> <span class="nf">get_cachedir</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">get_cachedir</span><span class="p">(</span><span class="n">scratchdir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get local scratch directory.&quot;&quot;&quot;</span>
 
-    <span class="n">scratchdir</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;nfflr-&quot;</span>
 
-    <span class="n">slurm_job</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SLURM_JOB_ID&quot;</span><span class="p">)</span>
-    <span class="n">scratchspace</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SCRATCH&quot;</span><span class="p">,</span> <span class="s2">&quot;/scratch&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">slurm_job</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">scratchdir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scratchspace</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">slurm_job</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">scratchdir</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">scratchdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scratchdir</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">scratchdir</span><span class="p">:</span>
+        <span class="n">scratchdir</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">cachedir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">scratchdir</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scratchdir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">scratchdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">scratchdir</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">cachedir</span>
+    <span class="k">if</span> <span class="s2">&quot;SCRATCH&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">scratchdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SCRATCH&quot;</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="s2">&quot;SLURM_JOB_ID&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">scratchdir</span> <span class="o">=</span> <span class="n">scratchdir</span> <span class="o">/</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SLURM_JOB_ID&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">scratchdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">scratchdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">scratchdir</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_select_relaxation_configurations</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter relaxation threshold by absolute energy difference threshold</span>
+
+<span class="sd">    Returns pandas index values for rows to keep</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">trajectory</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">energy</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">es</span><span class="p">,</span> <span class="n">prepend</span><span class="o">=</span><span class="n">es</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">atol</span><span class="p">))</span>
+
+    <span class="n">selection</span> <span class="o">=</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="n">atol</span>
+
+    <span class="k">return</span> <span class="n">idx</span><span class="p">[</span><span class="n">selection</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">collate_forcefield_targets</span><span class="p">(</span><span class="n">targets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]):</span>
@@ -482,14 +527,20 @@ document.write(`
     <span class="n">energy</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">])</span>
     <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">])</span>
     <span class="n">forces</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">total_energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">forces</span><span class="o">=</span><span class="n">forces</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s2">&quot;stresses&quot;</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;stresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;stresses&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">])</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">forces</span><span class="o">=</span><span class="n">forces</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;stress&quot;</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">result</span>
 
 
+<span class="k">def</span> <span class="nf">to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">())</span>
+
+
 <div class="viewcode-block" id="AtomsDataset">
-<a class="viewcode-back" href="../../../reference/dataset.html#nfflr.AtomsDataset">[docs]</a>
+<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset">[docs]</a>
 <span class="k">class</span> <span class="nc">AtomsDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dataset of Atoms.&quot;&quot;&quot;</span>
 
@@ -506,8 +557,9 @@ document.write(`
         <span class="n">group_split_token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span>
         <span class="n">n_train</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
         <span class="n">n_val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
-        <span class="n">energy_units</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;eV&quot;</span><span class="p">,</span> <span class="s2">&quot;eV/atom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;eV/atom&quot;</span><span class="p">,</span>
-        <span class="n">diskcache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">energy_units</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;eV&quot;</span><span class="p">,</span> <span class="s2">&quot;eV/atom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;eV&quot;</span><span class="p">,</span>
+        <span class="n">standardize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">diskcache</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pytorch Dataset for atomistic graphs.</span>
 
@@ -516,20 +568,25 @@ document.write(`
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">_load_dataset</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="n">example_id</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_tag</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># by default: don&#39;t try to process record ids</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">group_ids</span><span class="p">:</span>
-            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;group_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_tag</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;group_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">id_tag</span><span class="p">]</span>
             <span class="n">df</span><span class="p">[</span><span class="s2">&quot;step_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="s2">&quot;group_id&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;keeping predefined group ids&quot;</span><span class="p">)</span>
+            <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># try to parse record ids to extract group and step ids</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">example_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="n">df</span><span class="p">[</span><span class="s2">&quot;group_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_tag</span><span class="p">]</span>
                 <span class="n">df</span><span class="p">[</span><span class="s2">&quot;step_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
             <span class="k">elif</span> <span class="s2">&quot;_&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">example_id</span><span class="p">:</span>
-                <span class="n">df</span><span class="p">[</span><span class="s2">&quot;group_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_tag</span><span class="p">]</span>
+                <span class="n">df</span><span class="p">[</span><span class="s2">&quot;group_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_tag</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
                 <span class="n">df</span><span class="p">[</span><span class="s2">&quot;step_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># split key like &quot;JVASP-6664_main-5&quot;</span>
@@ -557,8 +614,8 @@ document.write(`
 
         <span class="bp">self</span><span class="o">.</span><span class="n">split</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_dataset_by_id</span><span class="p">(</span><span class="n">n_train</span><span class="p">,</span> <span class="n">n_val</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">diskcache</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">diskcache</span> <span class="o">=</span> <span class="n">get_cachedir</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">diskcache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">diskcache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">diskcache</span> <span class="o">=</span> <span class="n">get_cachedir</span><span class="p">(</span><span class="n">diskcache</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">diskcache</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -580,6 +637,19 @@ document.write(`
         <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">custom_prepare_batch_fn</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prepare_batch</span> <span class="o">=</span> <span class="n">custom_prepare_batch_fn</span>
 
+        <span class="c1"># atomwise standardization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standardize</span> <span class="o">=</span> <span class="n">standardize</span>
+        <span class="k">if</span> <span class="n">standardize</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setup_target_standardization</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">standardize</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">setup_target_standardization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standardize</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+        <span class="n">avg_n_atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">len</span><span class="p">))</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_key</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">EnergyScaling</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">avg_n_atoms</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get length.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -591,11 +661,6 @@ document.write(`
         <span class="n">atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
         <span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
         <span class="c1"># print(f&quot;{key=}, {n_atoms=}&quot;)</span>
-
-        <span class="k">def</span> <span class="nf">to_tensor</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">get_default_dtype</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">==</span> <span class="s2">&quot;energy_and_forces&quot;</span><span class="p">:</span>
             <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energy_and_forces</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">n_atoms</span><span class="o">=</span><span class="n">n_atoms</span><span class="p">)</span>
@@ -609,7 +674,8 @@ document.write(`
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">diskcache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cachefile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diskcache</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;jarvis-</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">.pkl&quot;</span>
+            <span class="n">cachekey</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+            <span class="n">cachefile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diskcache</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cachekey</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">.pkl&quot;</span>
 
             <span class="k">if</span> <span class="n">cachefile</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
                 <span class="c1"># print(f&quot;loading from {cachefile}&quot;)</span>
@@ -625,11 +691,17 @@ document.write(`
 
     <span class="k">def</span> <span class="nf">get_energy_and_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">n_atoms</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="n">target</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;energy&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_key</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
-            <span class="s2">&quot;forces&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
+            <span class="s2">&quot;energy&quot;</span><span class="p">:</span> <span class="n">to_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">energy_key</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span>
+            <span class="s2">&quot;forces&quot;</span><span class="p">:</span> <span class="n">to_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span>
         <span class="p">}</span>
-        <span class="k">if</span> <span class="s2">&quot;stresses&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">:</span>
-            <span class="n">target</span><span class="p">[</span><span class="s2">&quot;stresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;stresses&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">standardize</span><span class="p">:</span>
+            <span class="n">target</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">])</span>
+            <span class="n">target</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="s2">&quot;stress&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">:</span>
+            <span class="n">target</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">standardize</span><span class="p">:</span>
+                <span class="n">target</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">])</span>
 
         <span class="c1"># TODO: make sure datasets use standard units...</span>
         <span class="c1"># data store should have total energies in eV</span>
@@ -651,7 +723,9 @@ document.write(`
             <span class="n">e</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">len</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
 
         <span class="n">e</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
-        <span class="n">zs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="mi">108</span><span class="p">))</span>
+        <span class="n">zs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="mi">108</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">zs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">zs</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">use_bias</span><span class="p">:</span>
@@ -660,6 +734,8 @@ document.write(`
 
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">zs</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">solution</span>
 
+<div class="viewcode-block" id="AtomsDataset.split_dataset_by_id">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.split_dataset_by_id">[docs]</a>
     <span class="k">def</span> <span class="nf">split_dataset_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_train</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">n_val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get train/val/test split indices for SubsetRandomSampler.</span>
 
@@ -704,8 +780,11 @@ document.write(`
         <span class="k">return</span> <span class="p">{</span>
             <span class="n">key</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">all_ids</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">split_ids</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">split_ids</span> <span class="ow">in</span> <span class="n">split_ids</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">}</span>
+        <span class="p">}</span></div>
 
+
+<div class="viewcode-block" id="AtomsDataset.split_dataset">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.split_dataset">[docs]</a>
     <span class="k">def</span> <span class="nf">split_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get train/val/test split indices for SubsetRandomSampler.&quot;&quot;&quot;</span>
         <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -726,27 +805,11 @@ document.write(`
         <span class="n">val_ids</span> <span class="o">=</span> <span class="n">train_val_ids</span><span class="p">[:</span><span class="n">n_val</span><span class="p">]</span>
         <span class="n">train_ids</span> <span class="o">=</span> <span class="n">train_val_ids</span><span class="p">[</span><span class="n">n_val</span><span class="p">:]</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="n">train_ids</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">:</span> <span class="n">val_ids</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="n">test_ids</span><span class="p">}</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">collate_forcefield</span><span class="p">(</span><span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dataloader helper to batch graphs cross `samples`.</span>
-
-<span class="sd">        Forces get collated into a graph batch</span>
-<span class="sd">        by concatenating along the atoms dimension</span>
-
-<span class="sd">        energy and stress are global targets (properties of the whole graph)</span>
-<span class="sd">        total energy is a scalar, stess is a rank 2 tensor</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="n">train_ids</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">:</span> <span class="n">val_ids</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="n">test_ids</span><span class="p">}</span></div>
 
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">graphs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">samples</span><span class="p">))</span>
-
-        <span class="n">targets</span> <span class="o">=</span> <span class="n">collate_forcefield_targets</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
-
-        <span class="n">batched_graph</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">batched_graph</span><span class="p">,</span> <span class="n">targets</span>
-
+<div class="viewcode-block" id="AtomsDataset.prepare_batch_default">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.prepare_batch_default">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">prepare_batch_default</span><span class="p">(</span>
         <span class="n">batch</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span>
@@ -762,7 +825,7 @@ document.write(`
                 <span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="n">non_blocking</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">targets</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">}</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="n">g</span><span class="p">,</span> <span class="n">lg</span> <span class="o">=</span> <span class="n">atoms</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="p">(</span>
@@ -774,8 +837,11 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">batch</span> <span class="o">=</span> <span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="n">non_blocking</span><span class="p">),</span> <span class="n">targets</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">batch</span>
+        <span class="k">return</span> <span class="n">batch</span></div>
 
+
+<div class="viewcode-block" id="AtomsDataset.collate_default">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_default">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">collate_default</span><span class="p">(</span><span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dataloader helper to batch graphs cross `samples`.</span>
@@ -788,11 +854,21 @@ document.write(`
 
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">graphs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">samples</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">samples</span><span class="p">))</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">graphs</span><span class="p">,</span> <span class="n">line_graphs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">))</span>
+            <span class="n">batched_inputs</span> <span class="o">=</span> <span class="p">(</span><span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">line_graphs</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">batched_inputs</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">batched_inputs</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AtomsDataset.collate_forcefield">
+<a class="viewcode-back" href="../../../reference/generated/nfflr.AtomsDataset.html#nfflr.AtomsDataset.collate_forcefield">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">collate_default_line_graph</span><span class="p">(</span><span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]):</span>
+    <span class="k">def</span> <span class="nf">collate_forcefield</span><span class="p">(</span><span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dataloader helper to batch graphs cross `samples`.</span>
 
 <span class="sd">        Forces get collated into a graph batch</span>
@@ -800,26 +876,18 @@ document.write(`
 
 <span class="sd">        energy and stress are global targets (properties of the whole graph)</span>
 <span class="sd">        total energy is a scalar, stess is a rank 2 tensor</span>
-
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">samples</span><span class="p">))</span>
-        <span class="n">graphs</span><span class="p">,</span> <span class="n">line_graphs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">))</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">line_graphs</span><span class="p">)),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">collate_forcefield_targets</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">collate_line_graph_ff</span><span class="p">(</span>
-        <span class="n">samples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">dgl</span><span class="o">.</span><span class="n">DGLGraph</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dataloader helper to batch graphs cross `samples`.&quot;&quot;&quot;</span>
-        <span class="n">graphs</span><span class="p">,</span> <span class="n">line_graphs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">samples</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">graphs</span><span class="p">,</span> <span class="n">line_graphs</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">))</span>
+            <span class="n">batched_inputs</span> <span class="o">=</span> <span class="p">(</span><span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">line_graphs</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">batched_inputs</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
 
-        <span class="n">energy</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">])</span>
-        <span class="n">forces</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;forces&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">stresses</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;stresses&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">])</span>
-        <span class="n">targets</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">total_energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span> <span class="n">forces</span><span class="o">=</span><span class="n">forces</span><span class="p">,</span> <span class="n">stresses</span><span class="o">=</span><span class="n">stresses</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">graphs</span><span class="p">),</span> <span class="n">dgl</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">line_graphs</span><span class="p">),</span> <span class="n">targets</span></div>
+        <span class="k">return</span> <span class="n">batched_inputs</span><span class="p">,</span> <span class="n">targets</span></div>
+</div>
 
 </pre></div>
 

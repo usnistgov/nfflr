@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>nfflr.Atoms &#8212; nfflr 0.2.1 documentation</title>
+    <title>nfflr.Atoms &#8212; nfflr 0.3.0 documentation</title>
   
   
   
@@ -31,6 +31,8 @@
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -38,14 +40,20 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=c480a563"></script>
+    <script src="../_static/documentation_options.js?v=83a61292"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'reference/atoms';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="nfflr.nn.PeriodicRadiusGraph" href="generated/nfflr.nn.PeriodicRadiusGraph.html" />
+    <link rel="next" title="Atoms" href="generated/nfflr.Atoms.html" />
     <link rel="prev" title="Reference" href="index.html" />
 <!-- <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css"> -->
 
@@ -161,7 +169,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.2.1 documentation</p>
+    <p class="title logo__title">nfflr 0.3.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -187,31 +195,33 @@ $(document).ready(function(){
 <li class="toctree-l1 has-children"><a class="reference internal" href="../howto/index.html">How-to guides</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../howto/property-regression.html">Property regression example</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../howto/eam-forces.html">Checking autograd forces against analytical forces for Embedded Atom model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../howto/eam-forces.html">Check autograd forces against analytical forces</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Force field example</a></li>
-
+<li class="toctree-l2"><a class="reference internal" href="../howto/force-field-training.html">Train a force field from scratch</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2 current active has-children"><a class="current reference internal" href="#">nfflr.Atoms</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.PeriodicRadiusGraph.html">nfflr.nn.PeriodicRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.PeriodicKShellGraph.html">nfflr.nn.PeriodicKShellGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html">nfflr.nn.PeriodicAdaptiveRadiusGraph</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AtomType.html">nfflr.nn.AtomType</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AtomPairType.html">nfflr.nn.AtomPairType</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AttributeEmbedding.html">nfflr.nn.AttributeEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AtomicNumberEmbedding.html">nfflr.nn.AtomicNumberEmbedding</a></li>
-<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.PeriodicTableEmbedding.html">nfflr.nn.PeriodicTableEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.Atoms.html">Atoms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.batch.html">nfflr.batch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.unbatch.html">nfflr.unbatch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.spglib_cell.html">nfflr.spglib_cell</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.to_ase.html">nfflr.to_ase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.transform.PeriodicRadiusGraph.html">PeriodicRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.transform.PeriodicKShellGraph.html">PeriodicKShellGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.transform.PeriodicAdaptiveRadiusGraph.html">PeriodicAdaptiveRadiusGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AtomType.html">AtomType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AtomPairType.html">AtomPairType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AttributeEmbedding.html">AttributeEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.AtomicNumberEmbedding.html">AtomicNumberEmbedding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.PeriodicTableEmbedding.html">PeriodicTableEmbedding</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="dataset.html">nfflr.AtomsDataset</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.AtomsDataset.html">AtomsDataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.data.mlearn_dataset.html">nfflr.data.mlearn_dataset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.data.deepmd_hea_dataset.html">nfflr.data.deepmd_hea_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.data.vasprun_dataset.html">nfflr.data.vasprun_dataset</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="nn.html">nfflr.nn</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
@@ -220,6 +230,7 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.EdgeGatedGraphConv.html">EdgeGatedGraphConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.ALIGNNConv.html">ALIGNNConv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.SparseALIGNNConv.html">SparseALIGNNConv</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.Cosine.html">Cosine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.XPLOR.html">XPLOR</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.FeedForward.html">FeedForward</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.nn.MLPLayer.html">MLPLayer</a></li>
@@ -231,6 +242,17 @@ $(document).ready(function(){
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.models.ALIGNN.html">ALIGNN</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.models.SchNet.html">SchNet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generated/nfflr.models.Tersoff.html">Tersoff</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="trainer.html">trainer</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.train.TrainingConfig.html">TrainingConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.train.train.html">nfflr.train.train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.train.lr.html">nfflr.train.lr</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.train.trainer.get_dataflow.html">nfflr.train.trainer.get_dataflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.train.trainer.setup_model_and_optimizer.html">nfflr.train.trainer.setup_model_and_optimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.train.trainer.setup_trainer.html">nfflr.train.trainer.setup_trainer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.train.trainer.setup_checkpointing.html">nfflr.train.trainer.setup_checkpointing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated/nfflr.train.trainer.setup_evaluators.html">nfflr.train.trainer.setup_evaluators</a></li>
 </ul>
 </li>
 </ul>
@@ -382,14 +404,16 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nfflr.Atoms"><code class="docutils literal notranslate"><span class="pre">Atoms</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-nfflr.nn">Graph construction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#atom-representations">atom representations</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#batching">batching</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nfflr.batch"><code class="docutils literal notranslate"><span class="pre">batch()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#atoms">Atoms</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#batching">batching</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nfflr.batch"><code class="docutils literal notranslate"><span class="pre">batch()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-to-other-formats">conversion to other formats</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-to-other-formats">conversion to other formats</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#graph-construction">Graph construction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#atom-representations">atom representations</a></li>
 </ul>
             </nav>
         </div>
@@ -403,61 +427,59 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="nfflr-atoms">
 <h1>nfflr.Atoms<a class="headerlink" href="#nfflr-atoms" title="Link to this heading">#</a></h1>
-<p>This document describes the top-level nfflr API.</p>
-<dl class="py class" id="module-nfflr">
-<dt class="sig sig-object py" id="nfflr.Atoms">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nfflr.</span></span><span class="sig-name descname"><span class="pre">Atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (2.1.0a0+gitbe0b12e ))"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (2.1.0a0+gitbe0b12e ))"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">numbers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (2.1.0a0+gitbe0b12e ))"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_num_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.10/library/collections.abc.html#collections.abc.Iterable" title="(in Python v3.10)"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.10/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.10/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nfflr/data/atoms.html#Atoms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nfflr.Atoms" title="Link to this definition">#</a></dt>
-<dd><p>Atoms: a basic crystal structure data class.</p>
-<p>nfflr.Atoms consists of:
-- cell (lattice parameters / cell matrix)
-- positions (Cartesian coordinates)
-- numbers (atom identities / fractional site occupancies)
-- batching information</p>
-<p>The goal is to make it easy to work with a common representation,
-and transform it as needed to other formats:</p>
-<ul class="simple">
-<li><p>DGLGraph</p></li>
-<li><p>ALIGNNGraphTuple</p></li>
-<li><p>PyG format</p></li>
-<li><p>…</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Attributes<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>batch_num_atoms</strong></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Methods</p>
-<table class="table">
+<section id="atoms">
+<h2>Atoms<a class="headerlink" href="#atoms" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><strong>batched</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>scaled_positions</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>to</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.Atoms.html#nfflr.Atoms" title="nfflr.Atoms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Atoms</span></code></a>(cell, positions, numbers, *[, ...])</p></td>
+<td><p>Atoms: basic atomistic data structure supporting batching</p></td>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<section id="module-nfflr.nn">
-<span id="graph-construction"></span><h2>Graph construction<a class="headerlink" href="#module-nfflr.nn" title="Link to this heading">#</a></h2>
+<section id="batching">
+<h3>batching<a class="headerlink" href="#batching" title="Link to this heading">#</a></h3>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.PeriodicRadiusGraph.html#nfflr.nn.PeriodicRadiusGraph" title="nfflr.nn.PeriodicRadiusGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicRadiusGraph</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.batch.html#id0" title="nfflr.batch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch</span></code></a></p></td>
+<td><p><dl class="py function">
+<dt class="sig sig-object py" id="nfflr.batch">
+<span class="sig-prename descclassname"><span class="pre">nfflr.</span></span><span class="sig-name descname"><span class="pre">batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dgl.heterograph.DGLGraph</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nfflr/atoms.html#batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nfflr.batch" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.unbatch.html#nfflr.unbatch" title="nfflr.unbatch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unbatch</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="conversion-to-other-formats">
+<h3>conversion to other formats<a class="headerlink" href="#conversion-to-other-formats" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.spglib_cell.html#nfflr.spglib_cell" title="nfflr.spglib_cell"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spglib_cell</span></code></a></p></td>
+<td><p>Unpack Atoms to spglib tuple format.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.to_ase.html#nfflr.to_ase" title="nfflr.to_ase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_ase</span></code></a></p></td>
+<td><p>Convert nfflr.Atoms to ase.Atoms.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="graph-construction">
+<h2>Graph construction<a class="headerlink" href="#graph-construction" title="Link to this heading">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.transform.PeriodicRadiusGraph.html#nfflr.nn.transform.PeriodicRadiusGraph" title="nfflr.nn.transform.PeriodicRadiusGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicRadiusGraph</span></code></a></p></td>
 <td><p>Periodic radius graph transform.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.nn.PeriodicKShellGraph.html#nfflr.nn.PeriodicKShellGraph" title="nfflr.nn.PeriodicKShellGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicKShellGraph</span></code></a></p></td>
-<td><p><p class="rubric">Methods</p>
-</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.nn.transform.PeriodicKShellGraph.html#nfflr.nn.transform.PeriodicKShellGraph" title="nfflr.nn.transform.PeriodicKShellGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicKShellGraph</span></code></a></p></td>
+<td><p>Periodic k-neighbor shell graph construction.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.PeriodicAdaptiveRadiusGraph.html#nfflr.nn.PeriodicAdaptiveRadiusGraph" title="nfflr.nn.PeriodicAdaptiveRadiusGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicAdaptiveRadiusGraph</span></code></a></p></td>
-<td><p><p class="rubric">Methods</p>
-</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.nn.transform.PeriodicAdaptiveRadiusGraph.html#nfflr.nn.transform.PeriodicAdaptiveRadiusGraph" title="nfflr.nn.transform.PeriodicAdaptiveRadiusGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PeriodicAdaptiveRadiusGraph</span></code></a></p></td>
+<td><p>Adaptive periodic radius graph transform.</p></td>
 </tr>
 </tbody>
 </table>
@@ -486,37 +508,6 @@ and transform it as needed to other formats:</p>
 </tbody>
 </table>
 </section>
-<section id="batching">
-<h2>batching<a class="headerlink" href="#batching" title="Link to this heading">#</a></h2>
-<table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.batch.html#id0" title="nfflr.batch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch</span></code></a></p></td>
-<td><p><dl class="py function">
-<dt class="sig sig-object py" id="nfflr.batch">
-<span class="sig-prename descclassname"><span class="pre">nfflr.</span></span><span class="sig-name descname"><span class="pre">batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dgl.heterograph.DGLGraph</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nfflr/data/atoms.html#batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nfflr.batch" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.unbatch.html#nfflr.unbatch" title="nfflr.unbatch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unbatch</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="conversion-to-other-formats">
-<h2>conversion to other formats<a class="headerlink" href="#conversion-to-other-formats" title="Link to this heading">#</a></h2>
-<table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/nfflr.spglib_cell.html#nfflr.spglib_cell" title="nfflr.spglib_cell"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spglib_cell</span></code></a></p></td>
-<td><p>Unpack Atoms to spglib tuple format.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/nfflr.to_ase.html#nfflr.to_ase" title="nfflr.to_ase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_ase</span></code></a></p></td>
-<td><p>Convert nfflr.Atoms to ase.Atoms.</p></td>
-</tr>
-</tbody>
-</table>
-</section>
 </section>
 
 
@@ -540,11 +531,11 @@ and transform it as needed to other formats:</p>
       </div>
     </a>
     <a class="right-next"
-       href="generated/nfflr.nn.PeriodicRadiusGraph.html"
+       href="generated/nfflr.Atoms.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">nfflr.nn.PeriodicRadiusGraph</p>
+        <p class="prev-next-title">Atoms</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -564,14 +555,16 @@ and transform it as needed to other formats:</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nfflr.Atoms"><code class="docutils literal notranslate"><span class="pre">Atoms</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-nfflr.nn">Graph construction</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#atom-representations">atom representations</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#batching">batching</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nfflr.batch"><code class="docutils literal notranslate"><span class="pre">batch()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#atoms">Atoms</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#batching">batching</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nfflr.batch"><code class="docutils literal notranslate"><span class="pre">batch()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-to-other-formats">conversion to other formats</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-to-other-formats">conversion to other formats</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#graph-construction">Graph construction</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#atom-representations">atom representations</a></li>
 </ul>
   </nav></div>
 

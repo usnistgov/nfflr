@@ -8,4 +8,5 @@
    dataset
    nn
    models
+   trainer
 ```
