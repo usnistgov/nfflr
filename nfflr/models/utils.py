@@ -80,8 +80,15 @@ def reset_initial_output_bias(model, dataloader, max_samples=500):
     for idx, (inputs, targets) in enumerate(dataloader):
         if idx >= max_samples:
             break
+
+        if isinstance(inputs, tuple) or isinstance(inputs, list):
+            # TODO: make this more robust to different input types
+            inputs = (inputs[0].to(device), inputs[1].to(device))
+        else:
+            inputs = inputs.to(device)
+
         with torch.no_grad():
-            energies.append(model(inputs.to(device)))
+            energies.append(model(inputs))
         n_atoms.append(targets["n_atoms"])
 
     model.config.compute_forces = _compute_forces

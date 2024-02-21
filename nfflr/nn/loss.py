@@ -75,6 +75,10 @@ class MultitaskLoss(torch.nn.Module):
         scale inputs and targets by n_atoms for selected tasks
         """
         n_atoms = targets["n_atoms"]
+        if self.weights.data.device != n_atoms.device:
+            weights = self.weights.detach().clone().to(n_atoms.device)
+        else:
+            weights = self.weights
 
         losses = []
         for task, criterion in self.tasks.items():
@@ -89,12 +93,12 @@ class MultitaskLoss(torch.nn.Module):
         if self.adaptive_weights:
             # if adaptive, self.weights are log variances
             # factor of 2 assumes Gaussian likelihood...
-            task_variance = 2 * self.weights.exp()
+            task_variance = 2 * weights.exp()
             loss = (loss / task_variance).sum() + torch.log(
                 torch.sqrt(task_variance)
             ).sum()
         else:
-            loss = torch.sum(loss * self.weights)
+            loss = torch.sum(loss * weights)
 
         return loss
 

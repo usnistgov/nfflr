@@ -115,6 +115,10 @@ def setup_model_and_optimizer(
     model = idist.auto_model(model)
     criterion = idist.auto_model(config.criterion)
 
+    if isinstance(criterion, nfflr.nn.MultitaskLoss):
+        # auto_model won't transfer buffers...?
+        criterion = criterion.to(idist.device())
+
     params = group_decay(model)
     if isinstance(criterion, torch.nn.Module) and len(list(criterion.parameters())) > 0:
         params.append({"params": criterion.parameters(), "weight_decay": 0})
