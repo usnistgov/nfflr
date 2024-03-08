@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Quickstart &#8212; nfflr 0.3.0 documentation</title>
+    <title>Quickstart &#8212; nfflr 0.3.1 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=83a61292"></script>
+    <script src="../_static/documentation_options.js?v=385a908f"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script>let toggleHintShow = 'Click to show';</script>
@@ -171,7 +171,7 @@ $(document).ready(function(){
   
   
   
-    <p class="title logo__title">nfflr 0.3.0 documentation</p>
+    <p class="title logo__title">nfflr 0.3.1 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -459,10 +459,10 @@ This represents an atomistic system in the same way as <a class="reference exter
   from .autonotebook import tqdm as notebook_tqdm
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-02-21 21:27:06,631	INFO util.py:154 -- Missing packages: [&#39;ipywidgets&#39;]. Run `pip install -U ipywidgets`, then restart the notebook server for rich notebook output.
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-03-08 20:08:26,588	INFO util.py:154 -- Missing packages: [&#39;ipywidgets&#39;]. Run `pip install -U ipywidgets`, then restart the notebook server for rich notebook output.
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-02-21 21:27:06,800	INFO util.py:154 -- Missing packages: [&#39;ipywidgets&#39;]. Run `pip install -U ipywidgets`, then restart the notebook server for rich notebook output.
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2024-03-08 20:08:26,739	INFO util.py:154 -- Missing packages: [&#39;ipywidgets&#39;]. Run `pip install -U ipywidgets`, then restart the notebook server for rich notebook output.
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Atoms(cell=tensor([[4.1000, 0.0000, 0.0000],
@@ -516,7 +516,7 @@ warning: could not load CGCNN features for 101
 Setting it to max atomic number available here, 103
 warning: could not load CGCNN features for 102
 Setting it to max atomic number available here, 103
-tensor(0.4635)
+tensor(-0.3866)
 </pre></div>
 </div>
 </div>
@@ -533,7 +533,7 @@ For example, calling <code class="docutils literal notranslate"><span class="pre
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>convert
-tensor(0.4635)
+tensor(-0.3866)
 </pre></div>
 </div>
 </div>
@@ -556,12 +556,12 @@ and its (negative) gradient with respect to the (cartesian) atomic coordinates -
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(0.5623, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[ 1.9372e-07,  5.2899e-07, -8.3447e-07],
-         [-5.3644e-07, -5.7369e-07,  9.6112e-07]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[-3.9442e-01, -1.3709e-06,  5.3644e-07],
-          [-1.1623e-06, -3.9442e-01, -3.7253e-08],
-          [ 4.7684e-07, -1.4156e-07, -3.9442e-01]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(-0.3729, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[ 2.6822e-07, -1.6578e-07,  6.9477e-07],
+         [-2.8312e-07,  2.1793e-07, -6.4261e-07]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[ 1.3659e+00,  1.2666e-07,  2.8312e-07],
+          [ 2.0117e-07,  1.3659e+00, -1.6382e-06],
+          [ 3.6508e-07, -1.6605e-06,  1.3659e+00]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
@@ -596,12 +596,12 @@ For example, <code class="docutils literal notranslate"><span class="pre">ALIGNN
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(0.4977, grad_fn=&lt;SqueezeBackward0&gt;),
- &#39;forces&#39;: tensor([[-1.4305e-06, -2.3842e-07,  5.9600e-07],
-         [ 1.2219e-06,  2.8312e-07, -5.0698e-07]], grad_fn=&lt;MulBackward0&gt;),
- &#39;stress&#39;: tensor([[[-1.7245e+00,  3.2783e-06, -1.3113e-06],
-          [ 3.2783e-06, -1.7245e+00, -2.0266e-06],
-          [-1.3113e-06, -2.0266e-06, -1.7245e+00]]],
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(-0.3757, grad_fn=&lt;SqueezeBackward0&gt;),
+ &#39;forces&#39;: tensor([[ 2.6226e-06, -7.1526e-07,  2.0565e-06],
+         [-2.6226e-06,  5.9605e-07, -2.0265e-06]], grad_fn=&lt;MulBackward0&gt;),
+ &#39;stress&#39;: tensor([[[-6.0826e+00,  8.3447e-07, -7.1526e-07],
+          [ 8.3447e-07, -6.0826e+00, -4.7684e-07],
+          [-7.1526e-07, -4.7684e-07, -6.0826e+00]]],
         grad_fn=&lt;SegmentReduceBackward&gt;)}
 </pre></div>
 </div>
@@ -787,26 +787,25 @@ Reference:https://github.com/materialsvirtuallab/mlearn
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 0.00/2.57M [00:00&lt;?, ?iB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  2%|▏         | 52.2k/2.57M [00:00&lt;00:08, 293kiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  2%|▏         | 52.2k/2.57M [00:00&lt;00:06, 379kiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  8%|▊         | 209k/2.57M [00:00&lt;00:03, 645kiB/s] 
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  9%|▉         | 226k/2.57M [00:00&lt;00:02, 889kiB/s] 
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 35%|███▌      | 905k/2.57M [00:00&lt;00:00, 2.45MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 39%|███▊      | 992k/2.57M [00:00&lt;00:00, 2.97MiB/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 73%|███████▎  | 1.88M/2.57M [00:00&lt;00:00, 4.24MiB/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 2.57M/2.57M [00:00&lt;00:00, 4.15MiB/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 2.57M/2.57M [00:00&lt;00:00, 5.15MiB/s]
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loading the zipfile...
-Loading completed.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Loading completed.
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;energy&#39;: tensor(-604.2623),
