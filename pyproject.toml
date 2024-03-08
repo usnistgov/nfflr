@@ -47,7 +47,9 @@ nffd = "nfflr.train.distributed:main"
 [tool.setuptools]
 packages = [
     "nfflr",
+    "nfflr.train",
     "nfflr.data",
+    "nfflr.data.datasets",
     "nfflr.nn",
     "nfflr.nn.layers",
     "nfflr.models",
