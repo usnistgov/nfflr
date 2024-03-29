@@ -229,7 +229,7 @@ def train(
     model, criterion, optimizer = setup_model_and_optimizer(model, dataset, config)
     scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
-    if config.swag:
+    if config.swag_epochs is not None:
         swag_handler = SWAGHandler(model)
 
     trainer = setup_trainer(
@@ -246,13 +246,15 @@ def train(
             state["scheduler"] = scheduler
         if isinstance(criterion, torch.nn.Module):
             state["criterion"] = criterion
-        if config.swag:
+        if config.swag_epochs:
             state["swagmodel"] = swag_handler.swagmodel
 
         setup_checkpointing(state, config)
 
-    if config.swag:
-        swag_handler.attach(trainer)
+    if config.swag_epochs is not None:
+        swag_handler.attach(
+            trainer, event=ignite.engine.Events.EPOCH_COMPLETED(after=config.epochs)
+        )
 
     # evaluation
     metrics = {"loss": Loss(criterion)}
@@ -310,7 +312,10 @@ def train(
                 Events.COMPLETED, lambda engine: session.report(engine.state.metrics)
             )
 
-    trainer.run(train_loader, max_epochs=config.epochs)
+    max_epochs = config.epochs
+    if config.swag_epochs is not None:
+        max_epochs = config.epochs + config.swag_epochs
+    trainer.run(train_loader, max_epochs=max_epochs)
 
     return val_evaluator.state.metrics["loss"]
 
@@ -352,7 +357,7 @@ def lr(
     lr_finder = FastaiLRFinder()
     to_save = {"model": model, "optimizer": optimizer}
     with lr_finder.attach(
-        trainer, to_save, start_lr=1e-6, end_lr=0.1, num_iter=400, diverge_th=1e9
+        trainer, to_save, start_lr=1e-4, end_lr=100.0, num_iter=400, diverge_th=1e9
     ) as finder:
         finder.run(train_loader)
 
