@@ -106,7 +106,7 @@ def load_vasp_steps_jv(path: Path, dataset_dir: Path):
 def vasprun_to_json(datadir: Path | str, json_path: str = "vasprun_dataset.jsonl"):
     """Load vasprun dataset and cache to json-lines format.
 
-    nfflr.data.vasprun_to_json("/path/to/vasprun.xml", "vasprun_dataset.jsonl")
+    nfflr.data.vasprun_to_json("/path/to/vasp-projects", "vasprun_dataset.jsonl")
     dataset = nfflr.AtomsDataset(
         "vasprun_dataset.jsonl",
         id_tag="id",
