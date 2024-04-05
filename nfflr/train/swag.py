@@ -70,6 +70,9 @@ class SWAG(torch.nn.Module):
 
         torch.nn.utils.vector_to_parameters(sample, self.basemodel.parameters())
 
+    def reset_basemodel_to_mean(self):
+        torch.nn.utils.vector_to_parameters(self.mean, self.basemodel.parameters())
+
     def forward(self, *args, **kwargs):
         return self.basemodel(*args, **kwargs)
 
