@@ -307,7 +307,7 @@ def train(
             Events.COMPLETED, log_metric_history, config.output_dir
         )
 
-        if ray.tune.is_session_enabled():
+        if ray.train._internal.session._get_session():
             val_evaluator.add_event_handler(
                 Events.COMPLETED, lambda engine: session.report(engine.state.metrics)
             )
@@ -357,7 +357,7 @@ def lr(
     lr_finder = FastaiLRFinder()
     to_save = {"model": model, "optimizer": optimizer}
     with lr_finder.attach(
-        trainer, to_save, start_lr=1e-4, end_lr=100.0, num_iter=400, diverge_th=1e9
+        trainer, to_save, start_lr=1e-6, end_lr=1.0, num_iter=400, diverge_th=1e9
     ) as finder:
         finder.run(train_loader)
 
