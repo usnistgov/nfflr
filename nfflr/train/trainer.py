@@ -26,7 +26,6 @@ from py_config_runner import ConfigObject
 
 import nfflr
 
-
 if TYPE_CHECKING:
     from nfflr.train.config import TrainingConfig
 
@@ -50,7 +49,7 @@ num_gpus = len(gpus.split(","))
 backend = None
 nproc_per_node = None
 if num_gpus > 1:
-    backend == "nccl" if torch.distributed.is_nccl_available() else "gloo"
+    backend = "nccl" if torch.distributed.is_nccl_available() else "gloo"
     nproc_per_node = num_gpus
 
 spawn_kwargs = {
@@ -83,7 +82,6 @@ def get_dataflow(dataset: nfflr.AtomsDataset, config: TrainingConfig):
     dataset : nfflr.AtomsDataset
     config : nfflr.train.TrainingConfig
     """
-
     train_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
@@ -357,7 +355,7 @@ def lr(
     lr_finder = FastaiLRFinder()
     to_save = {"model": model, "optimizer": optimizer}
     with lr_finder.attach(
-        trainer, to_save, start_lr=1e-6, end_lr=1.0, num_iter=400, diverge_th=1e9
+        trainer, to_save, num_iter=400, diverge_th=1e9
     ) as finder:
         finder.run(train_loader)
 
@@ -383,6 +381,9 @@ def cli_train(config_path: Path, verbose: bool = False):
 
         parallel.run(train_wrapper, config.model, config.dataset, config.args)
 
+# wrap lr entry point for idist.Parallel
+def lr_wrapper(local_rank, model, dataset, args):
+    return lr(model, dataset, args, local_rank=local_rank)
 
 @cli.command("lr")
 def cli_lr(config_path: Path, verbose: bool = False):
@@ -396,10 +397,6 @@ def cli_lr(config_path: Path, verbose: bool = False):
 
         if verbose:
             print(config)
-
-        # wrap lr entry point for idist.Parallel
-        def lr_wrapper(local_rank, model, dataset, args):
-            return lr(model, dataset, args, local_rank=local_rank)
 
         parallel.run(lr_wrapper, config.model, config.dataset, config.args)
 
