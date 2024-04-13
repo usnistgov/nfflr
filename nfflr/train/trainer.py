@@ -13,7 +13,9 @@ import typer
 import ignite
 import ignite.distributed as idist
 from ignite.utils import manual_seed
-from ignite.metrics import Loss, MeanAbsoluteError, MedianAbsoluteError
+from ignite.metrics import Loss, MeanAbsoluteError
+from ignite.contrib.metrics import GpuInfo
+from ignite.contrib.metrics.regression import MedianAbsoluteError
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.handlers import Checkpoint, DiskSaver, FastaiLRFinder, TerminateOnNan
 from ignite.engine import Events, create_supervised_trainer
@@ -66,7 +68,11 @@ def log_console(engine: ignite.engine.Engine, name: str):
     loss = m["loss"]
 
     print(f"{name} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-    if "mae_forces" in m.keys():
+    if "med_abs_err_forces" in m.keys():
+        err_energy = m["med_abs_err_energy"]
+        err_forces = m["med_abs_err_forces"]
+        print(f"median abs err: energy: {err_energy:.2f}  force: {err_forces:.4f}")
+    elif "mae_forces" in m.keys():
         print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
 
 
@@ -152,6 +158,7 @@ def setup_trainer(
     )
 
     trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
+    GpuInfo().attach(trainer, name="gpu")
 
     if scheduler is not None:
         trainer.add_event_handler(
@@ -235,7 +242,7 @@ def train(
     )
     if config.progress and rank == 0:
         pbar = ProgressBar()
-        pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+        pbar.attach(trainer, metric_names=["gpu:0 mem(%)", "gpu:0 util(%)"])
 
     if config.checkpoint:
         state = dict(model=model, optimizer=optimizer, trainer=trainer)

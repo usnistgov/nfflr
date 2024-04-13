@@ -21,6 +21,7 @@ dependencies = [
     "typer",
     "einops",
     "pandas",
+    "pynvml",
     "pykeops",
     "mendeleev",
     "matplotlib",
