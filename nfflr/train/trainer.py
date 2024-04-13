@@ -13,7 +13,7 @@ import typer
 import ignite
 import ignite.distributed as idist
 from ignite.utils import manual_seed
-from ignite.metrics import Loss, MeanAbsoluteError
+from ignite.metrics import Loss, MeanAbsoluteError, MedianAbsoluteError
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.handlers import Checkpoint, DiskSaver, FastaiLRFinder, TerminateOnNan
 from ignite.engine import Events, create_supervised_trainer
@@ -268,6 +268,13 @@ def train(
             for task in criterion.tasks
         }
         metrics.update(eval_metrics)
+        eval_metrics = {
+            f"med_abs_err_{task}": MedianAbsoluteError(
+                select_target(task, unscale_fn=unscale)
+            )
+            for task in criterion.tasks
+        }
+        metrics.update(eval_metrics)
 
     train_evaluator, val_evaluator = setup_evaluators(
         model, dataset.prepare_batch, metrics, transfer_outputs
@@ -354,9 +361,7 @@ def lr(
 
     lr_finder = FastaiLRFinder()
     to_save = {"model": model, "optimizer": optimizer}
-    with lr_finder.attach(
-        trainer, to_save, num_iter=400, diverge_th=1e9
-    ) as finder:
+    with lr_finder.attach(trainer, to_save, num_iter=400, diverge_th=1e9) as finder:
         finder.run(train_loader)
 
     if rank == 0:
@@ -381,9 +386,11 @@ def cli_train(config_path: Path, verbose: bool = False):
 
         parallel.run(train_wrapper, config.model, config.dataset, config.args)
 
+
 # wrap lr entry point for idist.Parallel
 def lr_wrapper(local_rank, model, dataset, args):
     return lr(model, dataset, args, local_rank=local_rank)
+
 
 @cli.command("lr")
 def cli_lr(config_path: Path, verbose: bool = False):
