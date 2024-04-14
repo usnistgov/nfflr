@@ -121,6 +121,10 @@ def setup_optimizer(params, config: TrainingConfig):
 def setup_scheduler(config: TrainingConfig, optimizer, steps_per_epoch: int | float):
     """Configure OneCycle scheduler."""
 
+    if config.scheduler is None or config.epochs == 0:
+        scheduler = None
+        return scheduler
+
     warmup_steps = config.warmup_steps
     if warmup_steps < 1:
         # fractional specification
@@ -128,16 +132,13 @@ def setup_scheduler(config: TrainingConfig, optimizer, steps_per_epoch: int | fl
     else:
         pct_start = config.warmup_steps / (config.epochs * steps_per_epoch)
 
-    if config.epochs == 0:
-        scheduler = None
-    else:
-        scheduler = torch.optim.lr_scheduler.OneCycleLR(
-            optimizer,
-            max_lr=config.learning_rate,
-            epochs=config.epochs,
-            steps_per_epoch=steps_per_epoch,
-            pct_start=pct_start,
-        )
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer,
+        max_lr=config.learning_rate,
+        epochs=config.epochs,
+        steps_per_epoch=steps_per_epoch,
+        pct_start=pct_start,
+    )
 
     if config.swag_epochs is not None:
 

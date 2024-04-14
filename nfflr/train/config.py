@@ -37,7 +37,7 @@ class TrainingConfig:
     # optimization
     optimizer: Literal["sgd", "adamw"] = "adamw"
     criterion: torch.nn.Module | Callable = torch.nn.MSELoss()
-    scheduler: Optional[Literal["onecycle"]] = "onecycle"
+    scheduler: Literal["onecycle"] | None = "onecycle"
     warmup_steps: float | int = 0.3
     per_device_batch_size: int = 256
     batch_size: Optional[int] = None

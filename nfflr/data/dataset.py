@@ -76,7 +76,6 @@ def _load_dataset(dataset_name, cache_dir=None):
 
 def get_cachedir(scratchdir: Path | str | bool = True):
     """Get local scratch directory."""
-
     prefix = "nfflr-"
 
     if isinstance(scratchdir, bool) and scratchdir:
