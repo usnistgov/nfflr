@@ -364,7 +364,7 @@ def lr(
 
     if config.progress and rank == 0:
         pbar = ProgressBar()
-        pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+        pbar.attach(trainer, metric_names=["gpu:0 mem(%)", "gpu:0 util(%)"])
 
     lr_finder = FastaiLRFinder()
     to_save = {"model": model, "optimizer": optimizer}
