@@ -13,6 +13,7 @@ class ALIGNNConv(torch.nn.Module):
         in_features: int,
         out_features: int,
         norm: Literal["layernorm", "batchnorm"] = "layernorm",
+        skip_last_norm: bool = False,
     ):
         """Set up ALIGNN parameters."""
         super().__init__()
@@ -21,6 +22,7 @@ class ALIGNNConv(torch.nn.Module):
             out_features,
             out_features,
             norm=norm,
+            skip_edgenorm=skip_last_norm,
         )
 
     def forward(
@@ -44,7 +46,6 @@ class ALIGNNConv(torch.nn.Module):
 
         # Edge-gated graph convolution update on crystal graph
         y, z = self.edge_update(lg, m, z)
-
         return x, y, z
 
 

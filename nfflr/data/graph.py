@@ -4,7 +4,10 @@ __all__ = ()
 from typing import Tuple, Dict
 
 import dgl
+import dgl.function as fn
+
 import torch
+import einops
 import numpy as np
 from scipy import spatial
 
@@ -22,6 +25,24 @@ def compute_bond_cosines(edges):
     r2 = edges.dst["r"]
     bond_cosine = torch.sum(r1 * r2, dim=1) / (
         torch.norm(r1, dim=1) * torch.norm(r2, dim=1)
+    )
+    bond_cosine = torch.clamp(bond_cosine, -1, 1)
+    # bond_cosine = torch.arccos((torch.clamp(bond_cosine, -1, 1)))
+
+    return {"h": bond_cosine}
+
+
+def compute_bond_cosines_coincident(edges):
+    """Compute bond angle cosines from bond displacement vectors."""
+    # edge attention graph edge: (k, i) -> (j, i)
+    # `k -> i <- j`
+    # use law of cosines to compute angles cosines
+    # negate src bond so displacements are like `a <- b -> c`
+    # cos(theta) = ik \dot ji / (||ki|| ||ji||)
+    r_ki = edges.src["r"]
+    r_ji = edges.dst["r"]
+    bond_cosine = torch.sum(r_ki * r_ji, dim=1) / (
+        torch.norm(r_ki, dim=1) * torch.norm(r_ji, dim=1)
     )
     bond_cosine = torch.clamp(bond_cosine, -1, 1)
     # bond_cosine = torch.arccos((torch.clamp(bond_cosine, -1, 1)))
@@ -462,3 +483,39 @@ def prepare_dgl_batch(
     batch = (g.to(device, non_blocking=non_blocking), t)
 
     return batch
+
+
+def edge_coincidence_graph(g: dgl.DGLGraph, shared=False, cutoff: float | None = None):
+    # get all pairs of incident edges for each node
+    # torch.combinations gives half the pairs
+    edgepairs = [
+        torch.combinations(g.in_edges(id_node, form="eid"), r=2, with_replacement=False)
+        for id_node in g.nodes()
+    ]
+
+    eids, ps = einops.pack(edgepairs, "* d")
+
+    src, dst = eids.T
+
+    # to_bidirected fills in the other half of edge pairs all at once
+    # don't drop any bonds - make a graph with no edges if there are no triplets (?)
+    t = dgl.to_bidirected(dgl.graph((src, dst), num_nodes=g.num_edges()))
+
+    # TODO: return empty graph here if there are no triplets?
+    # also TODO: use a heterograph to include self-interactions for the attention?
+    # maybe this is more natural in KeOps...?
+
+    if shared:
+        t.ndata["r"] = g.edata["r"]
+
+    if cutoff is not None:
+        with torch.no_grad():
+            t.apply_edges(fn.u_sub_v("r", "r", "d"))
+            tripletmask = t.edata["d"].norm(dim=1) < cutoff
+            del t.edata["d"]
+            t = t.edge_subgraph(
+                torch.arange(t.num_edges(), device=src.device)[tripletmask],
+                relabel_nodes=False,
+            )
+
+    return t
