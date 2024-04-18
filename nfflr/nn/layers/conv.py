@@ -113,8 +113,6 @@ class EdgeGatedGraphConv(torch.nn.Module):
         # multiply the edge gate values with the cutoff value
         cutoff_value = g.edata.get("cutoff_value")
 
-        print(f"{cutoff_value.shape=}")
-
         if cutoff_value is not None:
             g.edata["sigma"] = torch.sigmoid(m) * cutoff_value.unsqueeze(1)
         else:
