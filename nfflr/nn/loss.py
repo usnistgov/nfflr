@@ -3,6 +3,7 @@ from collections.abc import Iterable
 
 import torch
 
+from nfflr.train.evaluation import pseudolog10
 
 class MultitaskLoss(torch.nn.Module):
     """Multitask loss function wrapper for force field training.
@@ -26,8 +27,10 @@ class MultitaskLoss(torch.nn.Module):
         adaptive_weights: bool = False,
         default_criterion: torch.nn.Module = torch.nn.MSELoss(),
         scale_per_atom: str | Iterable[str] | None = "energy",
+        pseudolog_forces: bool = False,
     ):
         super().__init__()
+        self.pseudolog_forces = pseudolog_forces
 
         if isinstance(tasks, dict):
             self.tasks = tasks
@@ -83,8 +86,11 @@ class MultitaskLoss(torch.nn.Module):
         losses = []
         for task, criterion in self.tasks.items():
             input, target = inputs[task], targets[task]
+
             if task in self.scale_per_atom:
                 losses.append(criterion(input / n_atoms, target / n_atoms))
+            elif task == "forces" and self.pseudolog_forces:
+                losses.append(criterion(pseudolog10(input), pseudolog10(target)))
             else:
                 losses.append(criterion(input, target))
 
