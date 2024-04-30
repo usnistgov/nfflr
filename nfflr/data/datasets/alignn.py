@@ -5,7 +5,10 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from jarvis.core.atoms import Atoms as jAtoms
+
 import nfflr
+import nfflr.data.dataset
 
 
 def alignn_ff_dataset(
@@ -19,7 +22,8 @@ def alignn_ff_dataset(
     force_threshold: max force component (eV/Å)
     distance_threshold: minimum nearest neighbor distance (Å)
     """
-    data = nfflr.data.dataset._load_dataset("alignn_ff_db")
+    # data = nfflr.data.dataset._load_dataset("alignn_ff_db")
+    data = nfflr.data._load_dataset("alignn_ff_db")
 
     # store total energy (figshare provides energy per atom)
     n = data.forces.apply(len)
@@ -32,16 +36,17 @@ def alignn_ff_dataset(
     # also, filter out any crystals that fails a radius graph construction
     # note: this pasted code might not work out of the box
     print("screening radius graph threshold...")
-    fails = []
+    passes, fails = [], []
     transform = nfflr.nn.PeriodicRadiusGraph(distance_threshold)
     for idx, at in tqdm(enumerate(data.atoms)):
         try:
-            transform(at)
+            transform(nfflr.Atoms(jAtoms.from_dict(at)))
+            passes.append(idx)
         except:
             fails.append(idx)
 
     print("radius graph screening complete")
-    data[~data.index.isin(fails)]
+    data = data.iloc[passes]
 
     return nfflr.AtomsDataset(
         data,
