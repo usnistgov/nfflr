@@ -58,7 +58,9 @@ class TrainingConfig:
     train_eval_fraction: float = 0.1
 
     def __post_init__(self):
-        self.batch_size = self.per_device_batch_size * idist.get_world_size()
+        # get_world_size is evaluating to 1 if this is evaluated outside of idist.Parallel
+        # self.batch_size = self.per_device_batch_size * idist.get_world_size()
+
         if self.output_dir is None:
             self.output_dir = self.experiment_dir
 

@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from typing import TYPE_CHECKING
+import warnings
 
 import torch
 from torch.utils.data import SubsetRandomSampler
@@ -88,10 +89,11 @@ def get_dataflow(dataset: nfflr.AtomsDataset, config: TrainingConfig):
     dataset : nfflr.AtomsDataset
     config : nfflr.train.TrainingConfig
     """
+    batch_size = config.per_device_batch_size * idist.get_world_size()
     train_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
-        batch_size=config.batch_size,
+        batch_size=batch_size,
         sampler=SubsetRandomSampler(dataset.split["train"]),
         drop_last=True,
         num_workers=config.dataloader_workers,
@@ -100,7 +102,7 @@ def get_dataflow(dataset: nfflr.AtomsDataset, config: TrainingConfig):
     val_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
-        batch_size=config.batch_size,
+        batch_size=batch_size,
         sampler=SubsetRandomSampler(dataset.split["val"]),
         drop_last=False,  # True -> possible issue crashing with MP dataset
         num_workers=config.dataloader_workers,
@@ -117,7 +119,12 @@ def setup_model_and_optimizer(
 ):
     """Initialize model, criterion, and optimizer."""
     model = idist.auto_model(model)
-    criterion = idist.auto_model(config.criterion)
+
+    criterion = config.criterion
+    if isinstance(criterion, torch.nn.Module) and any(
+        [p.requires_grad for p in criterion.parameters()]
+    ):
+        criterion = idist.auto_model(criterion)
 
     if isinstance(criterion, nfflr.nn.MultitaskLoss):
         # auto_model won't transfer buffers...?
@@ -275,13 +282,19 @@ def train(
             for task in criterion.tasks
         }
         metrics.update(eval_metrics)
+
         eval_metrics = {
             f"med_abs_err_{task}": MedianAbsoluteError(
                 select_target(task, unscale_fn=unscale)
             )
             for task in criterion.tasks
         }
-        metrics.update(eval_metrics)
+        if idist.get_world_size() == 1:
+            metrics.update(eval_metrics)
+        else:
+            warnings.warn(
+                "MedianAbsoluteError metric not yet supported in distributed training"
+            )
 
     train_evaluator, val_evaluator = setup_evaluators(
         model, dataset.prepare_batch, metrics, transfer_outputs
@@ -379,6 +392,11 @@ def lr(
         ax.figure.savefig("lr.png")
 
 
+def train_wrapper(local_rank, model, dataset, args):
+    """Wrap train entry point for idist.Parallel."""
+    return train(model, dataset, args, local_rank=local_rank)
+
+
 @cli.command("train")
 def cli_train(config_path: Path, verbose: bool = False):
     """NFF training entry point."""
@@ -386,16 +404,14 @@ def cli_train(config_path: Path, verbose: bool = False):
         config = ConfigObject(config_path)
         if verbose:
             print(config)
-
-        # wrap train entry point for idist.Parallel
-        def train_wrapper(local_rank, model, dataset, args):
-            return train(model, dataset, args, local_rank=local_rank)
+            print(spawn_kwargs)
+            print("loading config")
 
         parallel.run(train_wrapper, config.model, config.dataset, config.args)
 
 
-# wrap lr entry point for idist.Parallel
 def lr_wrapper(local_rank, model, dataset, args):
+    """Wrap lr entry point for idist.Parallel."""
     return lr(model, dataset, args, local_rank=local_rank)
 
 
