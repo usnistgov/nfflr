@@ -10,18 +10,20 @@ import torch
 from torch import nn
 
 import dgl
+import dgl.function as fn
 from dgl.nn import AvgPooling, SumPooling
 
 import nfflr
 from nfflr.nn import (
     RBFExpansion,
     MLPLayer,
-    SparseALIGNNConv,
+    ALIGNNConv,
     EdgeGatedGraphConv,
     AttributeEmbedding,
     PeriodicRadiusGraph,
     Cosine,
 )
+
 
 from nfflr.data.graph import compute_bond_cosines
 
@@ -31,6 +33,7 @@ class ALIGNNFFConfig:
     """Hyperparameters for alignn force field"""
 
     transform: Callable = PeriodicRadiusGraph(cutoff=5.0)
+    triplet_style: Literal["line_graph", "coincident"] = "line_graph"
     cutoff: torch.nn.Module = Cosine(5.0)
     local_cutoff: float = 4.0
     alignn_layers: int = 4
@@ -57,7 +60,8 @@ class ALIGNNFF(nn.Module):
         """Initialize class with number of input features, conv layers."""
         super().__init__()
         self.config = config
-        self.transform = self.config.transform
+        self.cutoff = config.cutoff
+        self.neighbor_transform = self.config.transform
 
         if config.atom_features == "embedding":
             self.atom_embedding = nn.Embedding(108, config.hidden_features)
@@ -86,9 +90,7 @@ class ALIGNNFF(nn.Module):
         self.alignn_layers = nn.ModuleList()
         for idx in range(1, config.alignn_layers + 1):
             skipnorm = idx == config.alignn_layers
-            self.alignn_layers.append(
-                SparseALIGNNConv(width, width, skip_last_norm=skipnorm)
-            )
+            self.alignn_layers.append(ALIGNNConv(width, width, skip_last_norm=skipnorm))
 
         self.gcn_layers = nn.ModuleList()
         for idx in range(1, config.gcn_layers + 1):
@@ -109,6 +111,24 @@ class ALIGNNFF(nn.Module):
     def reset_atomic_reference_energies(self, values: Optional[torch.Tensor] = None):
         if hasattr(self, "reference_energy"):
             self.reference_energy.reset_parameters(values=values)
+
+    def get_line_graph(self, g):
+        if self.config.triplet_style == "line_graph":
+            return g.line_graph()
+        elif self.config.triplet_style == "coincident":
+            return edge_coincidence_graph(
+                g, shared=True, cutoff=self.config.local_cutoff
+            )
+
+    def transform(self, a: nfflr.Atoms):
+        """Neighbor list and bond pair graph construction.
+
+        Does not share features to facilitate autograd.
+        """
+        g = self.config.transform(a)
+        lg = self.get_line_graph(g)
+        return g, lg
+
 
     @dispatch
     def forward(self, x):
@@ -161,27 +181,39 @@ class ALIGNNFF(nn.Module):
 
         # Local: apply GCN to local neighborhoods
         # solution: index into bond features and turn it into a residual connection?
-        edge_mask = bondlength <= config.local_cutoff
+        # edge_mask = bondlength <= config.local_cutoff
 
         if len(self.alignn_layers) > 0:
             if lg is None:
-                g_local = dgl.edge_subgraph(g, edge_mask, relabel_nodes=False)
+                lg = self.get_line_graph(g)
 
-                if g.num_nodes() != g_local.num_nodes():
-                    print("problem with edge_subgraph!")
+            lg.ndata["r"] = g.edata["r"]
 
-                lg = g_local.line_graph(backtracking=False)
+            # add triplet cutoff
+            lg.apply_edges(fn.u_sub_v("r", "r", "r_kj"))
+            fcut_kj = self.cutoff(torch.norm(lg.edata["r_kj"], dim=1, keepdim=False))
+            lg.ndata["fcut"] = g.edata["cutoff_value"]
+            lg.apply_edges(fn.u_mul_v("fcut", "fcut", "fcut_pair"))
+            fcut_kj = fcut_kj * lg.edata["fcut_pair"]
+            lg.edata["cutoff_value"] = fcut_kj
 
-            lg.ndata["r"] = g.edata["r"][edge_mask]
+            if self.config.triplet_style == "line_graph":
+                # prune line graph - coincident graph should already be pruned
+                # probably need to drop edges without dropping nodes?
+                drop = torch.where(lg.edata["cutoff_value"] <= 0)[0]
+                lg = dgl.remove_edges(lg, drop)
 
             # compute angle features (don't break autograd graph with precomputed lg)
-            lg.apply_edges(compute_bond_cosines)
+            if self.config.triplet_style == "line_graph":
+                lg.apply_edges(compute_bond_cosines)
+            elif self.config.triplet_style == "coincident":
+                lg.apply_edges(compute_bond_cosines_coincident)
+
             z = self.angle_embedding(lg.edata.pop("h"))
 
         # ALIGNN updates: update node, edge, triplet features
-        y_mask = torch.where(edge_mask)[0]
         for alignn_layer in self.alignn_layers:
-            x, y, z = alignn_layer(g, lg, x, y, z, y_mask=y_mask)
+            x, y, z = alignn_layer(g, lg, x, y, z)
 
         # gated GCN updates: update node, edge features
         for gcn_layer in self.gcn_layers:
