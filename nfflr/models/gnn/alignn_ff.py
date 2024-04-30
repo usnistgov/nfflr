@@ -24,8 +24,11 @@ from nfflr.nn import (
     Cosine,
 )
 
-
-from nfflr.data.graph import compute_bond_cosines
+from nfflr.data.graph import (
+    compute_bond_cosines,
+    compute_bond_cosines_coincident,
+    edge_coincidence_graph,
+)
 
 
 @dataclass
@@ -129,7 +132,6 @@ class ALIGNNFF(nn.Module):
         lg = self.get_line_graph(g)
         return g, lg
 
-
     @dispatch
     def forward(self, x):
         print("convert")
@@ -138,7 +140,8 @@ class ALIGNNFF(nn.Module):
     @dispatch
     def forward(self, x: nfflr.Atoms):
         device = next(self.parameters()).device
-        return self.forward(self.transform(x).to(device))
+        # return self.forward(self.transform(x).to(device))
+        return self.forward(self.transform(x))
 
     @dispatch
     def forward(
