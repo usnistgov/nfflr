@@ -16,7 +16,8 @@ import torch
 from numpy.random import default_rng
 import matplotlib.pyplot as plt
 
-from nfflr.atoms import Atoms, jarvis_load_atoms  # noqa:E402
+import nfflr
+from nfflr.atoms import jarvis_load_atoms  # noqa:E402
 from nfflr.models.utils import EnergyScaling
 
 from jarvis.core.atoms import Atoms as jAtoms
@@ -188,9 +189,15 @@ class AtomsDataset(torch.utils.data.Dataset):
                 df["group_id"], df["step_id"] = zip(*df[id_tag].apply(_split_key))
 
         if isinstance(df.atoms.iloc[0], dict):
-            self.atoms = df.atoms.apply(lambda x: Atoms(jAtoms.from_dict(x)))
-        elif isinstance(df.atoms.iloc[0], Atoms):
-            self.atoms = df.atoms
+            atoms = df.atoms.apply(lambda x: nfflr.Atoms(jAtoms.from_dict(x)))
+        elif isinstance(df.atoms.iloc[0], nfflr.Atoms):
+            atoms = df.atoms
+
+        # store a numpy array, not a pandas series
+        # self.atoms = atoms.values.copy()
+        self.cells = torch.stack([a.cell for a in atoms])
+        self.positions = np.array([a.positions.numpy() for a in atoms], dtype=object)
+        self.numbers = np.array([a.numbers.numpy() for a in atoms], dtype=object)
 
         self.transform = transform
         self.target = target
@@ -247,7 +254,13 @@ class AtomsDataset(torch.utils.data.Dataset):
         """Get AtomsDataset sample."""
 
         key = self.df[self.id_tag].iloc[idx]
-        atoms = self.atoms.iloc[idx]
+        # atoms = self.atoms.iloc[idx]
+        atoms = nfflr.Atoms(
+            self.cells[idx],
+            self.positions[idx],
+            self.numbers[idx]
+        )
+
         n_atoms = len(atoms)
         # print(f"{key=}, {n_atoms=}")
 
