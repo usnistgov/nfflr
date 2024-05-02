@@ -2,8 +2,10 @@ import warnings
 from collections.abc import Iterable
 
 import torch
+import numpy as np
 
 from nfflr.train.evaluation import pseudolog10
+
 
 class MultitaskLoss(torch.nn.Module):
     """Multitask loss function wrapper for force field training.
@@ -28,6 +30,7 @@ class MultitaskLoss(torch.nn.Module):
         default_criterion: torch.nn.Module = torch.nn.MSELoss(),
         scale_per_atom: str | Iterable[str] | None = "energy",
         pseudolog_forces: bool = False,
+        structurewise_force_loss: bool = False,
     ):
         super().__init__()
         self.pseudolog_forces = pseudolog_forces
@@ -68,6 +71,12 @@ class MultitaskLoss(torch.nn.Module):
         elif isinstance(scale_per_atom, Iterable):
             self.scale_per_atom.update(scale_per_atom)
 
+        # structurewise force loss aggregation from https://openreview.net/forum?id=PfPnugdxup
+        self.structurewise_force_loss = structurewise_force_loss
+        if self.structurewise_force_loss:
+            # modify the force criterion reduction!
+            self.tasks["forces"].reduction = "none"
+
     @property
     def tasknames(self):
         return list(self.tasks.keys())
@@ -88,11 +97,25 @@ class MultitaskLoss(torch.nn.Module):
             input, target = inputs[task], targets[task]
 
             if task in self.scale_per_atom:
-                losses.append(criterion(input / n_atoms, target / n_atoms))
+                task_loss = criterion(input / n_atoms, target / n_atoms)
             elif task == "forces" and self.pseudolog_forces:
-                losses.append(criterion(pseudolog10(input), pseudolog10(target)))
+                task_loss = criterion(pseudolog10(input), pseudolog10(target))
             else:
-                losses.append(criterion(input, target))
+                task_loss = criterion(input, target)
+
+            if self.structurewise_force_loss:
+                # perform custom reduction
+                # criterion should be torch.nn.MSELoss
+                # sqrt makes this a L2 norm reduction
+                atomwise_force_loss = task_loss.sum(dim=-1).sqrt()
+                index = torch.from_numpy(  # build up structurewise reduction index
+                    np.hstack([[i] * n for i, n in enumerate(n_atoms)])
+                )
+                task_loss = torch.zeros(len(n_atoms)).scatter_reduce_(
+                    0, index, atomwise_force_loss, reduce="mean"
+                )
+
+            losses.append(task_loss)
 
         loss = torch.hstack(losses)
 
