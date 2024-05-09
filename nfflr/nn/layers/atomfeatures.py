@@ -207,7 +207,7 @@ class PeriodicTableEmbedding(torch.nn.Module):
     def forward(self, zs):
         row = self.rows[zs - 1]
         col = self.cols[zs - 1]
-        return self.row_embedding(row) + self.col_embedding(col)
+        return self.row_embedding(row - 1) + self.col_embedding(col - 1)
 
 
 class AtomicReferenceEnergy(torch.nn.Module):
