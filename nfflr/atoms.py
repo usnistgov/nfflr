@@ -80,7 +80,10 @@ class Atoms:
         self, cell: Iterable, positions: Iterable, numbers: Iterable
     ):
         dtype = torch.get_default_dtype()
-        self.cell = torch.tensor(cell, dtype=dtype)
+        if isinstance(cell, torch.Tensor):
+            self.cell = cell if cell.dtype == dtype else cell.type(dtype)
+        else:
+            self.cell = torch.tensor(cell, dtype=dtype)
         self.positions = torch.tensor(positions, dtype=dtype)
         self.numbers = torch.tensor(numbers, dtype=Z_dtype)
 
