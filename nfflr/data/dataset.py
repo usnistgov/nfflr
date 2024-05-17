@@ -242,7 +242,7 @@ class AtomsDataset(torch.utils.data.Dataset):
     def setup_target_standardization(self):
         self.standardize = True
         sel = self.split["train"]
-        avg_n_atoms = np.mean(self.df.atoms.iloc[sel].apply(len))
+        avg_n_atoms = np.mean([len(n) for n in self.numbers])
         energies = self.df[self.energy_key].iloc[sel].values
         self.scaler = EnergyScaling(energies, avg_n_atoms)
 
@@ -322,13 +322,13 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         e = torch.from_numpy(self.df[self.energy_key].values)
         if self.energy_units == "eV/atom":
-            e *= self.atoms.apply(len).values
+            e *= np.array([len(n) for n in self.numbers])
 
         e = e[sel]
-        zs = self.atoms.iloc[sel].apply(
-            lambda a: torch.bincount(a.numbers, minlength=108)
-        )
-        zs = torch.stack(zs.values.tolist()).type(e.dtype)
+        zs = torch.stack(
+            [torch.bincount(torch.from_numpy(n), minlength=108) for n in self.numbers[sel]]
+        ).type(e.dtype)
+
 
         if use_bias:
             # add constant for zero offset
