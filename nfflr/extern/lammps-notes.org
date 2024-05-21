@@ -1,0 +1,33 @@
+* optional deps
+install cython
+get lammps `git clone git@github.com:lammps/lammps`
+
+* have to patch python/lammps/mliap
+
+__init__.py: add pylib.Py_Initialize()
+
+
+* compiling with make...
+Note: this does not quite seem to work for some reason related to python/C interface...
+
+edit lib/python/Makefile.lammps accordingly...
+
+then from the lammps src directory:
+make mode=shared yes-python yes-ml-snap yes-ml-iap serial
+make install-python
+
+
+* compiling with cmake worked
+with virtual environment activated:
+
+mkdir build && cd build
+cmake ../cmake -DLAMMPS_EXCEPTIONS=yes \
+               -DBUILD_SHARED_LIBS=yes \
+               -DMLIAP_ENABLE_PYTHON=yes \
+               -DPKG_PYTHON=yes \
+               -DPKG_ML-SNAP=yes \
+               -DPKG_ML-IAP=yes \
+               -DPYTHON_EXECUTABLE:FILEPATH=`which python`
+
+make -j12
+make install-python
