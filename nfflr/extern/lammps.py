@@ -12,7 +12,7 @@ MLIAPDataPy: TypeAlias = "mliap_unified_couple.MLIAPDataPy"  # noqa:F821
 class MLIAPModel(MLIAPUnified):
     """Test implementation for MLIAPUnified."""
 
-    def __init__(self, element_types, epsilon=1.0, sigma=1.0, rcutfac=1.25, lmp=None):
+    def __init__(self, element_types, epsilon=1.0, sigma=1.0, rcutfac=1.25):
         # extra MLIAP arguments not needed for MLIAPUnified model
         _interface = None
         _ndescriptors = 1
@@ -25,7 +25,6 @@ class MLIAPModel(MLIAPUnified):
         # pair_coeff * * 1 1
         self.epsilon = epsilon
         self.sigma = sigma
-        self.lmp = lmp
 
     def compute_gradients(self, data: MLIAPDataPy):
         """Test compute_gradients."""
@@ -44,23 +43,21 @@ class MLIAPModel(MLIAPUnified):
         print(f"{data.rij.shape=}")
 
         # cell
-        lmp = self.lmp
-        lmp_np = self.lmp.numpy
+        # lmp = self.lmp
+        # lmp_np = self.lmp.numpy
 
-        print(f"{lmp.extract_box()=}")
+        # print(f"{lmp.extract_box()=}")
 
         # neighborlist in iatoms, jatoms
         src = data.iatoms
         dst = data.jatoms
-        print(f"{src=}")
-        print(f"{dst=}")
 
-        # atom ids
-        print(f"{lmp_np.extract_atom('id')=}")
-        # atom positions
-        print(f"{lmp_np.extract_atom('x')=}")
-        # atom types
-        print(f"{lmp_np.extract_atom('type')=}")
+        # # atom ids
+        # print(f"{lmp_np.extract_atom('id')=}")
+        # # atom positions
+        # print(f"{lmp_np.extract_atom('x')=}")
+        # # atom types
+        # print(f"{lmp_np.extract_atom('type')=}")
 
         rij = data.rij
 
