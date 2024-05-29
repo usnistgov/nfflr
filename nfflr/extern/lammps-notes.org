@@ -17,9 +17,16 @@ make mode=shared yes-python yes-ml-snap yes-ml-iap serial
 make install-python
 
 
+* patching LAMMPS ML-IAP
+git clone git@github.com:lammps/lammps lammps-test
+cd lammps-test
+git apply --check 0001-prototype-modification-of-mliap_unified-pair-style-t.patch
+git am --signoff < 0001-prototype-modification-of-mliap_unified-pair-style-t.patch
+
 * compiling with cmake worked
 with virtual environment activated:
 
+pyenv shell nfflr-lammps
 mkdir build && cd build
 cmake ../cmake -DLAMMPS_EXCEPTIONS=yes \
                -DBUILD_SHARED_LIBS=yes \

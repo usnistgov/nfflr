@@ -48,6 +48,7 @@ class ALIGNNFFConfig:
     hidden_features: int = 256
     output_features: int = 1
     compute_forces: bool = True
+    reduce_forces: bool = False
     energy_units: Literal["eV", "eV/atom"] = "eV"
     reference_energies: Optional[Literal["fixed", "trainable"]] = None
 
@@ -204,6 +205,7 @@ class ALIGNNFF(nn.Module):
                 # prune line graph - coincident graph should already be pruned
                 # probably need to drop edges without dropping nodes?
                 drop = torch.where(lg.edata["cutoff_value"] <= 0)[0]
+                drop = drop.type(torch.int)
                 lg = dgl.remove_edges(lg, drop)
 
             # compute angle features (don't break autograd graph with precomputed lg)
@@ -238,6 +240,7 @@ class ALIGNNFF(nn.Module):
                 g,
                 energy_units=config.energy_units,
                 compute_stress=True,
+                reduce=config.reduce_forces,
             )
 
             return dict(

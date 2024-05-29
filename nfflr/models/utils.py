@@ -128,7 +128,7 @@ def autograd_forces(
     pairwise_forces = -dy_dr
 
     if not reduce:
-        return pairwise_forces
+        return pairwise_forces, None
 
     if compute_stress:
         # without cell volume, can only compute un-normalized stresses
