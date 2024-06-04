@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from typing import Optional, Literal
+from typing import Optional
 
 
 class ChebyshevExpansion(torch.nn.Module):
@@ -8,7 +8,7 @@ class ChebyshevExpansion(torch.nn.Module):
 
     def __init__(self, basis_size: int):
         super().__init__()
-        self.n = torch.arange(1, 1 + basis_size)
+        self.n = torch.arange(0, basis_size)
 
     def forward(self, x):
         """Trigonometric definition of Chebyshev polynomial basis for |x| \lq 1.
