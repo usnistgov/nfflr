@@ -3,6 +3,7 @@ from collections.abc import Iterable
 
 import torch
 import numpy as np
+import einops
 
 from nfflr.train.evaluation import pseudolog10
 
@@ -80,6 +81,24 @@ class MultitaskLoss(torch.nn.Module):
     @property
     def tasknames(self):
         return list(self.tasks.keys())
+
+    def make_output_transform(self, name: str):
+        """Build ignite metric transforms for multi-output models.
+
+        `output` should be Tuple[Dict[str,torch.Tensor], Dict[str,torch.Tensor]]
+        """
+
+        def output_transform(output):
+            """Select output tensor for metric computation."""
+            pred, target = output
+            pred, target = pred[name], target[name]
+            if name == "stress":
+                pred = einops.rearrange(pred, "b n n -> b (n n)")
+                target = einops.rearrange(target, "b n n -> b (n n)")
+
+            return pred, target
+
+        return output_transform
 
     def forward(self, inputs, targets):
         """Accumulate weighted multitask loss

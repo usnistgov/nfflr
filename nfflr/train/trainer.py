@@ -34,7 +34,6 @@ if TYPE_CHECKING:
 
 from nfflr.train.utils import (
     group_decay,
-    select_target,
     setup_evaluator_with_grad,
     setup_optimizer,
     setup_scheduler,
@@ -271,21 +270,16 @@ def train(
     # evaluation
     metrics = {"loss": Loss(criterion)}
     if isinstance(criterion, nfflr.nn.MultitaskLoss):
-        # NOTE: unscaling currently uses a global scale
-        # shared across all tasks (intended to scale energy units)
-        unscale = None
-        if dataset.standardize:
-            unscale = dataset.scaler.unscale
 
         eval_metrics = {
-            f"mae_{task}": MeanAbsoluteError(select_target(task, unscale_fn=unscale))
+            f"mae_{task}": MeanAbsoluteError(criterion.make_output_transform(task))
             for task in criterion.tasks
         }
         metrics.update(eval_metrics)
 
         eval_metrics = {
             f"med_abs_err_{task}": MedianAbsoluteError(
-                select_target(task, unscale_fn=unscale)
+                criterion.make_output_transform(task)
             )
             for task in criterion.tasks
         }
