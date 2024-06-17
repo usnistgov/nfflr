@@ -8,7 +8,7 @@ class ChebyshevExpansion(torch.nn.Module):
 
     def __init__(self, basis_size: int):
         super().__init__()
-        self.n = torch.arange(0, basis_size)
+        self.register_buffer("n", torch.arange(0, basis_size))
 
     def forward(self, x):
         """Trigonometric definition of Chebyshev polynomial basis for |x| \lq 1.
