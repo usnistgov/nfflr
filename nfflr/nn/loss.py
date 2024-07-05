@@ -93,8 +93,8 @@ class MultitaskLoss(torch.nn.Module):
             pred, target = output
             pred, target = pred[name], target[name]
             if name == "stress":
-                pred = einops.rearrange(pred, "b n n -> b (n n)")
-                target = einops.rearrange(target, "b n n -> b (n n)")
+                pred = einops.rearrange(pred, "b n1 n2 -> b (n1 n2)")
+                target = einops.rearrange(target, "b n1 n2 -> b (n1 n2)")
 
             return pred, target
 
@@ -122,17 +122,22 @@ class MultitaskLoss(torch.nn.Module):
             else:
                 task_loss = criterion(input, target)
 
-            if self.structurewise_force_loss:
+            if task == "forces" and self.structurewise_force_loss:
                 # perform custom reduction
                 # criterion should be torch.nn.MSELoss
                 # sqrt makes this a L2 norm reduction
                 atomwise_force_loss = task_loss.sum(dim=-1).sqrt()
+
+                device = atomwise_force_loss.device
                 index = torch.from_numpy(  # build up structurewise reduction index
-                    np.hstack([[i] * n for i, n in enumerate(n_atoms)])
-                )
-                task_loss = torch.zeros(len(n_atoms)).scatter_reduce_(
+                    np.hstack([[i] * n for i, n in enumerate(n_atoms)]),
+                ).to(device)
+                # first do atom-wise mean reduction for each structure
+                task_loss = torch.zeros(len(n_atoms), device=device).scatter_reduce_(
                     0, index, atomwise_force_loss, reduce="mean"
                 )
+                # then do structure-wise mean reduction
+                task_loss = task_loss.mean()
 
             losses.append(task_loss)
 

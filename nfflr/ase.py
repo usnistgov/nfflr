@@ -14,12 +14,14 @@ class NFFLrCalculator(Calculator):
         self,
         model: torch.nn.Module,
         scaler: Optional[torch.nn.Module] = None,
+        device: str = "cpu",
         log_history: bool = False,
         **kwargs
     ):
         super().__init__(**kwargs)
         self.model = model
         self.scaler = scaler
+        self.device = device
 
         self.log_history = log_history
         self.history = []
@@ -30,7 +32,7 @@ class NFFLrCalculator(Calculator):
             properties = self.implemented_properties
             self.calculate(atoms, properties, system_changes)
 
-        outputs = self.model(nfflr.Atoms(atoms))
+        outputs = self.model(nfflr.Atoms(atoms).to(self.device))
 
         energy = outputs["energy"].detach()
         forces = outputs["forces"].detach()

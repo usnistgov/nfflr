@@ -48,7 +48,7 @@ class ALIGNNFFConfig:
     hidden_features: int = 256
     output_features: int = 1
     compute_forces: bool = True
-    reduce_forces: bool = False
+    reduce_forces: bool = True
     energy_units: Literal["eV", "eV/atom"] = "eV"
     reference_energies: Optional[Literal["fixed", "trainable"]] = None
 
