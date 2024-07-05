@@ -9,6 +9,7 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Tuple, Union, Optional, Callable, Sequence
 
+import ase
 import dgl
 import numpy as np
 import pandas as pd
@@ -122,6 +123,9 @@ def collate_forcefield_targets(targets: Sequence[Dict[str, torch.Tensor]]):
     result = dict(energy=energy, n_atoms=n_atoms, forces=forces)
     if "stress" in targets[0]:
         result["stress"] = torch.stack([t["stress"] for t in targets])
+    if "virial" in targets[0]:
+        result["virial"] = torch.stack([t["virial"] for t in targets])
+
     return result
 
 
@@ -148,6 +152,7 @@ class AtomsDataset(torch.utils.data.Dataset):
         n_train: Union[float, int] = 0.8,
         n_val: Union[float, int] = 0.1,
         energy_units: Literal["eV", "eV/atom"] = "eV",
+        stress_conversion_factor: float | Literal["vasp"] | None = None,
         standardize: bool = False,
         diskcache: Optional[Path | str | bool] = None,
     ):
@@ -206,6 +211,13 @@ class AtomsDataset(torch.utils.data.Dataset):
         self.train_val_seed = train_val_seed
         self.id_tag = id_tag
         self.energy_units = energy_units
+        if stress_conversion_factor == "vasp":
+            # Vasp uses kBa with opposite sign convention from ASE
+            # convert stress to eV/AA^3
+            self.stress_conversion_factor = -0.1 * ase.units.GPa
+        else:
+            self.stress_conversion_factor = stress_conversion_factor
+
         self.ids = self.df[id_tag]
 
         self.split = self.split_dataset_by_id(n_train, n_val)
@@ -255,19 +267,16 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         key = self.df[self.id_tag].iloc[idx]
         # atoms = self.atoms.iloc[idx]
-        atoms = nfflr.Atoms(
-            self.cells[idx],
-            self.positions[idx],
-            self.numbers[idx]
-        )
+        atoms = nfflr.Atoms(self.cells[idx], self.positions[idx], self.numbers[idx])
 
         n_atoms = len(atoms)
         # print(f"{key=}, {n_atoms=}")
 
         if self.target == "energy_and_forces":
             target = self.get_energy_and_forces(idx, n_atoms=n_atoms)
-            # volume: abs(determinant(cell))
-            target["volume"] = atoms.cell.det().abs().item()
+            volume = atoms.cell.det().abs().item()
+            target["volume"] = volume
+            target["virial"] = -volume * target["stress"]
             target = {k: to_tensor(t) for k, t in target.items()}
 
         else:
@@ -302,6 +311,9 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         if "stress" in self.df:
             target["stress"] = to_tensor(self.df["stress"].iloc[idx])
+            if self.stress_conversion_factor is not None:
+                target["stress"] *= self.stress_conversion_factor
+
             if self.standardize:
                 target["stress"] = self.scaler.scale(target["stress"])
 
@@ -326,9 +338,11 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         e = e[sel]
         zs = torch.stack(
-            [torch.bincount(torch.from_numpy(n), minlength=108) for n in self.numbers[sel]]
+            [
+                torch.bincount(torch.from_numpy(n), minlength=108)
+                for n in self.numbers[sel]
+            ]
         ).type(e.dtype)
-
 
         if use_bias:
             # add constant for zero offset
