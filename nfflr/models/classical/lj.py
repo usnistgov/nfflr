@@ -136,6 +136,7 @@ class LennardJones(nn.Module):
         # initial bond features: bond displacement vectors
         # need to add bond vectors to autograd graph
         bond_vectors = g.edata.pop("r")
+        bond_vectors = bond_vectors.type(torch.get_default_dtype())
         bond_vectors.requires_grad_(True)
 
         # bondlen = torch.norm(bond_vectors, dim=1)
@@ -157,13 +158,20 @@ class LennardJones(nn.Module):
         g.update_all(fn.copy_e("pair_energy", "m"), fn.sum("m", "energy"))
 
         potential_energy = g.ndata["energy"].sum()
-        forces = autograd_forces(potential_energy, bond_vectors, g, energy_units="eV")
+        forces, virial = autograd_forces(
+            potential_energy, bond_vectors, g, energy_units="eV", compute_virial=True
+        )
 
-        g.edata["analytic_pair_forces"] = (
-            analytic_pairwise_forces.unsqueeze(-1) * bond_vectors
+        g.edata["analytic_pair_forces"] = analytic_pairwise_forces.unsqueeze(-1) * (
+            -bond_vectors
         )
         g.update_all(
             fn.copy_e("analytic_pair_forces", "m"), fn.sum("m", "analytic_force")
         )
 
-        return potential_energy, forces, g.ndata["analytic_force"]
+        return dict(
+            energy=potential_energy,
+            forces=forces,
+            virial=virial,
+            analytic_force=g.ndata["analytic_force"],
+        )

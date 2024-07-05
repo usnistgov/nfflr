@@ -13,9 +13,7 @@ model = MLIAPModel(["Ga", "N", "Si", "Al"], gnn)
 model.pickle("mliap_test_inline.pkl")
 """
 
-# 3d Lennard-Jones melt
-
-units       lj
+units       metal
 atom_style  atomic
 
 lattice     fcc 0.8442

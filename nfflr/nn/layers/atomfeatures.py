@@ -87,9 +87,12 @@ class AtomPairType(torch.nn.Module):
         # look up atom type ids for pairs
         atomtypes = self.atomtypes(zs)
 
-        # calculate 2D pair index
-        ia, ib = einops.unpack(atomtypes, ps, "i *")
+        # calculate 2D pair index - like this numpy function:
         # pairtype = torch.from_numpy(np.ravel_multi_index((ia, ib), (n, n)))
+        if len(z1) == 1:
+            ia, ib = atomtypes.split(1)
+        else:
+            ia, ib = einops.unpack(atomtypes, ps, "i *")
 
         # convert to pair index
         if self.symmetric:
