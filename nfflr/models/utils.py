@@ -107,11 +107,11 @@ def autograd_forces(
     g: dgl.DGLGraph,
     energy_units="eV/atom",
     reduce=True,
-    compute_stress=False,
+    compute_virial=False,
 ):
     # potentially we only need to build the computational graph
     # for the forces at training time, so that we can compute
-    # the gradient of the force (and stress) loss?
+    # the gradient of the force (and virial) loss?
     create_graph = True
 
     # energy gradient contribution of each bond
@@ -130,13 +130,19 @@ def autograd_forces(
     if not reduce:
         return pairwise_forces, None
 
-    if compute_stress:
+    if compute_virial:
         # without cell volume, can only compute un-normalized stresses
-        # these are the per-bond stress contributions:
+        # these are the per-bond virial contributions:
         # TODO: double check sign convention wrt edge direction...
-        stresses = vmap(torch.outer)(-pairwise_forces, displacement_vectors)
-        g.edata["stresses"] = stresses
-        stress = dgl.readout.sum_edges(g, "stresses")
+        # forces_ji contribution
+        virials = vmap(torch.outer)(pairwise_forces, displacement_vectors)
+        g.edata["virials"] = virials
+        virial = 0.5 * dgl.readout.sum_edges(g, "virials")
+
+        # consider reverse force sum -forces_ji
+        virials = vmap(torch.outer)(-pairwise_forces, -displacement_vectors)
+        g.edata["virials"] = virials
+        virial += 0.5 * dgl.readout.sum_edges(g, "virials")
 
     # reduce over bonds to get forces on each atom
     g.edata["pairwise_forces"] = pairwise_forces
@@ -158,7 +164,7 @@ def autograd_forces(
 
         forces = forces * n_nodes[:, None]
 
-    if compute_stress:
-        return forces, stress
+    if compute_virial:
+        return forces, virial
 
     return forces

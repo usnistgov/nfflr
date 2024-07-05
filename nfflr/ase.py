@@ -41,8 +41,8 @@ class NFFLrCalculator(Calculator):
 
         self.results["energy"] = energy.item()
         self.results["forces"] = forces.numpy()
-        self.results["stress"] = (
-            outputs["stress"].detach().numpy().squeeze() / atoms.get_volume()
+        self.results["stress"] = -(
+            outputs["virial"].detach().numpy().squeeze() / atoms.get_volume()
         )
 
         if self.log_history:
