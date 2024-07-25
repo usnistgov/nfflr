@@ -199,10 +199,16 @@ class AtomsDataset(torch.utils.data.Dataset):
             atoms = df.atoms
 
         # store a numpy array, not a pandas series
-        # self.atoms = atoms.values.copy()
+        # if all system sizes are uniform, store as a non-ragged array
+        # (so don't cast to object array)
         self.cells = torch.stack([a.cell for a in atoms])
-        self.positions = np.array([a.positions.numpy() for a in atoms], dtype=object)
-        self.numbers = np.array([a.numbers.numpy() for a in atoms], dtype=object)
+        n_atoms = [len(at) for at in atoms]
+        if np.unique(n_atoms).size > 1:
+            _dtype = object
+        else:
+            _dtype = None
+        self.positions = np.array([a.positions.numpy() for a in atoms], dtype=_dtype)
+        self.numbers = np.array([a.numbers.numpy() for a in atoms], dtype=_dtype)
 
         self.transform = transform
         self.target = target
