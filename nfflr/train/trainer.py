@@ -164,7 +164,8 @@ def setup_trainer(
     )
 
     trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
-    GpuInfo().attach(trainer, name="gpu")
+    if torch.cuda.is_available():
+        GpuInfo().attach(trainer, name="gpu")
 
     if scheduler is not None:
         trainer.add_event_handler(

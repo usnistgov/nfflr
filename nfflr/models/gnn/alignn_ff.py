@@ -124,13 +124,25 @@ class ALIGNNFF(nn.Module):
                 g, shared=True, cutoff=self.config.local_cutoff
             )
 
-    def transform(self, a: nfflr.Atoms):
+    def transform(self, atoms):
         """Neighbor list and bond pair graph construction.
 
         Does not share features to facilitate autograd.
         """
-        g = self.config.transform(a)
-        lg = self.get_line_graph(g)
+
+        cutoff = self.config.cutoff.r_cutoff
+
+        if isinstance(atoms, nfflr.Atoms):
+            g = self.config.transform(atoms)
+            lg = self.get_line_graph(g)
+
+        elif isinstance(atoms, dgl.DGLGraph):
+            g = atoms
+            lg = self.get_line_graph(g)
+
+        elif isinstance(atoms, tuple):
+            g, lg = atoms
+
         return g, lg
 
     @dispatch
@@ -205,7 +217,6 @@ class ALIGNNFF(nn.Module):
                 # prune line graph - coincident graph should already be pruned
                 # probably need to drop edges without dropping nodes?
                 drop = torch.where(lg.edata["cutoff_value"] <= 0)[0]
-                drop = drop.type(torch.int)
                 lg = dgl.remove_edges(lg, drop)
 
             # compute angle features (don't break autograd graph with precomputed lg)

@@ -136,8 +136,13 @@ class EAM(nn.Module):
         }
         potential_energy = F.sum() + pair_repulsion.sum()
 
-        forces = nfflr.autograd_forces(potential_energy, r, g, energy_units="eV")
-        return potential_energy, forces
+        # forces = nfflr.autograd_forces(potential_energy, r, g, energy_units="eV")
+
+        forces, virial = nfflr.autograd_forces(
+            potential_energy, r, g, energy_units="eV", compute_virial=True
+        )
+
+        return dict(energy=potential_energy, forces=forces, virial=virial)
 
 
 # alias
