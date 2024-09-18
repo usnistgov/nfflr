@@ -2,9 +2,12 @@ from typing import Callable, Optional
 from pathlib import Path
 import shutil
 import warnings
+import contextlib
+import sqlite3
 
 import torch
 import numpy as np
+import pandas as pd
 from numpy.random import default_rng
 
 import ase
@@ -168,10 +171,15 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         Stratify by calculation / trajectory id `"group_id"`
         """
         if self.group_ids:
-            # ids = self.df["group_id"].unique()
-            with ase.db.connect(self.dbpath) as db:
-                # assumes ids are contiguous and ordered
-                all_ids = np.array([row["group_id"] for row in db.select("group_id")])
+            with contextlib.closing(sqlite3.connect(self.dbpath)) as connection:
+                # load the entire group_id column from ase sqlite database
+                # directly run sql query from pandas instead of going through ase
+                groups = pd.read_sql(
+                    "select * from text_key_values where key='group_id'", connection
+                )
+                # sort by ase.db primary key
+                groups = groups.sort_values(by="id")
+                all_ids = groups["value"].values
         else:
             all_ids = np.arange(len(self))
 
@@ -202,10 +210,20 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         }
 
         # split atomistic configurations
-        return {
-            key: np.where(np.isin(all_ids, _split_ids))[0]
-            for key, _split_ids in split_ids.items()
+        # store the index as a column,
+        # set the string key to the pandas index,
+        # then slice with loc
+        groups = pd.DataFrame(dict(id=all_ids))
+        groups["idx"] = groups.index
+        groups.set_index("id", inplace=True)
+
+        # e.g. groups.loc[split_ids["train"]
+        splitdata = {
+            split_key: groups.loc[_split_ids]["idx"].values
+            for split_key, _split_ids in split_ids.items()
         }
+
+        return splitdata
 
 
 # dataset = AtomsSQLDataset(datadir.parent / "mptrj_train.db")
