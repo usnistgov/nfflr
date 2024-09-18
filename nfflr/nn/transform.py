@@ -1,4 +1,7 @@
+import dgl
 import torch
+
+import ase.neighborlist
 
 import nfflr
 from nfflr.data.graph import (
@@ -31,6 +34,31 @@ class PeriodicAdaptiveRadiusGraph(torch.nn.Module):
 
     def forward(self, x: nfflr.Atoms):
         return periodic_adaptive_radius_graph(x, r=self.cutoff, dtype=self.dtype)
+
+
+class PeriodicNaturalRadiusGraph(torch.nn.Module):
+    """Periodic radius graph transform based on covalent radii.
+
+    A thin wrapper around ase.neighborlist.neighbor_list
+    with natural cutoff radii
+    """
+
+    def __init__(self, mult: float = 1.0, dtype=None):
+        super().__init__()
+        self.mult = mult
+        self.dtype = dtype if dtype is not None else torch.get_default_dtype()
+
+    def forward(self, x: nfflr.Atoms):
+        at = nfflr.to_ase(x)
+        # per-atom cutoffs
+        cutoffs = ase.neighborlist.natural_cutoffs(at, mult=self.mult)
+        i, j, D = ase.neighborlist.neighbor_list("ijD", at, cutoffs)
+        g = dgl.graph((j, i))
+        g.ndata["coord"] = x.positions
+        g.edata["r"] = torch.from_numpy(D).type(self.dtype)
+        g.ndata["atomic_number"] = x.numbers.type(torch.int)
+
+        return g
 
 
 class PeriodicKShellGraph(torch.nn.Module):
