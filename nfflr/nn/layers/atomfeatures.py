@@ -4,6 +4,7 @@ import numpy as np
 
 import einops
 
+import ase.data
 from mendeleev.fetch import fetch_table
 from jarvis.core.specie import chem_data, get_node_attributes
 
@@ -237,3 +238,14 @@ class AtomicReferenceEnergy(torch.nn.Module):
 
     def forward(self, zs: torch.Tensor):
         return self.reference_energy(zs)
+
+
+class CovalentRadius(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        rs = torch.from_numpy(ase.data.covalent_radii).type(torch.get_default_dtype())
+        self.register_buffer("covalent_radii", rs)
+
+    def forward(self, zs: torch.Tensor):
+        return self.covalent_radii[zs]
