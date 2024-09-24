@@ -53,7 +53,7 @@ class PeriodicNaturalRadiusGraph(torch.nn.Module):
         # per-atom cutoffs
         cutoffs = ase.neighborlist.natural_cutoffs(at, mult=self.mult)
         i, j, D = ase.neighborlist.neighbor_list("ijD", at, cutoffs)
-        g = dgl.graph((j, i))
+        g = dgl.graph((j, i), num_nodes=len(at))
         g.ndata["coord"] = x.positions
         g.edata["r"] = torch.from_numpy(D).type(self.dtype)
         g.ndata["atomic_number"] = x.numbers.type(torch.int)
