@@ -255,7 +255,7 @@ def periodic_radius_graph(
     src, v = torch.where(neighbor_mask)
 
     # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % len(a.numbers)))
+    g = dgl.graph((src, v % len(a)), num_nodes=len(a))
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
@@ -294,7 +294,7 @@ def periodic_radius_graph_kdtree(
     src, v = dist.nonzero()
 
     # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % len(a.numbers)))
+    g = dgl.graph((src, v % len(a)), num_nodes=len(a))
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
@@ -341,7 +341,7 @@ def periodic_adaptive_radius_graph(
     src, v = torch.where(neighbor_mask)
 
     # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % len(a.numbers)))
+    g = dgl.graph((src, v % len(a)), num_nodes=len(a))
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
