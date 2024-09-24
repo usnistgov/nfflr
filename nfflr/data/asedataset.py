@@ -32,6 +32,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         train_val_seed: int = 42,
         diskcache: Optional[Path | str] = None,
         use_lmdb: bool = False,
+        cache_structures: bool = True,
         copy_db_to_scratch: bool = False,
     ):
         super().__init__()
@@ -43,6 +44,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         self.transform = transform
         self.group_ids = group_ids
 
+        self.cache_structures = cache_structures
         if diskcache is not None and diskcache is not False:
             # TemporaryDirectory
             self.cachedir = get_cachedir(diskcache)
@@ -129,7 +131,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         frame_id = row.frame_id.replace("/", "_")
         key = f"{frame_id}-{idx}"
 
-        if self.diskcache is not None:
+        if self.cache_structures and self.diskcache is not None:
             atoms = self._load_atoms(key)
             if atoms is not None:
                 return atoms
@@ -139,7 +141,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         if self.transform is not None:
             atoms = self.transform(atoms)
 
-        if self.diskcache is not None:
+        if self.cache_atoms and self.diskcache is not None:
             self._cache_atoms(key, atoms)
 
         return atoms
