@@ -48,7 +48,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
             self.cachedir = get_cachedir(diskcache)
             print(self.cachedir)
             if use_lmdb:
-                self.diskcache = lmdb.open(self.cachedir.name)
+                self.diskcache = lmdb.open(self.cachedir.name, map_size=1024**4)
             else:
                 self.diskcache = self.cachedir
 
