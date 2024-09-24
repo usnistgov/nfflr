@@ -10,6 +10,8 @@ from nfflr.data.graph import (
     periodic_kshell_graph,
 )
 
+from nfflr.nn.layers.atomfeatures import CovalentRadius
+
 
 class PeriodicRadiusGraph(torch.nn.Module):
     """Periodic radius graph transform."""
@@ -47,8 +49,10 @@ class PeriodicNaturalRadiusGraph(torch.nn.Module):
         super().__init__()
         self.mult = mult
         self.dtype = dtype if dtype is not None else torch.get_default_dtype()
+        self.forward = self.forward_dgl
+        self.covalent_radii = CovalentRadius()
 
-    def forward(self, x: nfflr.Atoms):
+    def forward_ase(self, x: nfflr.Atoms):
         at = nfflr.to_ase(x)
         # per-atom cutoffs
         cutoffs = ase.neighborlist.natural_cutoffs(at, mult=self.mult)
@@ -59,6 +63,22 @@ class PeriodicNaturalRadiusGraph(torch.nn.Module):
         g.ndata["atomic_number"] = x.numbers.type(torch.int)
 
         return g
+
+    def forward_dgl(self, x: nfflr.Atoms):
+
+        # per-atom cutoffs
+        radii = self.covalent_radii(x.numbers)
+
+        # construct fixed radius graph
+        global_cutoff = self.mult * 2 * radii.max()
+        g = periodic_radius_graph(x, r=global_cutoff, dtype=self.dtype)
+
+        # calculate natural cutoffs
+        cutoffs = self.mult * dgl.ops.u_add_v(g, radii, radii)
+        rs = g.edata["r"].norm(dim=1)
+
+        # drop edges - don't drop isolated nodes, discard edge info
+        return dgl.edge_subgraph(g, rs <= cutoffs, relabel_nodes=False, store_ids=False)
 
 
 class PeriodicKShellGraph(torch.nn.Module):
