@@ -141,7 +141,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         if self.transform is not None:
             atoms = self.transform(atoms)
 
-        if self.cache_atoms and self.diskcache is not None:
+        if self.cache_structures and self.diskcache is not None:
             self._cache_atoms(key, atoms)
 
         return atoms
