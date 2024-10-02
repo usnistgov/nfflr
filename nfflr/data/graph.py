@@ -14,6 +14,22 @@ from scipy import spatial
 import nfflr
 
 
+def sort_edges_by_dst(g: dgl.DGLGraph):
+    """Sort edges by increasing dst id"""
+
+    src, dst = g.edges(form="uv")
+    edge_order = torch.argsort(dst)
+
+    g_sorted = dgl.graph((src[edge_order], dst[edge_order]))
+
+    for key, value in g.ndata.items():
+        g_sorted.ndata[key] = value
+
+    g_sorted.edata["r"] = g.edata["r"][edge_order].contiguous()
+
+    return g_sorted
+
+
 def compute_bond_cosines(edges):
     """Compute bond angle cosines from bond displacement vectors."""
     # line graph edge: (a, b), (b, c)
