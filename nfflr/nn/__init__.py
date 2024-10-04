@@ -3,7 +3,11 @@
 __all__ = (
     "PeriodicRadiusGraph",
     "PeriodicKShellGraph",
+    "PeriodicNaturalRadiusGraph",
     "PeriodicAdaptiveRadiusGraph",
+    "MultitaskLoss",
+    "PerAtomLoss",
+    "Cosine",
     "XPLOR",
     "MLPLayer",
     "FeedForward",
@@ -13,6 +17,7 @@ from .cutoff import XPLOR, Cosine
 from .loss import MultitaskLoss, PerAtomLoss
 from .transform import (
     PeriodicRadiusGraph,
+    PeriodicNaturalRadiusGraph,
     PeriodicAdaptiveRadiusGraph,
     PeriodicKShellGraph,
 )
