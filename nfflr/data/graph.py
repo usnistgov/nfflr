@@ -16,6 +16,8 @@ import nfflr
 
 def sort_edges_by_dst(g: dgl.DGLGraph):
     """Sort edges by increasing dst id"""
+    if g.num_edges() <= 1:
+        return g
 
     src, dst = g.edges(form="uv")
     edge_order = torch.argsort(dst)
