@@ -469,6 +469,59 @@ def periodic_knn_graph(
     return g
 
 
+def periodic_sann_graph(
+    at: nfflr.Atoms,
+    max_neighbors: int = 32,
+    cutoff_radius: float = 10.0,
+    bond_tol: float = 0.15,
+    dtype=None,
+):
+    """Solid Angle Nearest Neighbor algorithm (10.1063/1.4729313).
+
+    This implementation uses an eager kd-tree k-neighbor query against a tiled supercell
+    to build a fixed-format neighborlist (sorted by the kdtree query)
+    so that the SANN cutoff criterion can be vectorized over atoms.
+    """
+    if dtype is None:
+        dtype = torch.get_default_dtype()
+
+    # build radius graph in supercell
+    x, x_supercell, root_ids, cell_images = tile_supercell_2(
+        at.positions.double(), at.cell.double(), cutoff_radius, bond_tol
+    )
+
+    # find k nearest tiled points to query points x
+    # this is nice because scipy sorts the points for us!
+    # start at neighbor 2 since x is always in x_supercell
+    tiled = spatial.KDTree(x_supercell)
+    distance, ids = tiled.query(x, k=range(2, 2 + max_neighbors))
+
+    # vectorize evaluation of SANN criterion
+    ms = np.arange(1, 1 + max_neighbors) - 2.0
+    ms[:2] = 0.01  # mask with value to give large rcut
+    rcut = distance.cumsum(axis=1) / ms
+    sann_neighbormask = distance < rcut  # ~(d >= rcut)
+
+    rcut = np.array(
+        [rcut[idx, idy] for idx, idy in enumerate(sann_neighbormask.sum(1))]
+    )
+
+    # broadcast the comparison to rcut to index into ids
+    # messages propagate src -> dst: propagation from *neighbor* to *self*
+    dst, nbr_supercell = np.where(distance <= rcut[:, None])
+    # index into knn neighbor ids -> atom ids
+    src_supercell = ids[dst, nbr_supercell]
+    g = dgl.graph((src_supercell % len(at.numbers), dst))
+
+    g.ndata["coord"] = x.to(dtype)
+    g.edata["r"] = (x[dst] - x_supercell[src_supercell]).to(dtype)
+    g.ndata["atomic_number"] = at.numbers.type(torch.int)
+
+    g.ndata["cutoff_distance"] = torch.from_numpy(rcut).type(dtype)
+
+    return g
+
+
 def prepare_line_graph_batch(
     batch: Tuple[dgl.DGLGraph, dgl.DGLGraph, Dict[str, torch.Tensor]],
     device=None,

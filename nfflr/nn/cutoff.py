@@ -63,7 +63,7 @@ class XPLOR(torch.nn.Module):
         return xplor_cutoff(r, self.r_onset, self.r_cutoff)
 
 
-def cosine_cutoff(r: torch.Tensor, r_cutoff: float = 4):
+def cosine_cutoff(r: torch.Tensor, r_cutoff: float | torch.Tensor = 4.0):
     """Apply smooth cutoff to pairwise interactions
 
     Cosine smoothing to zero at the cutoff distance
@@ -104,7 +104,7 @@ class Cosine(torch.nn.Module):
     """
 
     def __init__(
-        self, r_cutoff: float = 4, mode: Literal["fixed", "covalent"] = "fixed"
+        self, r_cutoff: float = 4, mode: Literal["fixed", "covalent", "local"] = "fixed"
     ):
         super().__init__()
         self.r_cutoff = r_cutoff
@@ -124,6 +124,12 @@ class Cosine(torch.nn.Module):
             if self.mode == "fixed":
                 return cosine_cutoff(rs, self.r_cutoff)
 
-            radii = self.covalent_radii(x.ndata["atomic_number"])
-            cutoffs = self.r_cutoff * dgl.ops.u_add_v(x, radii, radii)
-            return cosine_cutoff(rs, cutoffs)
+            elif self.mode == "covalent":
+                radii = self.covalent_radii(x.ndata["atomic_number"])
+                cutoffs = self.r_cutoff * dgl.ops.u_add_v(x, radii, radii)
+                return cosine_cutoff(rs, cutoffs)
+
+            elif self.mode == "local":
+                # expect x.ndata to have a cutoff_radius property
+                rcut = dgl.ops.copy_v(x, x.ndata["cutoff_distance"])
+                return cosine_cutoff(rs, rcut)
