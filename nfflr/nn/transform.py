@@ -8,6 +8,7 @@ from nfflr.data.graph import (
     periodic_radius_graph,
     periodic_adaptive_radius_graph,
     periodic_kshell_graph,
+    periodic_sann_graph,
     sort_edges_by_dst,
 )
 
@@ -43,6 +44,32 @@ class PeriodicAdaptiveRadiusGraph(torch.nn.Module):
 
     def forward(self, x: nfflr.Atoms):
         return periodic_adaptive_radius_graph(x, r=self.cutoff, dtype=self.dtype)
+
+
+class PeriodicSolidAngleGraph(torch.nn.Module):
+    """Periodic Solid Angle Nearest Neighbor graph transform."""
+
+    def __init__(
+        self,
+        max_neighbors: int = 32,
+        cutoff_radius: float = 10.0,
+        bond_tol: float = 0.15,
+        dtype=torch.get_default_dtype(),
+    ):
+        super().__init__()
+        self.max_neighbors = max_neighbors
+        self.cutoff_radius = cutoff_radius
+        self.bond_tol = bond_tol
+        self.dtype = dtype
+
+    def forward(self, x: nfflr.Atoms):
+        return periodic_sann_graph(
+            x,
+            max_neighbors=self.max_neighbors,
+            cutoff_radius=self.cutoff_radius,
+            bond_tol=self.bond_tol,
+            dtype=self.dtype,
+        )
 
 
 class PeriodicNaturalRadiusGraph(torch.nn.Module):

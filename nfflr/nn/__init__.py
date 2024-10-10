@@ -3,6 +3,7 @@
 __all__ = (
     "PeriodicRadiusGraph",
     "PeriodicKShellGraph",
+    "PeriodicSolidAngleGraph",
     "PeriodicNaturalRadiusGraph",
     "PeriodicAdaptiveRadiusGraph",
     "MultitaskLoss",
@@ -20,6 +21,7 @@ from .transform import (
     PeriodicNaturalRadiusGraph,
     PeriodicAdaptiveRadiusGraph,
     PeriodicKShellGraph,
+    PeriodicSolidAngleGraph,
 )
 
 # modeling primitives
