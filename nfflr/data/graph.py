@@ -502,6 +502,7 @@ def periodic_sann_graph(
     rcut = distance.cumsum(axis=1) / ms
     sann_neighbormask = distance < rcut  # ~(d >= rcut)
 
+    # there is an off-by-one error here sometimes?
     rcut = np.array(
         [rcut[idx, idy] for idx, idy in enumerate(sann_neighbormask.sum(1))]
     )

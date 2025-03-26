@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Literal
 from pathlib import Path
 import shutil
 import warnings
@@ -29,7 +29,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         n_train: float | int = 0.9,
         n_val: float | int = 0.1,
         group_ids: bool = True,
-        train_val_seed: int = 42,
+        train_val_seed: int | Literal["predefined"] = 42,
         diskcache: Optional[Path | str] = None,
         use_lmdb: bool = False,
         cache_structures: bool = True,
@@ -65,9 +65,12 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         self.collate = nfflr.AtomsDataset.collate_forcefield
         self.prepare_batch = nfflr.AtomsDataset.prepare_batch_default
 
-        # loading the dataset splits takes a bit for larger datasets...
         self.train_val_seed = train_val_seed
-        self.split = self.split_dataset_by_id(n_train, n_val)
+        if train_val_seed == "predefined":
+            self.split = self.predefined_split()
+        else:
+            # loading the dataset splits takes a bit for larger datasets...
+            self.split = self.split_dataset_by_id(n_train, n_val)
 
         if cohesive_energies:
             with ase.db.connect(self.dbpath) as db:
@@ -152,11 +155,17 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         atoms = self.produce_or_load_atoms(row, idx)
         # key = row.frame_id
 
+        # NOTE: careful loading row.stress, ase symmetrizes the stress tensor...
+        print(f"{row.stress=}")
+        if len(row.stress) == 9:
+            stress = row.stress.reshape(3, 3)
+        elif len(row.stress) == 6:
+            stress = ase.stress.voigt_6_to_full_3x3_stress(row.stress)
+
         refs = dict(
             energy=to_tensor(row.energy),
             forces=to_tensor(row.forces),
-            # NOTE: careful loading row.stress, ase symmetrizes the stress tensor...
-            stress=to_tensor(row.stress.reshape(3, 3)),
+            stress=to_tensor(stress),
             volume=row.volume,
         )
         refs["virial"] = -row.volume * refs["stress"]
@@ -166,6 +175,23 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
             refs["energy"] -= sum(self.atomic_energies[z] for z in row.numbers)
 
         return atoms, refs
+
+    def predefined_split(self):
+        """Load train/val/test splits from text metadata 'split'."""
+
+        # dict[Literal["train", "val", "test"]: Int[np.ndarray, "split_size"]]
+        with contextlib.closing(sqlite3.connect(self.dbpath)) as connection:
+            # load the entire group_id column from ase sqlite database
+            # directly run sql query from pandas instead of going through ase
+            splits = pd.read_sql(
+                "select * from text_key_values where key='split'", connection
+            )
+            # sort by ase.db primary key
+            splits = splits.sort_values(by="id")
+            split_ids = splits["value"].values
+
+        split_keys = np.unique(split_ids)
+        return {key: np.where(split_ids == key) for key in split_keys}
 
     def split_dataset_by_id(self, n_train: float | int, n_val: float | int):
         """Get train/val/test split indices for SubsetRandomSampler.
