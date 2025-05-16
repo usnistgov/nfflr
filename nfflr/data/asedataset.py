@@ -150,13 +150,13 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         return atoms
 
     def __getitem__(self, idx: int):
+        # print(f"{idx=}")
 
         row = self.load_atomsrow(int(idx))
         atoms = self.produce_or_load_atoms(row, idx)
         # key = row.frame_id
 
         # NOTE: careful loading row.stress, ase symmetrizes the stress tensor...
-        print(f"{row.stress=}")
         if len(row.stress) == 9:
             stress = row.stress.reshape(3, 3)
         elif len(row.stress) == 6:
@@ -167,6 +167,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
             forces=to_tensor(row.forces),
             stress=to_tensor(stress),
             volume=row.volume,
+            idx=idx,
         )
         refs["virial"] = -row.volume * refs["stress"]
 
@@ -191,7 +192,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
             split_ids = splits["value"].values
 
         split_keys = np.unique(split_ids)
-        return {key: np.where(split_ids == key) for key in split_keys}
+        return {key: np.where(split_ids == key)[0] for key in split_keys}
 
     def split_dataset_by_id(self, n_train: float | int, n_val: float | int):
         """Get train/val/test split indices for SubsetRandomSampler.
@@ -229,7 +230,8 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
                 warnings.warn("training and validation set exceed 100% of data")
 
         # shuffle in place with configurable train/val seed
-        train_val_rng = default_rng(self.train_val_seed)
+        if self.train_val_seed != "predefined":
+            train_val_rng = default_rng(self.train_val_seed)
         train_val_rng.shuffle(unique_ids)
 
         split_ids = {
