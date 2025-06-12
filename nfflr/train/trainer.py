@@ -327,7 +327,7 @@ def train(
             Events.COMPLETED, log_metric_history, config.output_dir
         )
 
-        if ray.train._internal.session._get_session():
+        if ray.train._internal.session.get_session():
             val_evaluator.add_event_handler(
                 Events.COMPLETED, lambda engine: session.report(engine.state.metrics)
             )
