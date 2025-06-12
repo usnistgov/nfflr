@@ -380,11 +380,19 @@ def lr(
         finder.run(train_loader)
 
     if rank == 0:
+        import matplotlib.pyplot as plt
+
         # print("Suggested LR", lr_finder.lr_suggestion())
-        ax = lr_finder.plot(display_suggestion=False)
-        ax.loglog()
-        ax.set_ylim(None, 5.0)
-        ax.figure.savefig("lr.png")
+        lrs = lr_finder._history["lr"]
+        losses = lr_finder._history["loss"]
+        plt.semilogx(lrs, losses)
+        plt.xlabel("lr")
+        plt.ylabel("loss")
+        plt.savefig("lr.png")
+        # ax = lr_finder.plot(display_suggestion=False)
+        # ax.loglog()
+        # ax.set_ylim(None, 5.0)
+        # ax.figure.savefig("lr.png")
 
 
 def train_wrapper(local_rank, model, dataset, args):
