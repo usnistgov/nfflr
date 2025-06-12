@@ -1,5 +1,7 @@
 from typing import Callable, Optional, Literal
 from pathlib import Path
+
+import json
 import shutil
 import warnings
 import contextlib
@@ -29,7 +31,8 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         n_train: float | int = 0.9,
         n_val: float | int = 0.1,
         group_ids: bool = True,
-        train_val_seed: int | Literal["predefined"] = 42,
+        train_val_seed: int = 42,
+        split: Literal["predefined"] | str | Path | None = None,
         diskcache: Optional[Path | str] = None,
         use_lmdb: bool = False,
         cache_structures: bool = True,
@@ -65,12 +68,20 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         self.collate = nfflr.AtomsDataset.collate_forcefield
         self.prepare_batch = nfflr.AtomsDataset.prepare_batch_default
 
-        self.train_val_seed = train_val_seed
-        if train_val_seed == "predefined":
-            self.split = self.predefined_split()
-        else:
+        self.train_val_seed = None
+        if split is None:
+            self.train_val_seed = train_val_seed
             # loading the dataset splits takes a bit for larger datasets...
             self.split = self.split_dataset_by_id(n_train, n_val)
+
+        elif split == "predefined":
+            self.split = self.predefined_split()
+
+        else:
+            if Path(split).is_file():
+                with open(split, "r") as f:
+                    splitdata = json.load(f)
+            self.split = {key: np.asarray(val) for key, val in splitdata.items()}
 
         if cohesive_energies:
             with ase.db.connect(self.dbpath) as db:
@@ -193,6 +204,20 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
 
         split_keys = np.unique(split_ids)
         return {key: np.where(split_ids == key)[0] for key in split_keys}
+
+    def elemental_subset(self, elements: set | list):
+        """filter dataset splits to contain only subsets of `elements`."""
+        elements = set(elements)
+        with ase.db.connect(self.dbpath) as db:
+            subset = lambda row: set(row.symbols).issubset(elements)
+            ids = [row.id for row in db.select(filter=subset)]
+
+        split = {
+            key: np.asarray([_id for _id in ids if _id in self.split[key]])
+            for key in self.split.keys()
+        }
+
+        return split
 
     def split_dataset_by_id(self, n_train: float | int, n_val: float | int):
         """Get train/val/test split indices for SubsetRandomSampler.
