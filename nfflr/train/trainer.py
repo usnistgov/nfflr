@@ -385,6 +385,7 @@ def lr(
         # print("Suggested LR", lr_finder.lr_suggestion())
         lrs = lr_finder._history["lr"]
         losses = lr_finder._history["loss"]
+        print(f"{losses=}")
         plt.semilogx(lrs, losses)
         plt.xlabel("lr")
         plt.ylabel("loss")
