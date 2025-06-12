@@ -113,9 +113,14 @@ class MultitaskLoss(torch.nn.Module):
 
         losses = []
         for task, criterion in self.tasks.items():
-            input, target = inputs[task], targets[task]
 
-            if task in self.scale_per_atom:
+            input = inputs.get(task)
+            target = targets.get(task)
+
+            if target is None:
+                # handle regularization terms included in model output
+                task_loss = input
+            elif task in self.scale_per_atom:
                 task_loss = criterion(input / n_atoms, target / n_atoms)
             elif task == "forces" and self.pseudolog_forces:
                 task_loss = criterion(pseudolog10(input), pseudolog10(target))
