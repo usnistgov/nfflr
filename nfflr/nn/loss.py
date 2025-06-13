@@ -91,7 +91,9 @@ class MultitaskLoss(torch.nn.Module):
         def output_transform(output):
             """Select output tensor for metric computation."""
             pred, target = output
-            pred, target = pred[name], target[name]
+            pred = pred.get(name)
+            target = target.get(name)
+
             if name in ("stress", "virial"):
                 pred = einops.rearrange(pred, "b n1 n2 -> b (n1 n2)")
                 target = einops.rearrange(target, "b n1 n2 -> b (n1 n2)")
