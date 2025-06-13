@@ -127,7 +127,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         else:
             cachefile = Path(self.diskcache.name) / f"{key}.pkl"
             if cachefile.is_file():
-                result = torch.load(cachefile)
+                result = torch.load(cachefile, weights_only=True)
 
         return result
 
@@ -209,7 +209,10 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         """filter dataset splits to contain only subsets of `elements`."""
         elements = set(elements)
         with ase.db.connect(self.dbpath) as db:
-            subset = lambda row: set(row.symbols).issubset(elements)
+
+            def subset(row):
+                return set(row.symbols).issubset(elements)
+
             ids = [row.id for row in db.select(filter=subset)]
 
         split = {
