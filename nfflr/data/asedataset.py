@@ -21,10 +21,6 @@ import pickle
 import nfflr
 from nfflr.data.dataset import to_tensor, get_cachedir
 
-import dgl
-
-torch.serialization.add_safe_globals([dgl.DGLGraph])
-
 
 class AtomsSQLDataset(torch.utils.data.Dataset):
     def __init__(
@@ -131,7 +127,8 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         else:
             cachefile = Path(self.diskcache.name) / f"{key}.pkl"
             if cachefile.is_file():
-                result = torch.load(cachefile, weights_only=True)
+                # weights_only=False is safe: loading trusted cache files
+                result = torch.load(cachefile, weights_only=False)
 
         return result
 
