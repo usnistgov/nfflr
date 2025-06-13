@@ -93,6 +93,8 @@ class MultitaskLoss(torch.nn.Module):
             pred, target = output
             pred = pred.get(name)
             target = target.get(name)
+            if target is None:
+                target = torch.zeros_like(pred)
 
             if name in ("stress", "virial"):
                 pred = einops.rearrange(pred, "b n1 n2 -> b (n1 n2)")
