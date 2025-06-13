@@ -273,16 +273,14 @@ def train(
     if isinstance(criterion, nfflr.nn.MultitaskLoss):
 
         eval_metrics = {
-            f"mae_{task}": MeanAbsoluteError(criterion.make_output_transform(task))
-            for task in criterion.tasks
+            f"mae_{task}": MeanAbsoluteError(transform)
+            for task, transform in criterion.output_transforms()
         }
         metrics.update(eval_metrics)
 
         eval_metrics = {
-            f"med_abs_err_{task}": MedianAbsoluteError(
-                criterion.make_output_transform(task)
-            )
-            for task in criterion.tasks
+            f"med_abs_err_{task}": MedianAbsoluteError(transform)
+            for task, transform in criterion.output_transforms()
         }
         if idist.get_world_size() == 1:
             metrics.update(eval_metrics)

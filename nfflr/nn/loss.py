@@ -82,6 +82,11 @@ class MultitaskLoss(torch.nn.Module):
     def tasknames(self):
         return list(self.tasks.keys())
 
+    def output_transforms(self):
+        for task, func in self.tasks.items():
+            if func is not None:
+                yield task, self.make_output_transform(task)
+
     def make_output_transform(self, name: str):
         """Build ignite metric transforms for multi-output models.
 
