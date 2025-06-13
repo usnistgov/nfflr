@@ -21,6 +21,10 @@ import pickle
 import nfflr
 from nfflr.data.dataset import to_tensor, get_cachedir
 
+import dgl
+
+torch.serialization.add_safe_globals([dgl.DGLGraph])
+
 
 class AtomsSQLDataset(torch.utils.data.Dataset):
     def __init__(
