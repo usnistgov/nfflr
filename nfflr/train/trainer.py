@@ -388,6 +388,7 @@ def lr(
         plt.xlabel("lr")
         plt.ylabel("loss")
         plt.savefig("lr.png")
+        torch.save("lr.pkl", dict(lr=lrs, losses=losses))
         # ax = lr_finder.plot(display_suggestion=False)
         # ax.loglog()
         # ax.set_ylim(None, 5.0)
