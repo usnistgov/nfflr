@@ -10,7 +10,7 @@ from .atoms import Atoms, spglib_cell, batch, unbatch, to_ase
 
 # AtomsDataset
 from .data.dataset import AtomsDataset, collate_forcefield_targets
-from .data.dataset.asedataset import AtomsSQLDataset
+from .data.asedataset import AtomsSQLDataset
 
 # utilities
 from .models.utils import autograd_forces
