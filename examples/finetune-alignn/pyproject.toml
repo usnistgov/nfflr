@@ -3,15 +3,14 @@ name = "finetune-alignn"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "alignn>=2024.12.12",
     "nfflr>=0.4.0",
 ]
 
 [tool.uv.sources]
-# nfflr = { git = "https://github.com/usnistgov/nfflr", branch = "v0.4.0-rc.0" }
-nfflr = { path = "../.." }
+nfflr = { git = "https://github.com/usnistgov/nfflr", branch = "main" }
 
 [dependency-groups]
 dev = [
