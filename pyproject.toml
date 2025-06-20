@@ -18,7 +18,7 @@ dependencies = [
     "numpy<2.0.0; sys_platform == 'darwin'",
     "scipy",
     "torch==2.4; sys_platform == 'linux'",
-    "torch==2.1.0; sys_platform == 'darwin'",
+    "torch==2.7.1; sys_platform == 'darwin'",
     "torchdata==0.7.0; sys_platform == 'darwin'",
     "typer",
     "einops",
