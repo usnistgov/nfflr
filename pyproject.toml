@@ -4,25 +4,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nfflr"
-version = "0.3.1"
-requires-python = ">=3.7"
+version = "0.4.0"
+requires-python = ">=3.8"
 description = "neural force field learning toolkit"
 readme = "README.md"
 authors = [
-    {name = "Brian DeCost", email = "brian.decost@nist.gov"},
-    {name = "Kamal Choudhary", email = "kamal.choudhary@nist.gov"}
+    {name = "Brian DeCost", email = "brian.decost@nist.gov"}
 ]
 dependencies = [
     "ase",
     "ray[tune]",
     "numpy",
     "scipy",
-    "torch",
+    "torch==2.4",
     "typer",
     "einops",
     "pandas",
     "pynvml",
     "pykeops",
+    "pynvml>=11.5.3",
+    "lmdb>=1.6.2",
     "mendeleev",
     "matplotlib",
     "cached-path",
@@ -30,8 +31,50 @@ dependencies = [
     "plum-dispatch",
     "pytorch-ignite",
     "py-config-runner",
-    "dgl>=0.6.0",
+    "dgl>=2.2.1",
     "jarvis-tools>=2021.07.19"
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "dgl-cu118"
+url = "https://data.dgl.ai/wheels/torch-2.4/cu118/repo.html"
+explicit = true
+format = "flat"
+
+[[tool.uv.index]]
+name = "dgl-cpu"
+url = "https://data.dgl.ai/wheels/torch-2.4/repo.html"
+explicit = true
+format = "flat"
+
+[[tool.uv.index]]
+name = "dgl-darwin"
+url = "https://data.dgl.ai/wheels/repo.html"
+explicit = true
+format = "flat"
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
+  { index = "pytorch-cu118", marker = "sys_platform == 'linux'" },
+]
+torchvision = [
+  { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
+  { index = "pytorch-cu118", marker = "sys_platform == 'linux'" },
+]
+dgl = [
+  { index = "dgl-cu118", marker = "sys_platform == 'linux'" },
+  { index = "dgl-darwin", marker = "sys_platform == 'darwin'" },
 ]
 
 [project.urls]
