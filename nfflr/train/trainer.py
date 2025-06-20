@@ -45,8 +45,11 @@ from nfflr.models.utils import reset_initial_output_bias
 cli = typer.Typer()
 
 # set up multi-GPU training, if available
-gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
-num_gpus = len(gpus.split(","))
+gpus = os.environ.get("CUDA_VISIBLE_DEVICES")
+if gpus:
+    num_gpus = len(gpus.split(","))
+else:
+    num_gpus = 0
 
 backend = None
 nproc_per_node = None
