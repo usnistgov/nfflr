@@ -10,6 +10,7 @@ import torch
 from torch import nn
 
 import dgl
+import dgl.function as fn
 from dgl.nn import AvgPooling, SumPooling
 
 import nfflr
@@ -36,7 +37,6 @@ class ALIGNNFFConfig:
 
     transform: Callable = PeriodicRadiusGraph(cutoff=5.0)
     triplet_style: Literal["line_graph", "coincident"] = "line_graph"
-    prune_triplets: bool = False
     cutoff: torch.nn.Module = Cosine(5.0)
     local_cutoff: float = 4.0
     alignn_layers: int = 4
@@ -48,7 +48,6 @@ class ALIGNNFFConfig:
     hidden_features: int = 256
     output_features: int = 1
     compute_forces: bool = True
-    reduce_forces: bool = True
     energy_units: Literal["eV", "eV/atom"] = "eV"
     reference_energies: Optional[Literal["fixed", "trainable"]] = None
 
@@ -117,47 +116,16 @@ class ALIGNNFF(nn.Module):
             self.reference_energy.reset_parameters(values=values)
 
     def get_line_graph(self, g):
-        if self.config.triplet_style == "line_graph":
-            return g.line_graph()
-        elif self.config.triplet_style == "coincident":
-            return edge_coincidence_graph(
-                g, shared=True, cutoff=self.config.local_cutoff
-            )
+        return edge_coincidence_graph(g, shared=True, cutoff=self.config.local_cutoff)
 
-    def transform(self, atoms):
+    def transform(self, a: nfflr.Atoms):
         """Neighbor list and bond pair graph construction.
 
         Does not share features to facilitate autograd.
         """
-
-        if isinstance(atoms, nfflr.Atoms):
-            g = self.config.transform(atoms)
-            lg = self.get_line_graph(g)
-
-        elif isinstance(atoms, dgl.DGLGraph):
-            g = atoms
-            lg = self.get_line_graph(g)
-
-        elif isinstance(atoms, tuple):
-            g, lg = atoms
-
+        g = self.config.transform(a)
+        lg = self.get_line_graph(g)
         return g, lg
-
-    def triplet_cutoff(self, g: dgl.DGLGraph, lg: dgl.DGLGraph) -> torch.Tensor:
-        """Calculate three-body interaction cutoffs (k->i)->(j->i).
-
-        This is the product of the two-body cutoffs.
-        If the model prunes triplets, also apply the cutoff for the k -> j bond
-        """
-
-        fcut = dgl.ops.u_mul_v(lg, g.edata["cutoff_value"], g.edata["cutoff_value"])
-
-        if self.config.prune_triplets:
-            r_kj = dgl.ops.u_sub_v(lg, lg.ndata["r"], lg.ndata["r"])
-            fcut_kj = self.cutoff(torch.norm(r_kj, dim=1, keepdim=False))
-            fcut = fcut * fcut_kj
-
-        return fcut
 
     @dispatch
     def forward(self, x):
@@ -167,8 +135,7 @@ class ALIGNNFF(nn.Module):
     @dispatch
     def forward(self, x: nfflr.Atoms):
         device = next(self.parameters()).device
-        return self.forward(self.transform(x).to(device))
-        # return self.forward(self.transform(x))
+        return self.forward(self.neighbor_transform(x).to(device))
 
     @dispatch
     def forward(
@@ -184,7 +151,11 @@ class ALIGNNFF(nn.Module):
         # print("forward")
         config = self.config
 
-        g, lg = self.transform(g)
+        if isinstance(g, dgl.DGLGraph):
+            lg = None
+        else:
+            g, lg = g
+
         g = g.local_var()
 
         # to compute forces, take gradient wrt g.edata["r"]
@@ -193,7 +164,7 @@ class ALIGNNFF(nn.Module):
             g.edata["r"].requires_grad_(True)
 
         # initial node features: atom feature network...
-        atomic_number = g.ndata["atomic_number"]
+        atomic_number = g.ndata.pop("atomic_number").int()
         x = self.atom_embedding(atomic_number)
 
         # initial bond features
@@ -203,21 +174,13 @@ class ALIGNNFF(nn.Module):
 
         if config.cutoff is not None:
             # save cutoff function value for application in EdgeGatedGraphconv
-            g.edata["cutoff_value"] = self.config.cutoff(g)
-
-        # Local: apply GCN to local neighborhoods
-        # solution: index into bond features and turn it into a residual connection?
-        # edge_mask = bondlength <= config.local_cutoff
+            g.edata["cutoff_value"] = self.config.cutoff(bondlength)
 
         if len(self.alignn_layers) > 0:
+            if lg is None:
+                lg = self.get_line_graph(g)
 
             lg.ndata["r"] = g.edata["r"]
-            lg.edata["cutoff_value"] = self.triplet_cutoff(g, lg)
-
-            if self.config.triplet_style == "line_graph":
-                # prune line graph without dropping nodes
-                drop = torch.where(lg.edata["cutoff_value"] <= 0)[0]
-                lg = dgl.remove_edges(lg, drop)
 
             # compute angle features (don't break autograd graph with precomputed lg)
             if self.config.triplet_style == "line_graph":
@@ -226,6 +189,14 @@ class ALIGNNFF(nn.Module):
                 lg.apply_edges(compute_bond_cosines_coincident)
 
             z = self.angle_embedding(lg.edata.pop("h"))
+
+            # add triplet cutoff
+            lg.apply_edges(fn.u_sub_v("r", "r", "r_kj"))
+            fcut_kj = self.cutoff(torch.norm(lg.edata["r_kj"], dim=1, keepdim=False))
+            lg.ndata["fcut"] = g.edata["cutoff_value"]
+            lg.apply_edges(fn.u_mul_v("fcut", "fcut", "fcut_pair"))
+            fcut_kj = fcut_kj * lg.edata["fcut_pair"]
+            lg.edata["cutoff_value"] = fcut_kj
 
         # ALIGNN updates: update node, edge, triplet features
         for alignn_layer in self.alignn_layers:
@@ -251,7 +222,6 @@ class ALIGNNFF(nn.Module):
                 g,
                 energy_units=config.energy_units,
                 compute_virial=True,
-                reduce=config.reduce_forces,
             )
 
             return dict(

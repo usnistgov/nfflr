@@ -1,9 +1,8 @@
 """Dataset construction based on collections of Vasp outputs."""
 
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Optional
 
-import ase
 import torch
 import numpy as np
 import pandas as pd
@@ -104,18 +103,36 @@ def load_vasp_steps_jv(path: Path, dataset_dir: Path):
     return configurations
 
 
+def vasprun_to_json(datadir: Path | str, json_path: str = "vasprun_dataset.jsonl"):
+    """Load vasprun dataset and cache to json-lines format.
+
+    nfflr.data.vasprun_to_json("/path/to/vasp-projects", "vasprun_dataset.jsonl")
+    dataset = nfflr.AtomsDataset(
+        "vasprun_dataset.jsonl",
+        id_tag="id",
+        group_ids=True,
+        target="energy_and_forces",
+        energy_units="eV",
+    )
+    """
+    dataset = vasprun_dataset(datadir)
+    dataset.df.to_json(json_path, lines=True, orient="records")
+
+
 def vasprun_dataset(
-    datafiles: Iterator[Path],
-    datadir: Path,
+    datadir: Path | str,
     transform: Optional[torch.nn.Module] = None,
     diskcache: bool = False,
 ):
     """Construct an AtomsDataset from a collection of vasprun.xml files.
 
-    e.g. datafiles = datadir.glob("*/*/vasprun.xml")
+    recursively searches directories under `datadir` for `vasprun.xml`
     """
+    if isinstance(datadir, str):
+        datadir = Path(datadir)
+
     data = []
-    for datafile in datadir.glob("*/*/vasprun.xml"):
+    for datafile in datadir.rglob("vasprun.xml"):
         try:
             data += load_vasp_steps_jv(datafile, datadir)
         except:

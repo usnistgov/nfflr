@@ -244,14 +244,14 @@ class TFM(nn.Module):
         output = torch.squeeze(self.readout(g, atomwise_energy))
 
         if config.compute_forces:
-            forces, stress = nfflr.autograd_forces(
+            forces, virial = nfflr.autograd_forces(
                 output,
                 g.edata["r"],
                 g,
                 energy_units=config.energy_units,
-                compute_stress=True,
+                compute_virial=True,
             )
 
-            return dict(energy=output, forces=forces, stress=stress, x=atomwise_energy)
+            return dict(energy=output, forces=forces, virial=virial, x=atomwise_energy)
 
         return output

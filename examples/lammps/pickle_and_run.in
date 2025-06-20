@@ -1,0 +1,39 @@
+print hello
+
+python source here """
+import torch
+import nfflr
+import lammps
+from nfflr.extern.lammps import MLIAPModel
+
+torch.set_default_dtype(torch.float32)
+cfg = nfflr.models.ALIGNNFFConfig(reduce_forces=False)
+gnn = nfflr.models.ALIGNNFF(cfg)
+model = MLIAPModel(["Ga", "N", "Si", "Al"], gnn)
+model.pickle("mliap_test_inline.pkl")
+"""
+
+units       metal
+atom_style  atomic
+
+lattice     fcc 0.8442
+region      box block 0 1.69 0 1.69 0 1.69
+create_box  1 box
+create_atoms    1 box
+mass        1 1.0
+
+velocity    all create 3.0 87287 loop geom
+
+# Run the simulation with the mliap unified pair style
+# Use pre-loaded model by specifying model filename as "EXISTS"
+# pair_style  mliap unified EXISTS
+pair_style      mliap unified mliap_test_inline.pkl 0
+pair_coeff  * * Ga As Al N
+
+neighbor    0.3 bin
+neigh_modify    every 20 delay 0 check no
+
+fix     1 all nve
+
+thermo      50
+run     250

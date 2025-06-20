@@ -189,12 +189,12 @@ class Tersoff(nn.Module):
 
         total_energy = energy.sum()
 
-        forces, stress = nfflr.autograd_forces(
-            total_energy, g.edata["r"], g, energy_units="eV", compute_stress=True
+        forces, virial = nfflr.autograd_forces(
+            total_energy, g.edata["r"], g, energy_units="eV", compute_virial=True
         )
 
         return dict(
             energy=total_energy,
             forces=forces,
-            stress=stress,
+            virial=virial,
         )

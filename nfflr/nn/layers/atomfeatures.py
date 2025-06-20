@@ -4,6 +4,7 @@ import numpy as np
 
 import einops
 
+import ase.data
 from mendeleev.fetch import fetch_table
 from jarvis.core.specie import chem_data, get_node_attributes
 
@@ -87,9 +88,12 @@ class AtomPairType(torch.nn.Module):
         # look up atom type ids for pairs
         atomtypes = self.atomtypes(zs)
 
-        # calculate 2D pair index
-        ia, ib = einops.unpack(atomtypes, ps, "i *")
+        # calculate 2D pair index - like this numpy function:
         # pairtype = torch.from_numpy(np.ravel_multi_index((ia, ib), (n, n)))
+        if len(z1) == 1:
+            ia, ib = atomtypes.split(1)
+        else:
+            ia, ib = einops.unpack(atomtypes, ps, "i *")
 
         # convert to pair index
         if self.symmetric:
@@ -207,7 +211,7 @@ class PeriodicTableEmbedding(torch.nn.Module):
     def forward(self, zs):
         row = self.rows[zs - 1]
         col = self.cols[zs - 1]
-        return self.row_embedding(row) + self.col_embedding(col)
+        return self.row_embedding(row - 1) + self.col_embedding(col - 1)
 
 
 class AtomicReferenceEnergy(torch.nn.Module):
@@ -234,3 +238,14 @@ class AtomicReferenceEnergy(torch.nn.Module):
 
     def forward(self, zs: torch.Tensor):
         return self.reference_energy(zs)
+
+
+class CovalentRadius(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        rs = torch.from_numpy(ase.data.covalent_radii).type(torch.get_default_dtype())
+        self.register_buffer("covalent_radii", rs)
+
+    def forward(self, zs: torch.Tensor):
+        return self.covalent_radii[zs]

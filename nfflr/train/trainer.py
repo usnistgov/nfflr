@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from typing import TYPE_CHECKING
+import warnings
 
 import torch
 from torch.utils.data import SubsetRandomSampler
@@ -14,6 +15,8 @@ import ignite
 import ignite.distributed as idist
 from ignite.utils import manual_seed
 from ignite.metrics import Loss, MeanAbsoluteError
+from ignite.contrib.metrics import GpuInfo
+from ignite.contrib.metrics.regression import MedianAbsoluteError
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.handlers import Checkpoint, DiskSaver, FastaiLRFinder, TerminateOnNan
 from ignite.engine import Events, create_supervised_trainer
@@ -26,13 +29,11 @@ from py_config_runner import ConfigObject
 
 import nfflr
 
-
 if TYPE_CHECKING:
     from nfflr.train.config import TrainingConfig
 
 from nfflr.train.utils import (
     group_decay,
-    select_target,
     setup_evaluator_with_grad,
     setup_optimizer,
     setup_scheduler,
@@ -44,13 +45,16 @@ from nfflr.models.utils import reset_initial_output_bias
 cli = typer.Typer()
 
 # set up multi-GPU training, if available
-gpus = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
-num_gpus = len(gpus.split(","))
+gpus = os.environ.get("CUDA_VISIBLE_DEVICES")
+if gpus:
+    num_gpus = len(gpus.split(","))
+else:
+    num_gpus = 0
 
 backend = None
 nproc_per_node = None
 if num_gpus > 1:
-    backend == "nccl" if torch.distributed.is_nccl_available() else "gloo"
+    backend = "nccl" if torch.distributed.is_nccl_available() else "gloo"
     nproc_per_node = num_gpus
 
 spawn_kwargs = {
@@ -67,7 +71,11 @@ def log_console(engine: ignite.engine.Engine, name: str):
     loss = m["loss"]
 
     print(f"{name} results - Epoch: {epoch}  Avg loss: {loss:.2f}")
-    if "mae_forces" in m.keys():
+    if "med_abs_err_forces" in m.keys():
+        err_energy = m["med_abs_err_energy"]
+        err_forces = m["med_abs_err_forces"]
+        print(f"median abs err: energy: {err_energy:.2f}  force: {err_forces:.4f}")
+    elif "mae_forces" in m.keys():
         print(f"energy: {m['mae_energy']:.2f}  force: {m['mae_forces']:.4f}")
 
 
@@ -83,11 +91,11 @@ def get_dataflow(dataset: nfflr.AtomsDataset, config: TrainingConfig):
     dataset : nfflr.AtomsDataset
     config : nfflr.train.TrainingConfig
     """
-
+    batch_size = config.per_device_batch_size * idist.get_world_size()
     train_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
-        batch_size=config.batch_size,
+        batch_size=batch_size,
         sampler=SubsetRandomSampler(dataset.split["train"]),
         drop_last=True,
         num_workers=config.dataloader_workers,
@@ -96,7 +104,7 @@ def get_dataflow(dataset: nfflr.AtomsDataset, config: TrainingConfig):
     val_loader = idist.auto_dataloader(
         dataset,
         collate_fn=dataset.collate,
-        batch_size=config.batch_size,
+        batch_size=batch_size,
         sampler=SubsetRandomSampler(dataset.split["val"]),
         drop_last=False,  # True -> possible issue crashing with MP dataset
         num_workers=config.dataloader_workers,
@@ -113,7 +121,12 @@ def setup_model_and_optimizer(
 ):
     """Initialize model, criterion, and optimizer."""
     model = idist.auto_model(model)
-    criterion = idist.auto_model(config.criterion)
+
+    criterion = config.criterion
+    if isinstance(criterion, torch.nn.Module) and any(
+        [p.requires_grad for p in criterion.parameters()]
+    ):
+        criterion = idist.auto_model(criterion)
 
     if isinstance(criterion, nfflr.nn.MultitaskLoss):
         # auto_model won't transfer buffers...?
@@ -154,6 +167,8 @@ def setup_trainer(
     )
 
     trainer.add_event_handler(Events.EPOCH_COMPLETED, TerminateOnNan())
+    if torch.cuda.is_available():
+        GpuInfo().attach(trainer, name="gpu")
 
     if scheduler is not None:
         trainer.add_event_handler(
@@ -229,7 +244,7 @@ def train(
     model, criterion, optimizer = setup_model_and_optimizer(model, dataset, config)
     scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
-    if config.swag:
+    if config.swag_epochs is not None:
         swag_handler = SWAGHandler(model)
 
     trainer = setup_trainer(
@@ -237,7 +252,7 @@ def train(
     )
     if config.progress and rank == 0:
         pbar = ProgressBar()
-        pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+        pbar.attach(trainer, metric_names=["gpu:0 mem(%)", "gpu:0 util(%)"])
 
     if config.checkpoint:
         state = dict(model=model, optimizer=optimizer, trainer=trainer)
@@ -246,28 +261,36 @@ def train(
             state["scheduler"] = scheduler
         if isinstance(criterion, torch.nn.Module):
             state["criterion"] = criterion
-        if config.swag:
+        if config.swag_epochs:
             state["swagmodel"] = swag_handler.swagmodel
 
         setup_checkpointing(state, config)
 
-    if config.swag:
-        swag_handler.attach(trainer)
+    if config.swag_epochs is not None:
+        swag_handler.attach(
+            trainer, event=ignite.engine.Events.EPOCH_COMPLETED(after=config.epochs)
+        )
 
     # evaluation
     metrics = {"loss": Loss(criterion)}
     if isinstance(criterion, nfflr.nn.MultitaskLoss):
-        # NOTE: unscaling currently uses a global scale
-        # shared across all tasks (intended to scale energy units)
-        unscale = None
-        if dataset.standardize:
-            unscale = dataset.scaler.unscale
 
         eval_metrics = {
-            f"mae_{task}": MeanAbsoluteError(select_target(task, unscale_fn=unscale))
-            for task in criterion.tasks
+            f"mae_{task}": MeanAbsoluteError(transform)
+            for task, transform in criterion.output_transforms()
         }
         metrics.update(eval_metrics)
+
+        eval_metrics = {
+            f"med_abs_err_{task}": MedianAbsoluteError(transform)
+            for task, transform in criterion.output_transforms()
+        }
+        if idist.get_world_size() == 1:
+            metrics.update(eval_metrics)
+        else:
+            warnings.warn(
+                "MedianAbsoluteError metric not yet supported in distributed training"
+            )
 
     train_evaluator, val_evaluator = setup_evaluators(
         model, dataset.prepare_batch, metrics, transfer_outputs
@@ -305,12 +328,15 @@ def train(
             Events.COMPLETED, log_metric_history, config.output_dir
         )
 
-        if ray.tune.is_session_enabled():
+        if ray.train._internal.session.get_session():
             val_evaluator.add_event_handler(
                 Events.COMPLETED, lambda engine: session.report(engine.state.metrics)
             )
 
-    trainer.run(train_loader, max_epochs=config.epochs)
+    max_epochs = config.epochs
+    if config.swag_epochs is not None:
+        max_epochs = config.epochs + config.swag_epochs
+    trainer.run(train_loader, max_epochs=max_epochs)
 
     return val_evaluator.state.metrics["loss"]
 
@@ -347,21 +373,34 @@ def lr(
 
     if config.progress and rank == 0:
         pbar = ProgressBar()
-        pbar.attach(trainer, output_transform=lambda x: {"loss": x})
+        pbar.attach(trainer, metric_names=["gpu:0 mem(%)", "gpu:0 util(%)"])
 
     lr_finder = FastaiLRFinder()
     to_save = {"model": model, "optimizer": optimizer}
-    with lr_finder.attach(
-        trainer, to_save, start_lr=1e-6, end_lr=0.1, num_iter=400, diverge_th=1e9
-    ) as finder:
+    with lr_finder.attach(trainer, to_save, num_iter=400, diverge_th=1e9) as finder:
         finder.run(train_loader)
 
     if rank == 0:
+        import matplotlib.pyplot as plt
+
         # print("Suggested LR", lr_finder.lr_suggestion())
-        ax = lr_finder.plot(display_suggestion=False)
-        ax.loglog()
-        ax.set_ylim(None, 5.0)
-        ax.figure.savefig("lr.png")
+        lrs = lr_finder._history["lr"]
+        losses = lr_finder._history["loss"]
+        print(f"{losses=}")
+        plt.semilogx(lrs, losses)
+        plt.xlabel("lr")
+        plt.ylabel("loss")
+        plt.savefig("lr.png")
+        torch.save(dict(lr=lrs, losses=losses), "lr.pkl")
+        # ax = lr_finder.plot(display_suggestion=False)
+        # ax.loglog()
+        # ax.set_ylim(None, 5.0)
+        # ax.figure.savefig("lr.png")
+
+
+def train_wrapper(local_rank, model, dataset, args):
+    """Wrap train entry point for idist.Parallel."""
+    return train(model, dataset, args, local_rank=local_rank)
 
 
 @cli.command("train")
@@ -371,12 +410,15 @@ def cli_train(config_path: Path, verbose: bool = False):
         config = ConfigObject(config_path)
         if verbose:
             print(config)
-
-        # wrap train entry point for idist.Parallel
-        def train_wrapper(local_rank, model, dataset, args):
-            return train(model, dataset, args, local_rank=local_rank)
+            print(spawn_kwargs)
+            print("loading config")
 
         parallel.run(train_wrapper, config.model, config.dataset, config.args)
+
+
+def lr_wrapper(local_rank, model, dataset, args):
+    """Wrap lr entry point for idist.Parallel."""
+    return lr(model, dataset, args, local_rank=local_rank)
 
 
 @cli.command("lr")
@@ -391,10 +433,6 @@ def cli_lr(config_path: Path, verbose: bool = False):
 
         if verbose:
             print(config)
-
-        # wrap lr entry point for idist.Parallel
-        def lr_wrapper(local_rank, model, dataset, args):
-            return lr(model, dataset, args, local_rank=local_rank)
 
         parallel.run(lr_wrapper, config.model, config.dataset, config.args)
 

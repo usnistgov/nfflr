@@ -4,11 +4,32 @@ __all__ = ()
 from typing import Tuple, Dict
 
 import dgl
+import dgl.function as fn
+
 import torch
+import einops
 import numpy as np
 from scipy import spatial
 
 import nfflr
+
+
+def sort_edges_by_dst(g: dgl.DGLGraph):
+    """Sort edges by increasing dst id"""
+    if g.num_edges() <= 1:
+        return g
+
+    src, dst = g.edges(form="uv")
+    edge_order = torch.argsort(dst)
+
+    g_sorted = dgl.graph((src[edge_order], dst[edge_order]))
+
+    for key, value in g.ndata.items():
+        g_sorted.ndata[key] = value
+
+    g_sorted.edata["r"] = g.edata["r"][edge_order].contiguous()
+
+    return g_sorted
 
 
 def compute_bond_cosines(edges):
@@ -22,6 +43,24 @@ def compute_bond_cosines(edges):
     r2 = edges.dst["r"]
     bond_cosine = torch.sum(r1 * r2, dim=1) / (
         torch.norm(r1, dim=1) * torch.norm(r2, dim=1)
+    )
+    bond_cosine = torch.clamp(bond_cosine, -1, 1)
+    # bond_cosine = torch.arccos((torch.clamp(bond_cosine, -1, 1)))
+
+    return {"h": bond_cosine}
+
+
+def compute_bond_cosines_coincident(edges):
+    """Compute bond angle cosines from bond displacement vectors."""
+    # edge attention graph edge: (k, i) -> (j, i)
+    # `k -> i <- j`
+    # use law of cosines to compute angles cosines
+    # negate src bond so displacements are like `a <- b -> c`
+    # cos(theta) = ik \dot ji / (||ki|| ||ji||)
+    r_ki = edges.src["r"]
+    r_ji = edges.dst["r"]
+    bond_cosine = torch.sum(r_ki * r_ji, dim=1) / (
+        torch.norm(r_ki, dim=1) * torch.norm(r_ji, dim=1)
     )
     bond_cosine = torch.clamp(bond_cosine, -1, 1)
     # bond_cosine = torch.arccos((torch.clamp(bond_cosine, -1, 1)))
@@ -234,7 +273,7 @@ def periodic_radius_graph(
     src, v = torch.where(neighbor_mask)
 
     # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % len(a.numbers)))
+    g = dgl.graph((src, v % len(a)), num_nodes=len(a))
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
@@ -273,7 +312,7 @@ def periodic_radius_graph_kdtree(
     src, v = dist.nonzero()
 
     # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % len(a.numbers)))
+    g = dgl.graph((src, v % len(a)), num_nodes=len(a))
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
@@ -320,7 +359,7 @@ def periodic_adaptive_radius_graph(
     src, v = torch.where(neighbor_mask)
 
     # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % len(a.numbers)))
+    g = dgl.graph((src, v % len(a)), num_nodes=len(a))
 
     # add the fractional coordinates
     # note: to do this differentiably, probably want to store
@@ -430,6 +469,60 @@ def periodic_knn_graph(
     return g
 
 
+def periodic_sann_graph(
+    at: nfflr.Atoms,
+    max_neighbors: int = 32,
+    cutoff_radius: float = 10.0,
+    bond_tol: float = 0.15,
+    dtype=None,
+):
+    """Solid Angle Nearest Neighbor algorithm (10.1063/1.4729313).
+
+    This implementation uses an eager kd-tree k-neighbor query against a tiled supercell
+    to build a fixed-format neighborlist (sorted by the kdtree query)
+    so that the SANN cutoff criterion can be vectorized over atoms.
+    """
+    if dtype is None:
+        dtype = torch.get_default_dtype()
+
+    # build radius graph in supercell
+    x, x_supercell, root_ids, cell_images = tile_supercell_2(
+        at.positions.double(), at.cell.double(), cutoff_radius, bond_tol
+    )
+
+    # find k nearest tiled points to query points x
+    # this is nice because scipy sorts the points for us!
+    # start at neighbor 2 since x is always in x_supercell
+    tiled = spatial.KDTree(x_supercell)
+    distance, ids = tiled.query(x, k=range(2, 2 + max_neighbors))
+
+    # vectorize evaluation of SANN criterion
+    ms = np.arange(1, 1 + max_neighbors) - 2.0
+    ms[:2] = 0.01  # mask with value to give large rcut
+    rcut = distance.cumsum(axis=1) / ms
+    sann_neighbormask = distance < rcut  # ~(d >= rcut)
+
+    # there is an off-by-one error here sometimes?
+    rcut = np.array(
+        [rcut[idx, idy] for idx, idy in enumerate(sann_neighbormask.sum(1))]
+    )
+
+    # broadcast the comparison to rcut to index into ids
+    # messages propagate src -> dst: propagation from *neighbor* to *self*
+    dst, nbr_supercell = np.where(distance <= rcut[:, None])
+    # index into knn neighbor ids -> atom ids
+    src_supercell = ids[dst, nbr_supercell]
+    g = dgl.graph((src_supercell % len(at.numbers), dst))
+
+    g.ndata["coord"] = x.to(dtype)
+    g.edata["r"] = (x[dst] - x_supercell[src_supercell]).to(dtype)
+    g.ndata["atomic_number"] = at.numbers.type(torch.int)
+
+    g.ndata["cutoff_distance"] = torch.from_numpy(rcut).type(dtype)
+
+    return g
+
+
 def prepare_line_graph_batch(
     batch: Tuple[dgl.DGLGraph, dgl.DGLGraph, Dict[str, torch.Tensor]],
     device=None,
@@ -462,3 +555,39 @@ def prepare_dgl_batch(
     batch = (g.to(device, non_blocking=non_blocking), t)
 
     return batch
+
+
+def edge_coincidence_graph(g: dgl.DGLGraph, shared=False, cutoff: float | None = None):
+    # get all pairs of incident edges for each node
+    # torch.combinations gives half the pairs
+    edgepairs = [
+        torch.combinations(g.in_edges(id_node, form="eid"), r=2, with_replacement=False)
+        for id_node in g.nodes()
+    ]
+
+    eids, ps = einops.pack(edgepairs, "* d")
+
+    src, dst = eids.T
+
+    # to_bidirected fills in the other half of edge pairs all at once
+    # don't drop any bonds - make a graph with no edges if there are no triplets (?)
+    t = dgl.to_bidirected(dgl.graph((src, dst), num_nodes=g.num_edges()))
+
+    # TODO: return empty graph here if there are no triplets?
+    # also TODO: use a heterograph to include self-interactions for the attention?
+    # maybe this is more natural in KeOps...?
+
+    if shared:
+        t.ndata["r"] = g.edata["r"]
+
+    if cutoff is not None:
+        with torch.no_grad():
+            t.apply_edges(fn.u_sub_v("r", "r", "d"))
+            tripletmask = t.edata["d"].norm(dim=1) < cutoff
+            del t.edata["d"]
+            t = t.edge_subgraph(
+                torch.arange(t.num_edges(), device=src.device)[tripletmask],
+                relabel_nodes=False,
+            )
+
+    return t

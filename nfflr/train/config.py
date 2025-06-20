@@ -37,7 +37,7 @@ class TrainingConfig:
     # optimization
     optimizer: Literal["sgd", "adamw"] = "adamw"
     criterion: torch.nn.Module | Callable = torch.nn.MSELoss()
-    scheduler: Optional[Literal["onecycle"]] = "onecycle"
+    scheduler: Literal["onecycle"] | None = "onecycle"
     warmup_steps: float | int = 0.3
     per_device_batch_size: int = 256
     batch_size: Optional[int] = None
@@ -45,7 +45,9 @@ class TrainingConfig:
     learning_rate: float = 1e-2
     weight_decay: float = 1e-5
     epochs: int = 30
-    swag: bool = False
+    swag_epochs: Optional[int] = None
+    swag_anneal_epochs: int = 1
+    swag_learning_rate: Optional[float] = None
 
     # model initialization
     initialize_bias: bool = False
@@ -56,6 +58,11 @@ class TrainingConfig:
     train_eval_fraction: float = 0.1
 
     def __post_init__(self):
-        self.batch_size = self.per_device_batch_size * idist.get_world_size()
+        # get_world_size is evaluating to 1 if this is evaluated outside of idist.Parallel
+        # self.batch_size = self.per_device_batch_size * idist.get_world_size()
+
         if self.output_dir is None:
             self.output_dir = self.experiment_dir
+
+        if self.swag_learning_rate is None and self.swag_epochs is not None:
+            self.swag_lr = self.learning_rate / 10

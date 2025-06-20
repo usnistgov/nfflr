@@ -14,7 +14,7 @@ def main():
     ```
     """
     package_root = Path(__file__).parent
-    nff_script = package_root / "train.py"
+    nff_script = package_root / "trainer.py"
     print(nff_script)
 
 
