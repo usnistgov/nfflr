@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nfflr"
-version = "0.4.0"
-requires-python = ">=3.8"
+version = "0.4.1"
+requires-python = ">=3.8,<3.13"
 description = "neural force field learning toolkit"
 readme = "README.md"
 authors = [
@@ -111,3 +111,9 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
+
+[dependency-groups]
+dev = [
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
+]
