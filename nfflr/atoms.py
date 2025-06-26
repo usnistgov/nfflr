@@ -2,10 +2,19 @@ __all__ = ()
 
 from pathlib import Path
 from collections.abc import Iterable
-from typing import TypeAlias, Optional, List
+from typing import Optional
 
 import ase
-import dgl
+
+try:
+    import dgl
+    from typing import TypeAlias
+
+    _dgl_available = True
+except ImportError:
+    _dgl_available = False
+
+
 import torch
 from plum import dispatch
 
@@ -158,7 +167,7 @@ def spglib_cell(x: Atoms):
 
 
 @dispatch
-def batch(atoms: List[Atoms]) -> Atoms:
+def batch(atoms: list[Atoms]) -> Atoms:
     batch_num_atoms = [a.positions.shape[0] for a in atoms]
     cell = torch.stack([a.cell for a in atoms])
     numbers = torch.hstack([a.numbers for a in atoms])
@@ -167,7 +176,7 @@ def batch(atoms: List[Atoms]) -> Atoms:
 
 
 @dispatch
-def unbatch(atoms: Atoms) -> List[Atoms]:
+def unbatch(atoms: Atoms) -> list[Atoms]:
     num_atoms = atoms.batch_num_atoms
     cell = [c for c in atoms.cell]
     positions = torch.split(atoms.positions, num_atoms)
@@ -175,9 +184,9 @@ def unbatch(atoms: Atoms) -> List[Atoms]:
     return [Atoms(c, n, x) for c, n, x in zip(cell, positions, numbers)]
 
 
-AtomsGraph: TypeAlias = dgl.DGLGraph
+if _dgl_available:
+    AtomsGraph: TypeAlias = dgl.DGLGraph
 
-
-@dispatch
-def batch(g: List[AtomsGraph]):  # noqa: F811
-    return dgl.batch(g)
+    @dispatch
+    def batch(g: list[AtomsGraph]):  # noqa: F811
+        return dgl.batch(g)

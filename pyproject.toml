@@ -14,12 +14,9 @@ authors = [
 dependencies = [
     "ase",
     "ray[tune]",
-    "numpy; sys_platform == 'linux'",
-    "numpy<2.0.0; sys_platform == 'darwin'",
+    "numpy",
     "scipy",
-    "torch==2.4; sys_platform == 'linux'",
-    "torch==2.1.0; sys_platform == 'darwin'",
-    "torchdata==0.7.0; sys_platform == 'darwin'",
+    "torch",
     "typer",
     "einops",
     "pandas",
@@ -34,9 +31,18 @@ dependencies = [
     "plum-dispatch",
     "pytorch-ignite",
     "py-config-runner",
-    "dgl>=2.4.0; sys_platform == 'linux'",
-    "dgl==2.1.0; sys_platform == 'darwin'",
     "jarvis-tools>=2021.07.19"
+]
+
+[project.optional-dependencies]
+dgl = [
+    "dgl>=2.4.0; sys_platform == 'linux'",
+    "numpy; sys_platform == 'linux'",
+    "torch==2.4; sys_platform == 'linux'",
+    "dgl==2.1.0; sys_platform == 'darwin'",
+    "numpy<2.0.0; sys_platform == 'darwin'",
+    "torch==2.1.0; sys_platform == 'darwin'",
+    "torchdata==0.7.0; sys_platform == 'darwin'",
 ]
 
 [[tool.uv.index]]

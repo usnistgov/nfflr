@@ -38,9 +38,9 @@ from nfflr.train.utils import (
     setup_optimizer,
     setup_scheduler,
     transfer_outputs,
+    reset_initial_output_bias,
 )
 from nfflr.train.swag import SWAGHandler
-from nfflr.models.utils import reset_initial_output_bias
 
 cli = typer.Typer()
 

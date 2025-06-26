@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Literal
+from typing import Any, Callable, Optional, Literal
 from pathlib import Path
 
 import json
@@ -19,7 +19,7 @@ import lmdb
 import pickle
 
 import nfflr
-from nfflr.data.dataset import to_tensor, get_cachedir
+from nfflr.data.dataset import to_tensor, get_cachedir, collate_forcefield_targets
 
 
 class AtomsSQLDataset(torch.utils.data.Dataset):
@@ -65,7 +65,18 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         else:
             self.diskcache = None
 
-        self.collate = nfflr.AtomsDataset.collate_forcefield
+        # either rely on users adding a dispatch for nfflr.batch
+        # or implement `collate` method of transform
+        collate_inputs = nfflr.batch
+        if self.transform is not None:
+            if hasattr(self.transform, "collate"):
+                collate_inputs = self.transform.collate
+
+        def _collate(samples: list[tuple[Any, torch.Tensor]]):
+            inputs, targets = map(list, zip(*samples))
+            return collate_inputs(inputs), collate_forcefield_targets(targets)
+
+        self.collate = _collate
         self.prepare_batch = nfflr.AtomsDataset.prepare_batch_default
 
         self.train_val_seed = None

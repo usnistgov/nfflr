@@ -68,39 +68,6 @@ class EnergyScaling(torch.nn.Module):
         return x * self._scale
 
 
-def reset_initial_output_bias(model, dataloader, max_samples=500):
-    """Fix initial output bias to obtain zero mean predictions on training data."""
-
-    _compute_forces = model.config.compute_forces
-    model.config.compute_forces = False
-
-    device = next(model.parameters()).device
-
-    energies, n_atoms = [], []
-    for idx, (inputs, targets) in enumerate(dataloader):
-        if idx >= max_samples:
-            break
-
-        if isinstance(inputs, tuple) or isinstance(inputs, list):
-            # TODO: make this more robust to different input types
-            inputs = (inputs[0].to(device), inputs[1].to(device))
-        else:
-            inputs = inputs.to(device)
-
-        with torch.no_grad():
-            energies.append(model(inputs))
-        n_atoms.append(targets["n_atoms"])
-
-    model.config.compute_forces = _compute_forces
-
-    initial_mean = torch.mean(torch.hstack(energies))
-    avg_num_atoms = torch.mean(torch.hstack(n_atoms).float())
-
-    bias = -initial_mean / avg_num_atoms
-    torch.nn.init.constant_(model.fc.bias, bias)
-    return bias
-
-
 def autograd_forces(
     total_energy: torch.tensor,
     displacement_vectors: torch.tensor,

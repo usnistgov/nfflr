@@ -7,19 +7,23 @@ import re
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Tuple, Union, Optional, Callable, Sequence
+from typing import Any, Literal, Union, Optional, Callable, Sequence
+from typing import Protocol, runtime_checkable
 
 import ase
-import dgl
+
+# import dgl
 import numpy as np
 import pandas as pd
 import torch
+import ignite
 from numpy.random import default_rng
 import matplotlib.pyplot as plt
 
 import nfflr
 from nfflr.atoms import jarvis_load_atoms  # noqa:E402
-from nfflr.models.utils import EnergyScaling
+
+# from nfflr.models.utils import EnergyScaling
 
 from jarvis.core.atoms import Atoms as jAtoms
 
@@ -115,7 +119,7 @@ def _select_relaxation_configurations(trajectory, atol=1e-2):
     return idx[selection]
 
 
-def collate_forcefield_targets(targets: Sequence[Dict[str, torch.Tensor]]):
+def collate_forcefield_targets(targets: Sequence[dict[str, torch.Tensor]]):
     """Specialized collate function for force field datasets."""
     energy = torch.tensor([t["energy"] for t in targets])
     n_atoms = torch.tensor([t["forces"].size(0) for t in targets])
@@ -133,6 +137,14 @@ def to_tensor(x):
     if isinstance(x, torch.Tensor):
         return x.clone().detach()
     return torch.tensor(x, dtype=torch.get_default_dtype())
+
+
+@runtime_checkable
+class TensorLike(Protocol):
+    """torch.Tensor protocol for auto-preprocessing with ignite"""
+
+    def to(self, device, non_blocking):
+        ...
 
 
 class AtomsDataset(torch.utils.data.Dataset):
@@ -233,11 +245,27 @@ class AtomsDataset(torch.utils.data.Dataset):
         else:
             self.diskcache = None
 
-        self.collate = self.collate_default
+        # self.collate = self.collate_default
         self.prepare_batch = self.prepare_batch_default
+        collate_target = torch.asarray
+        if self.target == "energy_and_forces":
+            collate_target = collate_forcefield_targets
+
+        # either rely on users adding a dispatch for nfflr.batch
+        # or implement `collate` method of transform
+        collate_inputs = nfflr.batch
+        if self.transform is not None:
+            if hasattr(self.transform, "collate"):
+                collate_inputs = self.transform.collate
+
+        def _collate(samples: list[tuple["any", torch.Tensor]]):
+            inputs, targets = map(list, zip(*samples))
+            return collate_inputs(inputs), collate_target(targets)
+
+        self.collate = _collate
 
         if self.target == "energy_and_forces":
-            self.collate = self.collate_forcefield
+            # self.collate = self.collate_forcefield
             if "total_energy" in self.df.keys():
                 self.energy_key = "total_energy"
             else:
@@ -426,72 +454,62 @@ class AtomsDataset(torch.utils.data.Dataset):
 
     @staticmethod
     def prepare_batch_default(
-        batch: Tuple[Any, Dict[str, torch.Tensor]],
+        batch: tuple[Any, dict[str, torch.Tensor]],
         device=None,
         non_blocking=False,
-    ) -> Tuple[Any, Dict[str, torch.Tensor]]:
+    ) -> tuple[Any, dict[str, torch.Tensor]]:
+
         """Send batched dgl crystal graph to device."""
-        atoms, targets = batch
-        if isinstance(targets, torch.Tensor):
-            targets = targets.to(device, non_blocking=non_blocking)
-        else:
-            targets = {
-                k: v.to(device, non_blocking=non_blocking) for k, v in targets.items()
-            }
 
-        if isinstance(atoms, list) or isinstance(atoms, tuple):
-            g, lg = atoms
-            batch = (
-                (
-                    g.to(device, non_blocking=non_blocking),
-                    lg.to(device, non_blocking=non_blocking),
-                ),
-                targets,
+        def _convert_tensorlike(x: TensorLike) -> TensorLike:
+            return (
+                x.to(device=device, non_blocking=non_blocking)
+                if device is not None
+                else x
             )
-        else:
-            batch = (atoms.to(device, non_blocking=non_blocking), targets)
 
-        return batch
+        return ignite.utils.apply_to_type(batch, TensorLike, _convert_tensorlike)
 
-    @staticmethod
-    def collate_default(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
-        """Dataloader helper to batch graphs cross `samples`.
+    # TODO: move collate to model to live with transform?
+    # or move to transform.batch?
+    # @staticmethod
+    # def collate_default(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
+    #     """Dataloader helper to batch graphs cross `samples`.
 
-        Forces get collated into a graph batch
-        by concatenating along the atoms dimension
+    #     Forces get collated into a graph batch
+    #     by concatenating along the atoms dimension
 
-        energy and stress are global targets (properties of the whole graph)
-        total energy is a scalar, stess is a rank 2 tensor
+    #     energy and stress are global targets (properties of the whole graph)
+    #     total energy is a scalar, stess is a rank 2 tensor
 
+    #     """
+    #     inputs, targets = map(list, zip(*samples))
 
-        """
-        inputs, targets = map(list, zip(*samples))
+    #     if isinstance(inputs[0], tuple):
+    #         graphs, line_graphs = map(list, zip(*inputs))
+    #         batched_inputs = (dgl.batch(graphs), dgl.batch(line_graphs))
+    #     else:
+    #         batched_inputs = dgl.batch(inputs)
 
-        if isinstance(inputs[0], tuple):
-            graphs, line_graphs = map(list, zip(*inputs))
-            batched_inputs = (dgl.batch(graphs), dgl.batch(line_graphs))
-        else:
-            batched_inputs = dgl.batch(inputs)
+    #     return batched_inputs, torch.tensor(targets)
 
-        return batched_inputs, torch.tensor(targets)
+    # @staticmethod
+    # def collate_forcefield(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
+    #     """Dataloader helper to batch graphs cross `samples`.
 
-    @staticmethod
-    def collate_forcefield(samples: List[Tuple[dgl.DGLGraph, torch.Tensor]]):
-        """Dataloader helper to batch graphs cross `samples`.
+    #     Forces get collated into a graph batch
+    #     by concatenating along the atoms dimension
 
-        Forces get collated into a graph batch
-        by concatenating along the atoms dimension
+    #     energy and stress are global targets (properties of the whole graph)
+    #     total energy is a scalar, stess is a rank 2 tensor
+    #     """
+    #     inputs, targets = map(list, zip(*samples))
+    #     targets = collate_forcefield_targets(targets)
 
-        energy and stress are global targets (properties of the whole graph)
-        total energy is a scalar, stess is a rank 2 tensor
-        """
-        inputs, targets = map(list, zip(*samples))
-        targets = collate_forcefield_targets(targets)
+    #     if isinstance(inputs[0], tuple):
+    #         graphs, line_graphs = map(list, zip(*inputs))
+    #         batched_inputs = (dgl.batch(graphs), dgl.batch(line_graphs))
+    #     else:
+    #         batched_inputs = dgl.batch(inputs)
 
-        if isinstance(inputs[0], tuple):
-            graphs, line_graphs = map(list, zip(*inputs))
-            batched_inputs = (dgl.batch(graphs), dgl.batch(line_graphs))
-        else:
-            batched_inputs = dgl.batch(inputs)
-
-        return batched_inputs, targets
+    #     return batched_inputs, targets
