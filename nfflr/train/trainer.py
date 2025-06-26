@@ -244,7 +244,7 @@ def train(
     model, criterion, optimizer = setup_model_and_optimizer(model, dataset, config)
     scheduler = setup_scheduler(config, optimizer, len(train_loader))
 
-    if config.swag_epochs is not None:
+    if config.swag_start is not None:
         swag_handler = SWAGHandler(model)
 
     trainer = setup_trainer(
@@ -261,14 +261,14 @@ def train(
             state["scheduler"] = scheduler
         if isinstance(criterion, torch.nn.Module):
             state["criterion"] = criterion
-        if config.swag_epochs:
+        if config.swag_start is not None:
             state["swagmodel"] = swag_handler.swagmodel
 
         setup_checkpointing(state, config)
 
-    if config.swag_epochs is not None:
+    if config.swag_start is not None:
         swag_handler.attach(
-            trainer, event=ignite.engine.Events.EPOCH_COMPLETED(after=config.epochs)
+            trainer, event=ignite.engine.Events.EPOCH_COMPLETED(after=config.swag_start)
         )
 
     # evaluation
@@ -295,6 +295,7 @@ def train(
     history = {
         "train": {m: [] for m in metrics.keys()},
         "validation": {m: [] for m in metrics.keys()},
+        "lr": [],
     }
     if config.resume_checkpoint is not None:
         history = torch.load(config.output_dir / "metric_history.pkl")
@@ -316,6 +317,10 @@ def train(
         train_evaluator.run(train_loader, epoch_length=n_train_eval, max_epochs=1)
         val_evaluator.run(val_loader)
 
+    @trainer.on(Events.ITERATION_COMPLETED)
+    def _log_lr(engine):
+        history["lr"].append(scheduler.get_last_lr()[0])
+
     def log_metric_history(engine, output_dir: Path):
         phases = {"train": train_evaluator, "validation": val_evaluator}
         for phase, evaluator in phases.items():
@@ -336,8 +341,8 @@ def train(
             )
 
     max_epochs = config.epochs
-    if config.swag_epochs is not None:
-        max_epochs = config.epochs + config.swag_epochs
+    if config.swalr_epochs is not None:
+        max_epochs = config.epochs + config.swalr_epochs
     trainer.run(train_loader, max_epochs=max_epochs)
 
     return val_evaluator.state.metrics["loss"]

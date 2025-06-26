@@ -3,7 +3,6 @@ from typing import Optional, Literal, Callable
 from dataclasses import dataclass
 
 import torch
-import ignite.distributed as idist
 
 
 @dataclass
@@ -37,7 +36,7 @@ class TrainingConfig:
     # optimization
     optimizer: Literal["sgd", "adamw"] = "adamw"
     criterion: torch.nn.Module | Callable = torch.nn.MSELoss()
-    scheduler: Literal["onecycle"] | None = "onecycle"
+    scheduler: Literal["onecycle", "trapezoid"] | None = "onecycle"
     warmup_steps: float | int = 0.3
     per_device_batch_size: int = 256
     batch_size: Optional[int] = None
@@ -45,9 +44,10 @@ class TrainingConfig:
     learning_rate: float = 1e-2
     weight_decay: float = 1e-5
     epochs: int = 30
-    swag_epochs: Optional[int] = None
-    swag_anneal_epochs: int = 1
-    swag_learning_rate: Optional[float] = None
+    swag_start: int | None = None
+    swalr_epochs: int | None = None
+    swalr_anneal_epochs: int = 0
+    swalr_learning_rate: float | None = None
 
     # model initialization
     initialize_bias: bool = False
@@ -58,11 +58,11 @@ class TrainingConfig:
     train_eval_fraction: float = 0.1
 
     def __post_init__(self):
-        # get_world_size is evaluating to 1 if this is evaluated outside of idist.Parallel
+        # get_world_size is evaluating to 1 evaluated outside of idist.Parallel
         # self.batch_size = self.per_device_batch_size * idist.get_world_size()
 
         if self.output_dir is None:
             self.output_dir = self.experiment_dir
 
-        if self.swag_learning_rate is None and self.swag_epochs is not None:
-            self.swag_lr = self.learning_rate / 10
+        if self.swalr_learning_rate is None and self.swalr_epochs is not None:
+            self.swalr_learning_rate = self.learning_rate / 10

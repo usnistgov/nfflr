@@ -118,30 +118,59 @@ def setup_optimizer(params, config: TrainingConfig):
     return optimizer
 
 
+def make_trapezoid_schedule(opt, total_steps, warmup_steps=100, decay_fraction=0.1):
+
+    decay_steps = int(decay_fraction * total_steps)
+    stable_steps = total_steps - decay_steps - warmup_steps
+
+    warmup = torch.optim.lr_scheduler.LinearLR(
+        opt, start_factor=1 / 25, end_factor=1.0, total_iters=warmup_steps
+    )
+    stable = torch.optim.lr_scheduler.ConstantLR(
+        opt, factor=1.0, total_iters=stable_steps
+    )
+    decay = torch.optim.lr_scheduler.LinearLR(
+        opt, start_factor=1.0, end_factor=1e-5, total_iters=decay_steps
+    )
+
+    scheduler = torch.optim.lr_scheduler.SequentialLR(
+        opt,
+        [warmup, stable, decay],
+        milestones=[warmup_steps, warmup_steps + stable_steps],
+    )
+
+    return scheduler
+
+
 def setup_scheduler(config: TrainingConfig, optimizer, steps_per_epoch: int | float):
-    """Configure OneCycle scheduler."""
+    """Configure learning rate scheduler."""
 
     if config.scheduler is None or config.epochs == 0:
         scheduler = None
         return scheduler
 
     warmup_steps = config.warmup_steps
-    if warmup_steps < 1:
+    if config.warmup_steps < 1:
         # fractional specification
+        warmup_steps = config.warmup_steps * config.epochs * steps_per_epoch
         pct_start = warmup_steps
     else:
+        warmup_steps = config.warmup_steps
         pct_start = config.warmup_steps / (config.epochs * steps_per_epoch)
 
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        optimizer,
-        max_lr=config.learning_rate,
-        epochs=config.epochs,
-        steps_per_epoch=steps_per_epoch,
-        pct_start=pct_start,
-    )
+    if config.scheduler == "onecycle":
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer,
+            max_lr=config.learning_rate,
+            epochs=config.epochs,
+            steps_per_epoch=steps_per_epoch,
+            pct_start=pct_start,
+        )
+    elif config.scheduler == "trapezoid":
+        total_steps = config.epochs * steps_per_epoch
+        scheduler = make_trapezoid_schedule(optimizer, total_steps, warmup_steps)
 
-    if config.swag_epochs is not None:
-
+    if config.swalr_epochs is not None:
         # TODO: SWALR expects epochs, OneCycle expects steps...
         swa_start = config.epochs
         swalr = torch.optim.swa_utils.SWALR(
