@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 
+import ase
+from ase.calculators.calculator import Calculator
+
 import torch
 import einops
 import numpy as np
@@ -29,16 +32,23 @@ def collect_results(dataset, ids, model):
     f_ref, f_pred = [], []
     for _id in ids:
         inputs, reference = dataset[_id]
-        y = model(inputs)
+        if isinstance(model, Calculator):
+            inputs.calc = model
+            energy = inputs.get_total_energy()
+            forces = torch.asarray(inputs.get_forces())
+        else:
+            y = model(inputs)
+            energy = y["energy"].item()
+            forces = y["forces"].detach()
 
         e_ref.append(reference["energy"].item())
-        e_pred.append(y["energy"].item())
+        e_pred.append(energy)
 
         f_ref.append(reference["forces"].detach())
-        f_pred.append(y["forces"].detach())
+        f_pred.append(forces)
 
-    e_ref = torch.tensor(e_ref)
-    e_pred = torch.tensor(e_pred)
+    e_ref = torch.asarray(e_ref)
+    e_pred = torch.asarray(e_pred)
 
     f_ref, f_ps = einops.pack(f_ref, "* d")
     f_pred, f_ps = einops.pack(f_pred, "* d")
