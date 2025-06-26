@@ -292,6 +292,13 @@ def train(
                 "MedianAbsoluteError metric not yet supported in distributed training"
             )
 
+    history = {
+        "train": {m: [] for m in metrics.keys()},
+        "validation": {m: [] for m in metrics.keys()},
+    }
+    if config.resume_checkpoint is not None:
+        history = torch.load(config.output_dir / "metric_history.pkl")
+
     train_evaluator, val_evaluator = setup_evaluators(
         model, dataset.prepare_batch, metrics, transfer_outputs
     )
@@ -299,11 +306,6 @@ def train(
         vpbar = ProgressBar()
         vpbar.attach(train_evaluator)
         vpbar.attach(val_evaluator)
-
-    history = {
-        "train": {m: [] for m in metrics.keys()},
-        "validation": {m: [] for m in metrics.keys()},
-    }
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def _eval(engine):
