@@ -35,57 +35,49 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dgl = [
-    "dgl>=2.4.0; sys_platform == 'linux'",
-    "numpy; sys_platform == 'linux'",
-    "torch==2.4; sys_platform == 'linux'",
-    "dgl==2.1.0; sys_platform == 'darwin'",
-    "numpy<2.0.0; sys_platform == 'darwin'",
-    "torch==2.1.0; sys_platform == 'darwin'",
-    "torchdata==0.7.0; sys_platform == 'darwin'",
-]
+dgl = [ "dgl" ]
 
-[[tool.uv.index]]
-name = "pytorch-cu118"
-url = "https://download.pytorch.org/whl/cu118"
-explicit = true
+# [[tool.uv.index]]
+# name = "pytorch-cu118"
+# url = "https://download.pytorch.org/whl/cu118"
+# explicit = true
 
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
+# [[tool.uv.index]]
+# name = "pytorch-cpu"
+# url = "https://download.pytorch.org/whl/cpu"
+# explicit = true
 
-[[tool.uv.index]]
-name = "dgl-cu118"
-url = "https://data.dgl.ai/wheels/torch-2.4/cu118/repo.html"
-explicit = true
-format = "flat"
+# [[tool.uv.index]]
+# name = "dgl-cu118"
+# url = "https://data.dgl.ai/wheels/torch-2.4/cu118/repo.html"
+# explicit = true
+# format = "flat"
 
-[[tool.uv.index]]
-name = "dgl-cpu"
-url = "https://data.dgl.ai/wheels/torch-2.4/repo.html"
-explicit = true
-format = "flat"
+# [[tool.uv.index]]
+# name = "dgl-cpu"
+# url = "https://data.dgl.ai/wheels/torch-2.4/repo.html"
+# explicit = true
+# format = "flat"
 
-[[tool.uv.index]]
-name = "dgl-darwin"
-url = "https://data.dgl.ai/wheels/repo.html"
-explicit = true
-format = "flat"
+# [[tool.uv.index]]
+# name = "dgl-darwin"
+# url = "https://data.dgl.ai/wheels/repo.html"
+# explicit = true
+# format = "flat"
 
-[tool.uv.sources]
-torch = [
-  { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
-  { index = "pytorch-cu118", marker = "sys_platform == 'linux'" },
-]
-torchvision = [
-  { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
-  { index = "pytorch-cu118", marker = "sys_platform == 'linux'" },
-]
-dgl = [
-  { index = "dgl-cu118", marker = "sys_platform == 'linux'" },
-  { index = "dgl-darwin", marker = "sys_platform == 'darwin'" },
-]
+# [tool.uv.sources]
+# torch = [
+#   { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
+#   { index = "pytorch-cu118", marker = "sys_platform == 'linux'" },
+# ]
+# torchvision = [
+#   { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
+#   { index = "pytorch-cu118", marker = "sys_platform == 'linux'" },
+# ]
+# dgl = [
+#   { index = "dgl-cu118", marker = "sys_platform == 'linux'" },
+#   { index = "dgl-darwin", marker = "sys_platform == 'darwin'" },
+# ]
 
 [project.urls]
 homepage = "https://pages.nist.gov/nfflr"
