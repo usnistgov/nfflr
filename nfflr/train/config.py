@@ -3,6 +3,7 @@ from typing import Optional, Literal, Callable
 from dataclasses import dataclass
 
 import torch
+import ignite.metrics
 
 
 @dataclass
@@ -36,6 +37,7 @@ class TrainingConfig:
     # optimization
     optimizer: Literal["sgd", "adamw"] = "adamw"
     criterion: torch.nn.Module | Callable = torch.nn.MSELoss()
+    metrics: dict[str, ignite.metrics.Metric] | None = (None,)
     scheduler: Literal["onecycle", "trapezoid"] | None = "onecycle"
     warmup_steps: float | int = 0.3
     per_device_batch_size: int = 256
