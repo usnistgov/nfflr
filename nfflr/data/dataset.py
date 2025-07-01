@@ -247,22 +247,16 @@ class AtomsDataset(torch.utils.data.Dataset):
 
         # self.collate = self.collate_default
         self.prepare_batch = self.prepare_batch_default
-        collate_target = torch.asarray
+        self.collate_target = torch.asarray
         if self.target == "energy_and_forces":
-            collate_target = collate_forcefield_targets
+            self.collate_target = collate_forcefield_targets
 
         # either rely on users adding a dispatch for nfflr.batch
         # or implement `collate` method of transform
-        collate_inputs = nfflr.batch
+        self.collate_inputs = nfflr.batch
         if self.transform is not None:
             if hasattr(self.transform, "collate"):
-                collate_inputs = self.transform.collate
-
-        def _collate(samples: list[tuple["any", torch.Tensor]]):
-            inputs, targets = map(list, zip(*samples))
-            return collate_inputs(inputs), collate_target(targets)
-
-        self.collate = _collate
+                self.collate_inputs = self.transform.collate
 
         if self.target == "energy_and_forces":
             # self.collate = self.collate_forcefield
@@ -451,6 +445,10 @@ class AtomsDataset(torch.utils.data.Dataset):
         train_ids = train_val_ids[n_val:]
 
         return {"train": train_ids, "val": val_ids, "test": test_ids}
+
+    def collate(self, samples: list[tuple["any", torch.Tensor]]):
+        inputs, targets = map(list, zip(*samples))
+        return self.collate_inputs(inputs), self.collate_target(targets)
 
     @staticmethod
     def prepare_batch_default(

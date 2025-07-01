@@ -65,18 +65,6 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         else:
             self.diskcache = None
 
-        # either rely on users adding a dispatch for nfflr.batch
-        # or implement `collate` method of transform
-        collate_inputs = nfflr.batch
-        if self.transform is not None:
-            if hasattr(self.transform, "collate"):
-                collate_inputs = self.transform.collate
-
-        def _collate(samples: list[tuple[Any, torch.Tensor]]):
-            inputs, targets = map(list, zip(*samples))
-            return collate_inputs(inputs), collate_forcefield_targets(targets)
-
-        self.collate = _collate
         self.prepare_batch = nfflr.AtomsDataset.prepare_batch_default
 
         self.train_val_seed = None
@@ -116,6 +104,19 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
             sz = len(db)
 
         return sz
+
+    def collate(self, samples: list[tuple[Any, torch.Tensor]]):
+        # either rely on users adding a dispatch for nfflr.batch
+        # or implement `collate` method of transform
+
+        inputs, targets = map(list, zip(*samples))
+
+        if self.transform is not None and hasattr(self.transform, "collate"):
+            inputs = self.transform.collate(inputs)
+        else:
+            inputs = nfflr.batch(inputs)
+
+        return inputs, collate_forcefield_targets(targets)
 
     def load_atomsrow(self, idx: int):
 

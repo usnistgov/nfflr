@@ -149,11 +149,11 @@ def setup_scheduler(config: TrainingConfig, optimizer, steps_per_epoch: int | fl
         scheduler = None
         return scheduler
 
-    warmup_steps = config.warmup_steps
+    # warmup_steps = config.warmup_steps
     if config.warmup_steps < 1:
         # fractional specification
+        pct_start = config.warmup_steps
         warmup_steps = config.warmup_steps * config.epochs * steps_per_epoch
-        pct_start = warmup_steps
     else:
         warmup_steps = config.warmup_steps
         pct_start = config.warmup_steps / (config.epochs * steps_per_epoch)

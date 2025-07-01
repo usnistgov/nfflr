@@ -14,9 +14,8 @@ import typer
 import ignite
 import ignite.distributed as idist
 from ignite.utils import manual_seed
-from ignite.metrics import Loss, MeanAbsoluteError
+from ignite.metrics import Loss
 from ignite.contrib.metrics import GpuInfo
-from ignite.contrib.metrics.regression import MedianAbsoluteError
 from ignite.contrib.handlers.tqdm_logger import ProgressBar
 from ignite.handlers import Checkpoint, DiskSaver, FastaiLRFinder, TerminateOnNan
 from ignite.engine import Events, create_supervised_trainer
@@ -273,24 +272,8 @@ def train(
 
     # evaluation
     metrics = {"loss": Loss(criterion)}
-    if isinstance(criterion, nfflr.nn.MultitaskLoss):
-
-        eval_metrics = {
-            f"mae_{task}": MeanAbsoluteError(transform)
-            for task, transform in criterion.output_transforms()
-        }
-        metrics.update(eval_metrics)
-
-        eval_metrics = {
-            f"med_abs_err_{task}": MedianAbsoluteError(transform)
-            for task, transform in criterion.output_transforms()
-        }
-        if idist.get_world_size() == 1:
-            metrics.update(eval_metrics)
-        else:
-            warnings.warn(
-                "MedianAbsoluteError metric not yet supported in distributed training"
-            )
+    if config.metrics is not None:
+        metrics.update(config.metrics)
 
     history = {
         "train": {m: [] for m in metrics.keys()},

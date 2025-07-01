@@ -1,13 +1,12 @@
 import warnings
 from collections.abc import Iterable
-from dataclasses import dataclass
-from typing import Literal, Callable
-from functools import partial
+from typing import Sequence
 
 import torch
 import einops
 import numpy as np
 import ignite.metrics
+from ignite.metrics import MeanAbsoluteError
 
 from nfflr.train.evaluation import pseudolog10
 
@@ -26,6 +25,7 @@ class MeanAbsLogAccuracyRatio(torch.nn.Module):
         self.eps = eps
 
     def forward(self, inputs, targets):
+        print(f"{inputs=}")
         err = torch.log(self.eps + inputs) - torch.log(self.eps + targets)
         return err.abs().mean()
 
@@ -141,6 +141,25 @@ class MultitaskForceFieldLoss(torch.nn.Module):
 
         return output_transform
 
+    def metrics(self):
+        metrics = {
+            f"mae_{task}": MeanAbsoluteError(transform)
+            for task, transform in self.output_transforms()
+        }
+
+        # metrics = {
+        #     f"med_abs_err_{task}": MedianAbsoluteError(transform)
+        #     for task, transform in self.output_transforms()
+        # }
+        # if idist.get_world_size() == 1:
+        #     metrics.update(eval_metrics)
+        # else:
+        #     warnings.warn(
+        #         "MedianAbsoluteError metric not yet supported in distributed training"
+        #     )
+
+        return metrics
+
     def forward(self, inputs, targets):
         """Accumulate weighted multitask loss
 
@@ -224,49 +243,97 @@ class PerAtomLoss(torch.nn.Module):
         return self.criterion(inputs[self.key] / n_atoms, targets[self.key] / n_atoms)
 
 
-@dataclass
-class Task:
-    key: str
-    criterion: torch.nn.Module
-    preprocess: Literal["per_atom", "tril", "norm"] | Callable = lambda x: x
-    weight: float = 1.0
-    adaptive: bool = False
+class Norm(torch.nn.Module):
+    def forward(self, x):
+        return x.norm(dim=-1)
 
-    def __post_init__(self):
-        if self.preprocess == "tril":
 
-            def tril(x):
-                i, j = np.tril_indices(3)
-                return x[..., i, j]
+class AddConstant(torch.nn.Module):
+    def __init__(self, value: float = 1e-3):
+        super().__init__()
+        self.value = value
 
-            preprocess_func = tril
+    def forward(self, x):
+        return x + self.value
 
-        elif self.preprocess == "norm":
-            preprocess_func = partial(torch.norm, dim=-1)
 
-        elif self.preprocess == "per_atom":
-            preprocess_func = lambda x: x
+class FlattenTril(torch.nn.Module):
+    def __init__(self, size: int = 3):
+        super().__init__()
+        self.size = size
+        i, j = np.tril_indices(size)
+        self.i = i
+        self.j = j
 
+    def forward(self, x):
+        return x[..., self.i, self.j]
+
+
+class ScaledAsinh(torch.nn.Module):
+    def __init__(self, scale: float = 1e-3):
+        super().__init__()
+        self.scale = scale
+
+    def forward(self, x):
+        return torch.asinh(x / self.scale)
+
+
+class Task(torch.nn.Module):
+    """Force field task definition.
+
+    ```python
+    tasks = {
+        "energy": Task("energy", scale_per_atom=True),
+        "force_norm": Task("forces", transform=Norm())
+    }
+    criterion = MultitaskLoss(tasks)
+    metrics = {
+        f"mae_{key}": ignite.metrics.MeanAbsoluteError(tasks[key].process_outputs)
+        for key in ("energy", "forces", "virial")
+    }
+    ```
+    """
+
+    def __init__(
+        self,
+        key: str,
+        weight: float = 1.0,
+        adaptive: bool = False,
+        criterion: torch.nn.Module = torch.nn.MSELoss(),
+        scale_per_atom: bool = False,
+        transform: torch.nn.Module | Sequence[torch.nn.Module] = torch.nn.Identity(),
+    ):
+        super().__init__()
+        self.key = key
+        self.weight = weight
+        self.adaptive = adaptive
+        self.criterion = criterion
+        self.scale_per_atom = scale_per_atom
+
+        if isinstance(transform, Sequence):
+            self.transform = torch.nn.Sequential(*transform)
         else:
-            preprocess_func = self.preprocess
+            self.transform = transform
 
-        self.preprocess_func = preprocess_func
+    def forward(self, x: tuple[dict[str, torch.Tensor]]):
+        inputs, targets = self.process_outputs(x)
+        return self.criterion(inputs, targets)
 
-    def transform(
-        self, output: tuple[dict[str, torch.Tensor]]
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        inputs, targets = output
+    def process_outputs(self, x: tuple[dict[str, torch.Tensor]]):
+        # should `forward` process outputs, or call the criterion?
+        inputs, targets = x
 
         scale = 1
-        if self.preprocess == "per_atom":
+        if self.scale_per_atom:
+            # apply scaling before transform
             scale = targets["n_atoms"]
 
-        inputs = self.preprocess_func(inputs.get(self.key))
-        targets = self.preprocess_func(targets.get(self.key))
+        inputs = self.transform(inputs[self.key] / scale)
 
-        inputs = inputs / scale
-        if targets is not None:
-            targets = targets / scale
+        if self.key in targets:
+            targets = self.transform(targets[self.key] / scale)
+        else:
+            targets = None
 
         return inputs, targets
 
@@ -289,34 +356,33 @@ class MultitaskLoss(torch.nn.Module):
 
         self.tasks = tasks
 
-    def forward(self, inputs, targets):
-        loss = torch.tensor(0.0)
+    def forward(self, inputs, targets, reduce_terms: bool = True):
 
+        losses = {}
         for task_name, task in self.tasks.items():
-            input, target = task.transform((inputs, targets))
-            loss += task.weight * task.criterion(input, target)
+            losses[task_name] = task.weight * task((inputs, targets))
 
-        return loss
+        if not reduce_terms:
+            return losses
+
+        return sum(losses.values())
 
 
 def forcefield_metrics(tasks: dict[str, Task]):
     metrics = {
-        "mae_energy": ignite.metrics.MeanAbsoluteError(tasks["energy"].transform),
-        "mae_forces": ignite.metrics.MeanAbsoluteError(tasks["forces"].transform),
-        "mae_virial": ignite.metrics.MeanAbsoluteError(tasks["virial"].transform),
+        "mae_energy": ignite.metrics.MeanAbsoluteError(tasks["energy"].process_outputs),
+        "mae_forces": ignite.metrics.MeanAbsoluteError(tasks["forces"].process_outputs),
+        "mae_virial": ignite.metrics.MeanAbsoluteError(tasks["virial"].process_outputs),
     }
 
-    if "force_norm" in tasks:
-
-        def force_norm_transform(output):
-            inputs, targets = output
-            inputs = torch.log(torch.norm(inputs["forces"], dim=-1) + 1e-3)
-            targets = torch.log(torch.norm(targets["forces"], dim=-1) + 1e-3)
-            return inputs, targets
-
-        metrics["mean_abs_log_acc_forces_norm"] = ignite.metrics.MeanAbsoluteError(
-            force_norm_transform
-        )
+    metrics["mae_force_norm"] = ignite.metrics.MeanAbsoluteError(
+        output_transform=Task("forces", transform=Norm()).process_outputs
+    )
+    metrics["mae_relative_force_norm"] = ignite.metrics.MeanAbsoluteError(
+        output_transform=Task(
+            "forces", transform=(Norm(), ScaledAsinh(1e-3))
+        ).process_outputs
+    )
 
     return metrics
 
@@ -325,11 +391,6 @@ def regularization_metrics(tasks: dict[str, Task]):
     metrics = {}
     for task_name, task in tasks.items():
         if isinstance(task.criterion, RegularizationLoss):
-
-            def transform(output):
-                inputs, targets = output
-                return inputs.get(task.key)
-
-            metrics[task_name] = ignite.metrics.Average(transform)
+            metrics[task_name] = ignite.metrics.Average(task)
 
     return metrics
