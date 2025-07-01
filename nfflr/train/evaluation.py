@@ -20,6 +20,8 @@ class ForceFieldOutput:
 
     energy: torch.Tensor
     forces: torch.Tensor
+    virial: torch.Tensor
+    volume: torch.Tensor
     force_ps: torch.Tensor
 
     def unpack_forces(self):
@@ -30,16 +32,21 @@ def collect_results(dataset, ids, model):
 
     e_ref, e_pred = [], []
     f_ref, f_pred = [], []
+    v_ref, v_pred = [], []
+    volume = []
     for _id in ids:
         inputs, reference = dataset[_id]
         if isinstance(model, Calculator):
             inputs.calc = model
             energy = inputs.get_total_energy()
             forces = torch.asarray(inputs.get_forces())
+            stress = torch.asarray(inputs.get_stress())
+            virial = -stress / inputs.get_volume()
         else:
             y = model(inputs)
             energy = y["energy"].item()
             forces = y["forces"].detach()
+            virial = y["virial"].detach()
 
         e_ref.append(reference["energy"].item())
         e_pred.append(energy)
@@ -47,14 +54,24 @@ def collect_results(dataset, ids, model):
         f_ref.append(reference["forces"].detach())
         f_pred.append(forces)
 
+        v_ref.append(reference["virial"].detach())
+        v_pred.append(virial)
+
+        volume.append(reference["volume"])
+
     e_ref = torch.asarray(e_ref)
     e_pred = torch.asarray(e_pred)
 
     f_ref, f_ps = einops.pack(f_ref, "* d")
     f_pred, f_ps = einops.pack(f_pred, "* d")
 
-    ref = ForceFieldOutput(e_ref, f_ref, f_ps)
-    pred = ForceFieldOutput(e_pred, f_pred, f_ps)
+    v_ref, _ = einops.pack(v_ref, "* d1 d2")
+    v_pred, _ = einops.pack(v_pred, "* d1 d2")
+
+    volume = torch.asarray(volume)
+
+    ref = ForceFieldOutput(e_ref, f_ref, v_ref, volume, f_ps)
+    pred = ForceFieldOutput(e_pred, f_pred, v_pred, volume, f_ps)
 
     return ref, pred
 
