@@ -348,19 +348,53 @@ class MultitaskLoss(torch.nn.Module):
     def __init__(self, tasks: dict[str, Task]):
         super().__init__()
 
-        for task in tasks.values():
+        # TODO: this might be simpler with an indicator vector
+        # that selects from the dense initial or adaptive logvariance parameters?
+        # use adaptive task uncertainty from https://arxiv.org/abs/1705.07115
+        adaptive_weights = dict()
+        static_weights = dict()
+        for task_name, task in tasks.items():
             if task.adaptive:
                 # TODO: check for adaptive tasks and collect their weights
                 # into a trainable log-scaled buffer
-                raise NotImplementedError("adaptive task weights not yet supported")
+                adaptive_weights[task_name] = task.weight
+            else:
+                static_weights[task_name] = task.weight
+
+        if len(adaptive_weights) > 0:
+            # weight = 1 / (2 * task_variance)
+            # task_variance = 1 / (2 * weight)
+            weights = torch.asarray(list(adaptive_weights.values()))
+            initial_logvar = torch.log(1 / (2 * weights))
+            # model log variance for each task
+            self.register_parameter("log_variance", torch.nn.Parameter(initial_logvar))
+
+        self.adaptive_weights: dict[str, int] = {
+            key: idx for idx, key in enumerate(adaptive_weights.keys())
+        }
+        self.static_weights = static_weights
 
         self.tasks = tasks
 
     def forward(self, inputs, targets, reduce_terms: bool = True):
 
         losses = {}
-        for task_name, task in self.tasks.items():
-            losses[task_name] = task.weight * task((inputs, targets))
+        if len(self.adaptive_weights) > 0:
+            task_variance = torch.exp(self.log_variance)
+            weights = 1 / (2 * task_variance)
+
+            losses["task_noise"] = torch.sum(task_variance.sqrt())
+            for task_name, idx in self.adaptive_weights.items():
+                losses[task_name] = weights[idx] * self.tasks[task_name](
+                    (inputs, targets)
+                )
+
+        if len(self.static_weights) > 0:
+            for task_name, weight in self.static_weights.items():
+                losses[task_name] = weight * self.tasks[task_name]((inputs, targets))
+
+        # for task_name, task in self.tasks.items():
+        #     losses[task_name] = task.weight * task((inputs, targets))
 
         if not reduce_terms:
             return losses
