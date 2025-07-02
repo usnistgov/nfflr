@@ -192,6 +192,7 @@ def setup_checkpointing(state: dict, config: TrainingConfig):
     state["trainer"].add_event_handler(Events.EPOCH_COMPLETED, checkpoint_handler)
 
     if config.resume_checkpoint is not None:
+        # if the model is wrapped in SWAGHandler, model requires surgery
         checkpoint = torch.load(config.resume_checkpoint, map_location=idist.device())
         Checkpoint.load_objects(to_load=state, checkpoint=checkpoint)
 
@@ -245,6 +246,9 @@ def train(
 
     if config.swag_start is not None:
         swag_handler = SWAGHandler(model)
+        if config.resume_checkpoint is not None:
+            # have to manually load state to reset parameter buffer sizes
+            swag_handler.swagmodel.load_state(config.resume_checkpoint)
 
     trainer = setup_trainer(
         model, criterion, optimizer, scheduler, dataset.prepare_batch, config
@@ -304,16 +308,31 @@ def train(
     def _log_lr(engine):
         history["lr"].append(scheduler.get_last_lr()[0])
 
+    def _log_task_weights(engine):
+        log_variance = criterion.log_variance.detach().tolist()
+        if "log_task_variance" not in history:
+            history["log_task_variance"] = [log_variance]
+        else:
+            history["log_task_variance"].append(log_variance)
+
+        return
+
     def log_metric_history(engine, output_dir: Path):
         phases = {"train": train_evaluator, "validation": val_evaluator}
         for phase, evaluator in phases.items():
             for key, value in evaluator.state.metrics.items():
                 history[phase][key].append(value)
         torch.save(history, output_dir / "metric_history.pkl")
+        return
 
     if rank == 0:
         train_evaluator.add_event_handler(Events.COMPLETED, log_console, name="train")
         val_evaluator.add_event_handler(Events.COMPLETED, log_console, name="val")
+        if isinstance(criterion, nfflr.nn.MultitaskLoss):
+            val_evaluator.add_event_handler(
+                Events.COMPLETED, _log_task_weights, config.output_dir
+            )
+
         val_evaluator.add_event_handler(
             Events.COMPLETED, log_metric_history, config.output_dir
         )
@@ -326,6 +345,7 @@ def train(
     max_epochs = config.epochs
     if config.swalr_epochs is not None:
         max_epochs = config.epochs + config.swalr_epochs
+
     trainer.run(train_loader, max_epochs=max_epochs)
 
     return val_evaluator.state.metrics["loss"]

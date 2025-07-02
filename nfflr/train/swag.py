@@ -109,6 +109,7 @@ class SWAG(torch.nn.Module):
         cov_mat_sqrt = torch.vstack([self.cov_mat_sqrt, self.mean - currentparams])
         if self.n_models.item() + 1 >= self.max_n_models:
             cov_mat_sqrt = cov_mat_sqrt[1:, :]
+            self.n_models.sub_(1)
 
         self.cov_mat_sqrt = cov_mat_sqrt
         self.n_models.add_(1)

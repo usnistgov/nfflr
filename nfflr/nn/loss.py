@@ -383,7 +383,7 @@ class MultitaskLoss(torch.nn.Module):
             task_variance = torch.exp(self.log_variance)
             weights = 1 / (2 * task_variance)
 
-            losses["task_noise"] = torch.sum(task_variance.sqrt())
+            losses["task_noise"] = torch.sum(torch.log(torch.sqrt(task_variance)))
             for task_name, idx in self.adaptive_weights.items():
                 losses[task_name] = weights[idx] * self.tasks[task_name](
                     (inputs, targets)
