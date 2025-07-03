@@ -361,7 +361,9 @@ class MultitaskLoss(torch.nn.Module):
             else:
                 static_weights[task_name] = task.weight
 
+        self.adaptive = False
         if len(adaptive_weights) > 0:
+            self.adaptive = True
             # weight = 1 / (2 * task_variance)
             # task_variance = 1 / (2 * weight)
             weights = torch.asarray(list(adaptive_weights.values()))

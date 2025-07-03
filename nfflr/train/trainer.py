@@ -328,7 +328,7 @@ def train(
     if rank == 0:
         train_evaluator.add_event_handler(Events.COMPLETED, log_console, name="train")
         val_evaluator.add_event_handler(Events.COMPLETED, log_console, name="val")
-        if isinstance(criterion, nfflr.nn.MultitaskLoss):
+        if isinstance(criterion, nfflr.nn.MultitaskLoss) and criterion.adaptive:
             val_evaluator.add_event_handler(
                 Events.COMPLETED, _log_task_weights, config.output_dir
             )
