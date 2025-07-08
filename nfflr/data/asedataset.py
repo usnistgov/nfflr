@@ -228,6 +228,9 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
 
             ids = [row.id for row in db.select(filter=subset)]
 
+        # undo the off-by-one indexing from primary key to dataset
+        ids = np.asarray(ids) - 1
+
         split = {
             key: np.asarray([_id for _id in ids if _id in self.split[key]])
             for key in self.split.keys()
