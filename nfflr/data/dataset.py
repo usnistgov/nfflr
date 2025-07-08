@@ -90,8 +90,8 @@ def get_cachedir(scratchdir: Path | str | bool = True):
     if isinstance(scratchdir, str):
         scratchdir = Path(scratchdir)
 
-    if "SCRATCH" in os.environ:
-        scratchdir = Path(os.environ.get("SCRATCH"))
+    if "TMPDIR" in os.environ:
+        scratchdir = Path(os.environ.get("TMPDIR"))
 
     if "SLURM_JOB_ID" in os.environ:
         scratchdir = scratchdir / os.environ.get("SLURM_JOB_ID")
