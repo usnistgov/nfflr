@@ -44,11 +44,14 @@ from nfflr.train.swag import SWAGHandler
 cli = typer.Typer()
 
 # set up multi-GPU training, if available
+# by default use all available GPUs
+num_gpus = torch.cuda.device_count()
+
+# override with comma-separated list of GPUs
+# if CUDA_VISIBLE_DEVICES is set
 gpus = os.environ.get("CUDA_VISIBLE_DEVICES")
 if gpus:
     num_gpus = len(gpus.split(","))
-else:
-    num_gpus = 0
 
 backend = None
 nproc_per_node = None
@@ -56,10 +59,11 @@ if num_gpus > 1:
     backend = "nccl" if torch.distributed.is_nccl_available() else "gloo"
     nproc_per_node = num_gpus
 
+# TODO: get these from idist?
 spawn_kwargs = {
     "backend": backend,
     "nproc_per_node": nproc_per_node,
-    "timeout": timedelta(seconds=60),
+    "timeout": timedelta(seconds=300),
 }
 
 
