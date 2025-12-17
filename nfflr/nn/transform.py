@@ -1,3 +1,5 @@
+from typing import Literal
+
 import dgl
 import torch
 
@@ -19,16 +21,61 @@ class PeriodicRadiusGraph(torch.nn.Module):
     """Periodic radius graph transform."""
 
     def __init__(
-        self, cutoff: float = 5.0, dtype=torch.float, sort_edges: bool = False
+        self,
+        cutoff: float = 5.0,
+        dtype=torch.float,
+        sort_edges: bool = False,
+        backend: Literal["nfflr", "ase"] = "nfflr",
     ):
         super().__init__()
         self.cutoff = cutoff
         self.dtype = dtype
         self.sort_edges = sort_edges
+        self.backend = backend
 
-    def forward(self, x: nfflr.Atoms):
+        if backend == "ase":
+            self._build_graph = self._build_graph_ase
+        elif backend == "nfflr":
+            self._build_graph = self._build_graph_nfflr
+
+    def _build_graph_nfflr(self, x: nfflr.Atoms):
+        return periodic_radius_graph(x, r=self.cutoff, dtype=self.dtype)
+
+    def _build_graph_ase(self, x: ase.Atoms):
+        # i, j, D = ase.neighborlist.neighbor_list("ijD", x, self.cutoff)
+        nl = ase.neighborlist.NeighborList(
+            cutoffs=[self.cutoff / 2] * len(x),
+            skin=0.0,
+            self_interaction=False,
+            bothways=True,
+            primitive=ase.neighborlist.NewPrimitiveNeighborList,
+        )
+        nl.update(x)
+        i, j, offset = [], [], []
+        for _idx in range(len(x)):
+            _neighbor, _offset = nl.get_neighbors(_idx)
+            i.append(torch.full((len(_neighbor),), _idx))
+            j.append(torch.asarray(_neighbor))
+            offset.append(torch.asarray(_offset))
+
+        i = torch.hstack(i)
+        j = torch.hstack(j)
+        offset = torch.vstack(offset)
+
+        xi = torch.asarray(x.positions[i], dtype=self.dtype)
+        xj = torch.asarray(x.positions[j], dtype=self.dtype)
+        D = (xj + offset @ x.cell) - xi
+
+        g = dgl.graph((j, i), num_nodes=len(x))
+        g.ndata["coord"] = torch.asarray(x.positions, dtype=self.dtype)
+        g.edata["r"] = torch.asarray(D, dtype=self.dtype)
+        g.ndata["atomic_number"] = torch.asarray(x.numbers, dtype=torch.int)
+
+        return g
+
+    def forward(self, x: nfflr.Atoms | ase.Atoms):
         """Compute periodic radius graph."""
-        g = periodic_radius_graph(x, r=self.cutoff, dtype=self.dtype)
+        g = self._build_graph(x)
         if self.sort_edges:
             g = sort_edges_by_dst(g)
         return g

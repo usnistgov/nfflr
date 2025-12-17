@@ -55,7 +55,7 @@ class Atoms:
     Parameters
     ----------
     cell : torch.Tensor
-        cell matrix / lattice parameters
+        cell matrix: rows are lattice vectors
     positions : torch.Tensor
         Cartesian coordinates
     numbers : torch.Tensor
@@ -76,25 +76,28 @@ class Atoms:
         positions: torch.Tensor,
         numbers: torch.Tensor,
         *,
+        pbc: torch.Tensor = [True, True, True],
         batch_num_atoms: Optional[Iterable[int]] = None,
     ):
         """Create atoms"""
         self.cell = cell
         self.positions = positions
         self.numbers = numbers
+        self.pbc = pbc
         self._batch_num_atoms = batch_num_atoms
 
     @dispatch
     def __init__(  # noqa: F811
-        self, cell: Iterable, positions: Iterable, numbers: Iterable
+        self, cell: Iterable, positions: Iterable, numbers: Iterable, pbc: Iterable
     ):
         dtype = torch.get_default_dtype()
         if isinstance(cell, torch.Tensor):
             self.cell = cell if cell.dtype == dtype else cell.type(dtype)
         else:
-            self.cell = torch.tensor(cell, dtype=dtype)
-        self.positions = torch.tensor(positions, dtype=dtype)
-        self.numbers = torch.tensor(numbers, dtype=Z_dtype)
+            self.cell = torch.asarray(cell, dtype=dtype)
+        self.positions = torch.asarray(positions, dtype=dtype)
+        self.numbers = torch.asarray(numbers, dtype=Z_dtype)
+        self.pbc = torch.asarray(pbc, dtype=bool)
 
     @dispatch
     def __init__(self, atoms: jarvis.core.atoms.Atoms):  # noqa: F811
@@ -103,7 +106,10 @@ class Atoms:
     @dispatch
     def __init__(self, atoms: ase.Atoms):  # noqa: F811
         self.__init__(
-            atoms.cell.array, atoms.get_positions(), atoms.get_atomic_numbers()
+            atoms.cell.array,
+            atoms.get_positions(),
+            atoms.get_atomic_numbers(),
+            atoms.pbc,
         )
 
     @property
@@ -129,14 +135,26 @@ class Atoms:
                 "__len__ not defined for batched atoms. use batch_num_atoms instead."
             )
 
-    def scaled_positions(self) -> torch.Tensor:
+    def scaled_positions(self, wrap: bool = True) -> torch.Tensor:
         """Convert cartesian coordinates to fractional coordinates.
+
+        Does not handle structures with missing cell vectors
 
         Returns
         -------
         scaled_positions : torch.Tensor
         """
-        return self.positions @ torch.linalg.inv(self.cell)
+        x = torch.linalg.solve(self.cell.T, self.positions.T).T
+
+        if wrap:
+            for idx, periodic in enumerate(self.pbc):
+                # apply twice, following ASE
+                if periodic:
+                    x[:, idx] %= 1.0
+                    x[:, idx] %= 1.0
+
+        return x
+        # return self.positions @ torch.linalg.inv(self.cell)
 
     def to(self, device, non_blocking: bool = False):
         """Transfer atoms data to compute device.
@@ -151,12 +169,15 @@ class Atoms:
         self.cell = self.cell.to(device, non_blocking=non_blocking)
         self.positions = self.positions.to(device, non_blocking=non_blocking)
         self.numbers = self.numbers.to(device, non_blocking=non_blocking)
+        self.pbc = self.pbc.to(device, non_blocking=non_blocking)
         return self
 
 
 def to_ase(at: Atoms):
     """Convert nfflr.Atoms to ase.Atoms."""
-    return ase.Atoms(cell=at.cell, positions=at.positions, numbers=at.numbers, pbc=True)
+    return ase.Atoms(
+        cell=at.cell, positions=at.positions, numbers=at.numbers, pbc=at.pbc
+    )
 
 
 def spglib_cell(x: Atoms):
@@ -172,7 +193,8 @@ def batch(atoms: list[Atoms]) -> Atoms:
     cell = torch.stack([a.cell for a in atoms])
     numbers = torch.hstack([a.numbers for a in atoms])
     positions = torch.vstack([a.positions for a in atoms])
-    return Atoms(cell, positions, numbers, batch_num_atoms=batch_num_atoms)
+    pbc = torch.stack([a.pbc for a in atoms])
+    return Atoms(cell, positions, numbers, pbc, batch_num_atoms=batch_num_atoms)
 
 
 @dispatch
@@ -181,7 +203,8 @@ def unbatch(atoms: Atoms) -> list[Atoms]:
     cell = [c for c in atoms.cell]
     positions = torch.split(atoms.positions, num_atoms)
     numbers = torch.split(atoms.numbers, num_atoms)
-    return [Atoms(c, n, x) for c, n, x in zip(cell, positions, numbers)]
+    pbc = [x for x in atoms.pbc]
+    return [Atoms(c, n, x, p) for c, n, x, p in zip(cell, positions, numbers, pbc)]
 
 
 if _dgl_available:

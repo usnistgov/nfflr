@@ -26,6 +26,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
     def __init__(
         self,
         dbpath: Path | str,
+        format: Literal["nfflr", "ase"] = "nfflr",
         transform: Optional[Callable] = None,
         cohesive_energies: bool = False,
         n_train: float | int = 0.9,
@@ -44,6 +45,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
             dbpath = Path(dbpath)
 
         self.dbpath = dbpath
+        self.format = format
         self.transform = transform
         self.group_ids = group_ids
 
@@ -163,7 +165,10 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
             if atoms is not None:
                 return atoms
 
-        atoms = nfflr.Atoms(row.cell, row.positions, row.numbers)
+        if self.format == "nfflr":
+            atoms = nfflr.Atoms(row.cell, row.positions, row.numbers)
+        else:
+            atoms = row.toatoms()
 
         if self.transform is not None:
             atoms = self.transform(atoms)
@@ -181,19 +186,22 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
         # key = row.frame_id
 
         # NOTE: careful loading row.stress, ase symmetrizes the stress tensor...
-        if len(row.stress) == 9:
+        stress = row.get("stress", np.nan * np.ones(6))
+        if len(stress) == 9:
             stress = row.stress.reshape(3, 3)
-        elif len(row.stress) == 6:
-            stress = ase.stress.voigt_6_to_full_3x3_stress(row.stress)
+        elif len(stress) == 6:
+            stress = ase.stress.voigt_6_to_full_3x3_stress(stress)
+
+        volume = row.get("volume", np.nan)
 
         refs = dict(
             energy=to_tensor(row.energy),
             forces=to_tensor(row.forces),
             stress=to_tensor(stress),
-            volume=row.volume,
+            volume=volume,
             idx=idx,
         )
-        refs["virial"] = -row.volume * refs["stress"]
+        refs["virial"] = -volume * refs["stress"]
 
         if self.cohesive_energies:
             # subtract off atomic reference energies to obtain cohesive energy
