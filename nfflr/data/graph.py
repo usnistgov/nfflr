@@ -36,12 +36,13 @@ def sort_edges_by_dst(g: dgl.DGLGraph):
 def compute_bond_cosines(edges):
     """Compute bond angle cosines from bond displacement vectors."""
     # line graph edge: (a, b), (b, c)
-    # `a -> b -> c`
+    # messages flow: `a -> b -> c`
+    # displacements: `a <- b <- c`
     # use law of cosines to compute angles cosines
-    # negate src bond so displacements are like `a <- b -> c`
+    # negate dst bond so displacements are like `a <- b -> c`
     # cos(theta) = ba \dot bc / (||ba|| ||bc||)
-    r1 = -edges.src["r"]
-    r2 = edges.dst["r"]
+    r1 = edges.src["r"]
+    r2 = -edges.dst["r"]
     bond_cosine = torch.sum(r1 * r2, dim=1) / (
         torch.norm(r1, dim=1) * torch.norm(r2, dim=1)
     )
@@ -54,9 +55,9 @@ def compute_bond_cosines(edges):
 def compute_bond_cosines_coincident(edges):
     """Compute bond angle cosines from bond displacement vectors."""
     # edge attention graph edge: (k, i) -> (j, i)
-    # `k -> i <- j`
+    # messages flow: `k -> i <- j`
+    # displacements: `k <- i -> j`
     # use law of cosines to compute angles cosines
-    # negate src bond so displacements are like `a <- b -> c`
     # cos(theta) = ik \dot ji / (||ki|| ||ji||)
     r_ki = edges.src["r"]
     r_ji = edges.dst["r"]
@@ -69,137 +70,37 @@ def compute_bond_cosines_coincident(edges):
     return {"h": bond_cosine}
 
 
-def tile_supercell(
-    a: nfflr.Atoms, r: float = 5, bond_tol: float = 0.15
-) -> tuple[torch.Tensor, torch.Tensor]:
-    """Construct supercell coordinate array with indices to atoms in (000) image."""
-    n = len(a)
-    Xcart = a.positions.clone().detach()
-    Xfrac = a.scaled_positions().clone().detach()
-    # Xfrac = Xcart @ torch.linalg.inv(a.cell) # this should be a function
-
-    # cutoff -> calculate which periodic images to consider
-    recp = 2 * np.pi * torch.linalg.inv(a.cell.T)
-    recp_len = torch.sqrt(torch.sum(recp**2, dim=1))
-    # recp_len = torch.tensor(a.lattice.reciprocal_lattice().abc)
-
-    maxr = torch.ceil((r + bond_tol) * recp_len / (2 * np.pi))
-    nmin = torch.floor(Xfrac.min(0).values) - maxr
-    nmax = torch.ceil(Xfrac.max(0).values) + maxr
-    all_ranges = [
-        torch.arange(x, y, dtype=Xfrac.dtype) for x, y in zip(nmin, nmax, strict=True)
-    ]
-    cell_images = torch.cartesian_prod(*all_ranges)
-
-    # get single image index for cell 000
-    root_cell = (cell_images == 0).all(dim=1).nonzero().item()
-    root_ids = n * root_cell + torch.arange(n)
-
-    # tile periodic images into X_dst
-    # index id_dst into X_dst maps to atom id as id_dest % num_atoms
-    X_supercell = (cell_images @ a.cell).unsqueeze(1) + Xcart
-    X_supercell = X_supercell.reshape(-1, 3)
-
-    return X_supercell, root_ids
-
-
-def reduce_supercell_graph(g: dgl.DGLGraph, root_ids: torch.Tensor) -> dgl.DGLGraph:
-    """Remove edges not involving (000) cell and remap node ids."""
-    n = root_ids.shape[0]
-    X_supercell = g.ndata["Xcart"]
-
-    # keep edges with at least one node in root cell
-    # note: edge_subgraph relabels the nodes
-    src, dst = g.edges()
-    edge_ids = torch.where(torch.isin(src, root_ids) | torch.isin(dst, root_ids))[0]
-    g = dgl.edge_subgraph(g, edge_ids)
-
-    # load coordinates based on original supercell indices
-    g.ndata["Xcart"] = X_supercell[g.ndata["_ID"]]
-
-    # compute all displacement vectors in the supercell subgraph
-    g.apply_edges(dgl.function.v_sub_u("Xcart", "Xcart", "r"))
-
-    # build new graph with same edge data but remap node ids into image (000)
-    # src and dst use subset indices, not full supercell indices
-    src, dst = g.edges()
-
-    # map src and dst ids into periodic image (000)
-    # first look up supercell indices with _ID values for src and dst
-    src = g.ndata["_ID"][src]
-    dst = g.ndata["_ID"][dst]
-
-    # mod n to get original indices
-    periodic_graph = dgl.graph((src % n, dst % n))
-    periodic_graph.ndata["Xcart"] = X_supercell[root_ids]
-    periodic_graph.edata["r"] = g.edata["r"]
-
-    return periodic_graph
-
-
-def tile_supercell_2(
-    x_cart, cell, r: float = 5, bond_tol: float = 0.15
-) -> tuple[torch.Tensor, torch.Tensor]:
-    """Construct supercell coordinate array with indices to atoms in (000) image."""
-    n, _ = x_cart.shape
-    x_frac = x_cart @ torch.linalg.inv(cell)
-
-    # cutoff -> calculate which periodic images to consider
-    # recp_len = np.array(a.lattice.reciprocal_lattice().abc)
-    recp = 2 * np.pi * torch.linalg.inv(cell.T)
-    recp_len = torch.sqrt(torch.sum(recp**2, dim=1))
-
-    maxr = torch.ceil((r + bond_tol) * recp_len / (2 * np.pi))
-    nmin = torch.floor(x_frac.min(0).values) - maxr
-    nmax = torch.ceil(x_frac.max(0).values) + maxr
-
-    all_ranges = [
-        torch.arange(x, y, dtype=x_frac.dtype) for x, y in zip(nmin, nmax, strict=True)
-    ]
-
-    cell_images = torch.cartesian_prod(*all_ranges)
-
-    # get single image index for cell 000
-    root_cell = (cell_images == 0).all(dim=1).nonzero().item()
-    root_ids = n * root_cell + torch.arange(n)
-
-    # tile periodic images into X_dst
-    # index id_dst into X_dst maps to atom id as id_dest % num_atoms
-
-    x_supercell = (cell_images @ cell).unsqueeze(1) + x_cart
-    x_supercell = x_supercell.reshape(-1, 3)
-
-    return x_cart, x_supercell, root_ids, cell_images
-
-
-def pad_ghost_region(atoms: nfflr.Atoms, cutoff: float = 5):
+def pad_ghost_region(a: nfflr.Atoms, cutoff: float = 5):
     """Pad ghost atoms using supercell tiling method."""
+    # build radius graph in supercell
+    repeats = expand_supercell(a.cell, a.pbc, cutoff)
+    image_ranges = [torch.arange(-n, n + 1) for n in repeats]
+    cell_images = torch.cartesian_prod(*image_ranges)
 
-    # note: maybe don't need to do this in double precision?
-    x_src, x_supercell, root_ids, offsets = tile_supercell_2(
-        atoms.positions, atoms.cell, cutoff
+    # images atoms xyz
+    x_supercell = a.positions + (cell_images @ a.cell).unsqueeze(1)
+    x_supercell = einops.rearrange(
+        x_supercell, "images atoms xyz -> (images atoms) xyz"
     )
-
-    x_supercell = x_supercell.reshape(-1, 3)  # (n_cells * n_atoms, n_dim)
 
     # pairwise distances between atoms in (0,0,0) cell
     # and atoms in all periodic images
-    dist = torch.cdist(x_src, x_supercell)
+    dist = torch.cdist(a.positions, x_supercell)
 
-    atol = 1e-5
-    neighbor_mask = (dist > atol) & (dist < cutoff)
+    neighbor_mask = (dist > 1e-5) & (dist <= cutoff)
 
     # get node indices for edgelist from neighbor mask
-    src, v = torch.where(neighbor_mask)
+    # src, v = torch.where(neighbor_mask)
+    id_atom, id_nbr_image = torch.where(neighbor_mask)
 
     # keep only unique images
-    v = torch.unique(v)
+    # v = torch.unique(v)
 
     # divmod to get cell and atom ids
-    cell_ids = torch.div(v, len(atoms), rounding_mode="floor")
-    atom_ids = v % len(atoms)
+    cell_ids = torch.div(id_nbr_image, len(a), rounding_mode="floor")
+    nbr_ids = id_nbr_image % len(a)
 
-    return offsets[cell_ids], atom_ids
+    return cell_images[cell_ids], nbr_ids
 
 
 def expand_supercell(cell, pbc, cutoff):
@@ -249,30 +150,44 @@ def periodic_radius_graph(
 
 
 def periodic_radius_graph_kdtree(
-    a: nfflr.Atoms, r: float = 5, bond_tol: float = 0.15
+    a: nfflr.Atoms,
+    r: float = 5,
+    bond_tol: float = 0.15,
+    dtype=torch.get_default_dtype(),
 ) -> dgl.DGLGraph:
     """Build periodic radius graph for crystal.
 
-    TODO: support 2D, 1D, or non-periodic boundary conditions
+    Uses a supercell kd-tree for neighbor queries.
     """
-
     # build radius graph in supercell
-    x_src, x_supercell, root_ids, cell_images = tile_supercell_2(
-        a.positions.double(), a.cell.double(), r, bond_tol
+    repeats = expand_supercell(a.cell, a.pbc, r)
+    image_ranges = [torch.arange(-n, n + 1) for n in repeats]
+    cell_images = torch.cartesian_prod(*image_ranges)
+
+    # images atoms xyz
+    x_supercell = a.positions + (cell_images @ a.cell).unsqueeze(1)
+    x_supercell = einops.rearrange(
+        x_supercell, "images atoms xyz -> (images atoms) xyz"
     )
-    primary = spatial.KDTree(x_src)
+
+    primary = spatial.KDTree(a.positions)
     tiled = spatial.KDTree(x_supercell)
+
     dist = primary.sparse_distance_matrix(tiled, r, output_type="coo_matrix")
 
     # get node indices for edgelist from sparse distance matrix
     # either KDTree or scipy csr nonzero resolves the ≈0 distance self-edges...
-    src, v = dist.nonzero()
+    id_atom, id_nbr_image = dist.nonzero()
 
     # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % len(a)), num_nodes=len(a))
-    g.ndata["coord"] = x_src.float()
-    g.ndata["atomic_number"] = a.numbers.type(torch.int)
-    g.edata["r"] = (x_supercell[v] - x_src[src]).float()
+    id_nbr = id_nbr_image % len(a)
+
+    g = dgl.graph((id_nbr, id_atom), num_nodes=len(a))
+    g.ndata["coord"] = torch.asarray(a.positions, dtype=dtype)
+    g.ndata["atomic_number"] = torch.asarray(a.numbers, dtype=torch.int)
+    g.edata["r"] = torch.asarray(
+        x_supercell[id_nbr_image] - a.positions[id_atom], dtype=dtype
+    )
 
     return g
 
@@ -282,17 +197,21 @@ def periodic_adaptive_radius_graph(
 ) -> dgl.DGLGraph:
     """Build periodic radius graph for crystal.
 
-    TODO: support 2D, 1D, or non-periodic boundary conditions
+    Sets the cutoff distance to sqrt(2) times the largest nearest neighbor distance.
     """
-
     # build radius graph in supercell
-    x_src, x_supercell, root_ids, cell_images = tile_supercell_2(
-        a.positions.double(), a.cell.double(), r, bond_tol
+    repeats = expand_supercell(a.cell, a.pbc, r)
+    image_ranges = [torch.arange(-n, n + 1) for n in repeats]
+    cell_images = torch.cartesian_prod(*image_ranges)
+
+    # images atoms xyz
+    x_supercell = a.positions + (cell_images @ a.cell).unsqueeze(1)
+    x_supercell = einops.rearrange(
+        x_supercell, "images atoms xyz -> (images atoms) xyz"
     )
 
-    # pairwise distances between atoms in (0,0,0) cell
-    # and atoms in all periodic images
-    dist = torch.cdist(x_src, x_supercell)
+    # pairwise distances between atoms in (0,0,0) cell and atoms in all periodic images
+    dist = torch.cdist(a.positions, x_supercell)
 
     # collect nearest neighbor distance
     # k = 2 because first neighbor is a self-interaction
@@ -300,33 +219,27 @@ def periodic_adaptive_radius_graph(
     nearest_dist, _ = dist.kthvalue(k=2)
 
     cutoff = np.sqrt(2) * nearest_dist.max()
-
-    atol = 1e-5
-    neighbor_mask = (dist > atol) & (dist < cutoff)
+    neighbor_mask = (dist > 1e-5) & (dist <= cutoff)
 
     # get node indices for edgelist from neighbor mask
-    src, v = torch.where(neighbor_mask)
+    id_atom, id_nbr_image = torch.where(neighbor_mask)
+    id_nbr = id_nbr_image % len(a)
 
     # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % len(a)), num_nodes=len(a))
-
-    # add the fractional coordinates
-    # note: to do this differentiably, probably want to store
-    # fractional coordinates and cell matrix and compute cartesian coordinates
-    # and bond distances on demand?
-    # g.ndata["Xfrac"] = a.positions.to(dtype)
+    g = dgl.graph((id_nbr, id_atom), num_nodes=len(a))
 
     # messages propagate src -> dst
     # this means propagation from *neighbor* to *self*
-    g.ndata["coord"] = x_src.to(dtype)
-    g.edata["r"] = (x_supercell[v] - x_src[src]).to(dtype)
+    g.ndata["coord"] = torch.asarray(a.positions, dtype=dtype)
+    g.ndata["atomic_number"] = torch.asarray(a.numbers, dtype=torch.int)
+    g.edata["r"] = torch.asarray(
+        x_supercell[id_nbr_image] - a.positions[id_atom], dtype=dtype
+    )
 
     # cosine cutoff - smoothly go from one to zero in [0, cutoff] interval
     # consider alternative: HOOMD cutoff with inner radius of nearest_dist.max()?
     rnorm = torch.norm(g.edata["r"], dim=1)
     g.edata["cutoff_value"] = (1 + torch.cos(np.pi * rnorm / cutoff)) / 2
-
-    g.ndata["atomic_number"] = a.numbers.type(torch.int)
 
     return g
 
@@ -338,92 +251,111 @@ def periodic_kshell_graph(
     bond_tol: float = 0.15,
     dtype=torch.float,
 ) -> dgl.DGLGraph:
-    """Build periodic radius graph for crystal.
+    """Build periodic k-shell graph for crystal."""
+    # set up supercell distance query
+    repeats = expand_supercell(a.cell, a.pbc, r)
+    image_ranges = [torch.arange(-n, n + 1) for n in repeats]
+    cell_images = torch.cartesian_prod(*image_ranges)
 
-    TODO: support 2D, 1D, or non-periodic boundary conditions
-    """
-
-    # build radius graph in supercell
-    x_src, x_supercell, root_ids, cell_images = tile_supercell_2(
-        a.positions.double(), a.cell.double(), r, bond_tol
+    # images atoms xyz
+    x_supercell = a.positions + (cell_images @ a.cell).unsqueeze(1)
+    x_supercell = einops.rearrange(
+        x_supercell, "images atoms xyz -> (images atoms) xyz"
     )
 
     # pairwise distances between atoms in (0,0,0) cell
     # and atoms in all periodic images
-    dist = torch.cdist(x_src, x_supercell)
+    dist = torch.cdist(a.positions, x_supercell)
 
-    atol = 1e-5
-    # neighbor_mask = (dist > atol) & (dist < r)
-
-    # collect 12th-nearest neighbor distance
+    # collect kth-nearest neighbor distance
     # topk: k = 13 because first neighbor is a self-interaction
     # this is filtered out in the neighbor_mask selection
-    nbrdist, _ = dist.topk(13, largest=False)
+    nbrdist, _ = dist.topk(k + 1, largest=False)
     k_dist = nbrdist[:, -1]
 
     # expand k-NN graph to include all atoms in the
     # neighbor shell of the twelfth neighbor
     # broadcast the <= along the src axis
+    atol = 1e-5
     neighbor_mask = (dist > atol) & (dist < k_dist[:, None] + atol)
 
     # get node indices for edgelist from neighbor mask
-    src, v = torch.where(neighbor_mask)
+    id_atom, id_nbr_image = torch.where(neighbor_mask)
+    id_nbr = id_nbr_image % len(a)
 
     # index into tiled cell image index to atom ids
-    g = dgl.graph((src, v % len(a.numbers)))
-
-    # add the fractional coordinates
-    # note: to do this differentiably, probably want to store
-    # fractional coordinates and cell matrix and compute cartesian coordinates
-    # and bond distances on demand?
-    # g.ndata["Xfrac"] = a.positions.to(dtype)
+    g = dgl.graph((id_nbr, id_atom))
 
     # messages propagate src -> dst
     # this means propagation from *neighbor* to *self*
-    g.ndata["coord"] = x_src.to(dtype)
-    g.edata["r"] = (x_supercell[v] - x_src[src]).to(dtype)
-
-    g.ndata["atomic_number"] = a.numbers.type(torch.int)
+    g.ndata["coord"] = torch.asarray(a.positions, dtype=dtype)
+    g.ndata["atomic_number"] = torch.asarray(a.numbers, dtype=torch.int)
+    g.edata["r"] = torch.asarray(
+        x_supercell[id_nbr_image] - a.positions[id_atom], dtype=dtype
+    )
 
     return g
 
 
 def periodic_knn_graph(
-    a: nfflr.Atoms, k: int = 12, r: float = 5, bond_tol: float = 0.15
+    a: nfflr.Atoms,
+    k: int = 12,
+    r: float = 5,
+    bond_tol: float = 0.15,
+    dtype=torch.float,
 ) -> dgl.DGLGraph:
     """Build periodic knn graph for crystal.
 
     this doesn't work quite the same as the alignn version, which is a k-shell graph
-    that constructs the shell graph for the kth neighbor's shell...
-
-    TODO: support 2D, 1D, or non-periodic boundary conditions
+    that constructs the shell graph for the kth neighbor's shell.
     """
-    x_supercell, root_ids = tile_supercell(a, r, bond_tol)
+    # set up supercell distance query
+    repeats = expand_supercell(a.cell, a.pbc, r)
+    image_ranges = [torch.arange(-n, n + 1) for n in repeats]
+    cell_images = torch.cartesian_prod(*image_ranges)
 
-    # build knn graph in supercell
-    g = dgl.knn_graph(x_supercell, k, exclude_self=True)
-    g.ndata["Xcart"] = x_supercell.type(torch.get_default_dtype())
+    # images atoms xyz
+    x_supercell = a.positions + (cell_images @ a.cell).unsqueeze(1)
+    x_supercell = einops.rearrange(
+        x_supercell, "images atoms xyz -> (images atoms) xyz"
+    )
 
-    # reduce supercell graph to (000) image with periodic edges
-    g = reduce_supercell_graph(g, root_ids)
+    # pairwise distances between atoms in (0,0,0) cell
+    # and atoms in all periodic images
+    dist = torch.cdist(a.positions, x_supercell)
+    print(f"{dist.shape=}")
 
-    # add the fractional coordinates
-    # note: to do this differentiably, probably want to store
-    # fractional coordinates and cell matrix and compute cartesian coordinates
-    # and bond distances on demand?
-    # g.ndata["Xfrac"] = a.positions @ torch.linalg.inv(a.cell)
+    # collect kth-nearest neighbor distance
+    # topk: k = 13 because first neighbor is a self-interaction
+    # this is filtered out in the neighbor_mask selection
+    nbrdist, id_nbr_image = dist.topk(k + 1, largest=False)
 
-    g.ndata["atomic_number"] = a.numbers.type(torch.int)
+    # skip the nearest neighbor, which is a self-interaction
+    id_atom = einops.repeat(torch.arange(len(a)), "atoms -> atoms k", k=k)
+    id_nbr_image = id_nbr_image[:, 1:]
+
+    id_atom = id_atom.flatten()
+    id_nbr_image = id_nbr_image.flatten()
+    id_nbr = id_nbr_image % len(a)
+
+    # messages propagate src -> dst
+    # this means propagation from *neighbor* to *self*
+    g = dgl.graph((id_nbr, id_atom))
+    g.ndata["coord"] = torch.asarray(a.positions, dtype=dtype)
+    g.ndata["atomic_number"] = torch.asarray(a.numbers, dtype=torch.int)
+    g.edata["r"] = torch.asarray(
+        x_supercell[id_nbr_image] - a.positions[id_atom], dtype=dtype
+    )
 
     return g
 
 
 def periodic_sann_graph(
-    at: nfflr.Atoms,
+    a: nfflr.Atoms,
     max_neighbors: int = 32,
     cutoff_radius: float = 10.0,
     bond_tol: float = 0.15,
-    dtype=None,
+    dtype=torch.get_default_dtype(),
 ):
     """Solid Angle Nearest Neighbor algorithm (10.1063/1.4729313).
 
@@ -431,19 +363,22 @@ def periodic_sann_graph(
     to build a fixed-format neighborlist (sorted by the kdtree query)
     so that the SANN cutoff criterion can be vectorized over atoms.
     """
-    if dtype is None:
-        dtype = torch.get_default_dtype()
+    # set up supercell distance query
+    repeats = expand_supercell(a.cell, a.pbc, cutoff_radius)
+    image_ranges = [torch.arange(-n, n + 1) for n in repeats]
+    cell_images = torch.cartesian_prod(*image_ranges)
 
-    # build radius graph in supercell
-    x, x_supercell, root_ids, cell_images = tile_supercell_2(
-        at.positions.double(), at.cell.double(), cutoff_radius, bond_tol
+    # images atoms xyz
+    x_supercell = a.positions + (cell_images @ a.cell).unsqueeze(1)
+    x_supercell = einops.rearrange(
+        x_supercell, "images atoms xyz -> (images atoms) xyz"
     )
 
     # find k nearest tiled points to query points x
     # this is nice because scipy sorts the points for us!
     # start at neighbor 2 since x is always in x_supercell
     tiled = spatial.KDTree(x_supercell)
-    distance, ids = tiled.query(x, k=range(2, 2 + max_neighbors))
+    distance, ids = tiled.query(a.positions, k=range(2, 2 + max_neighbors))
 
     # vectorize evaluation of SANN criterion
     ms = np.arange(1, 1 + max_neighbors) - 2.0
@@ -458,16 +393,20 @@ def periodic_sann_graph(
 
     # broadcast the comparison to rcut to index into ids
     # messages propagate src -> dst: propagation from *neighbor* to *self*
-    dst, nbr_supercell = np.where(distance <= rcut[:, None])
+    id_atom, nbr_supercell = np.where(distance <= rcut[:, None])
+
     # index into knn neighbor ids -> atom ids
-    src_supercell = ids[dst, nbr_supercell]
-    g = dgl.graph((src_supercell % len(at.numbers), dst))
+    id_nbr_image = ids[id_atom, nbr_supercell]
+    id_nbr = id_nbr_image % len(a)
 
-    g.ndata["coord"] = x.to(dtype)
-    g.edata["r"] = (x[dst] - x_supercell[src_supercell]).to(dtype)
-    g.ndata["atomic_number"] = at.numbers.type(torch.int)
+    g = dgl.graph((id_nbr, id_atom))
+    g.ndata["coord"] = torch.asarray(a.positions, dtype=dtype)
+    g.ndata["atomic_number"] = torch.asarray(a.numbers, dtype=torch.int)
+    g.edata["r"] = torch.asarray(
+        x_supercell[id_nbr_image] - a.positions[id_atom], dtype=dtype
+    )
 
-    g.ndata["cutoff_distance"] = torch.from_numpy(rcut).type(dtype)
+    g.ndata["cutoff_distance"] = torch.asarray(rcut, dtype=dtype)
 
     return g
 
