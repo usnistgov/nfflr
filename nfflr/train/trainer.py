@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from typing import TYPE_CHECKING
-import warnings
 
 import torch
 from torch.utils.data import SubsetRandomSampler
@@ -67,6 +66,14 @@ spawn_kwargs = {
 }
 
 
+def _get_device():
+    # hack to disable mps... should make this configurable
+    device = idist.device()
+    if device.type == "mps":
+        device = torch.device("cpu")
+    return device
+
+
 def log_console(engine: ignite.engine.Engine, name: str):
     """Log evaluation stats to console."""
     epoch = engine.state.training_epoch  # custom state field
@@ -123,17 +130,21 @@ def setup_model_and_optimizer(
     config: TrainingConfig,
 ):
     """Initialize model, criterion, and optimizer."""
+    device = _get_device()
+
     model = idist.auto_model(model)
+    model.to(device)
 
     criterion = config.criterion
     if isinstance(criterion, torch.nn.Module) and any(
         [p.requires_grad for p in criterion.parameters()]
     ):
         criterion = idist.auto_model(criterion)
+        criterion.to(device)
 
     if isinstance(criterion, nfflr.nn.MultitaskLoss):
         # auto_model won't transfer buffers...?
-        criterion = criterion.to(idist.device())
+        criterion = criterion.to(device)
 
     params = group_decay(model)
     if isinstance(criterion, torch.nn.Module) and len(list(criterion.parameters())) > 0:
@@ -158,7 +169,7 @@ def setup_trainer(
     model, criterion, optimizer, scheduler, prepare_batch, config: TrainingConfig
 ):
     """Create ignite trainer and attach common event handlers."""
-    device = idist.device()
+    device = _get_device()
 
     trainer = create_supervised_trainer(
         model,
@@ -197,7 +208,7 @@ def setup_checkpointing(state: dict, config: TrainingConfig):
 
     if config.resume_checkpoint is not None:
         # if the model is wrapped in SWAGHandler, model requires surgery
-        checkpoint = torch.load(config.resume_checkpoint, map_location=idist.device())
+        checkpoint = torch.load(config.resume_checkpoint, map_location=_get_device())
         Checkpoint.load_objects(to_load=state, checkpoint=checkpoint)
 
     return state
@@ -205,7 +216,7 @@ def setup_checkpointing(state: dict, config: TrainingConfig):
 
 def setup_evaluators(model, prepare_batch, metrics, transfer_outputs):
     """Configure train and validation evaluators."""
-    device = idist.device()
+    device = _get_device()
     # create_supervised_evaluator
     train_evaluator = setup_evaluator_with_grad(
         model,

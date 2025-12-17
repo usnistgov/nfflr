@@ -88,16 +88,20 @@ class Atoms:
 
     @dispatch
     def __init__(  # noqa: F811
-        self, cell: Iterable, positions: Iterable, numbers: Iterable, pbc: Iterable
+        self,
+        cell: Iterable,
+        positions: Iterable,
+        numbers: Iterable,
+        pbc: Iterable | None,
     ):
         dtype = torch.get_default_dtype()
         if isinstance(cell, torch.Tensor):
             self.cell = cell if cell.dtype == dtype else cell.type(dtype)
         else:
-            self.cell = torch.asarray(cell, dtype=dtype)
-        self.positions = torch.asarray(positions, dtype=dtype)
-        self.numbers = torch.asarray(numbers, dtype=Z_dtype)
-        self.pbc = torch.asarray(pbc, dtype=bool)
+            self.cell = torch.asarray(cell.copy(), dtype=dtype)
+        self.positions = torch.asarray(positions.copy(), dtype=dtype)
+        self.numbers = torch.asarray(numbers.copy(), dtype=Z_dtype)
+        self.pbc = torch.asarray(pbc.copy(), dtype=bool)
 
     @dispatch
     def __init__(self, atoms: jarvis.core.atoms.Atoms):  # noqa: F811

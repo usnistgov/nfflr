@@ -166,7 +166,7 @@ class AtomsSQLDataset(torch.utils.data.Dataset):
                 return atoms
 
         if self.format == "nfflr":
-            atoms = nfflr.Atoms(row.cell, row.positions, row.numbers)
+            atoms = nfflr.Atoms(row.cell, row.positions, row.numbers, row.pbc)
         else:
             atoms = row.toatoms()
 
