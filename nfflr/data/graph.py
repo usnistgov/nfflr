@@ -83,9 +83,10 @@ def pad_ghost_region(a: nfflr.Atoms, cutoff: float = 5):
         x_supercell, "images atoms xyz -> (images atoms) xyz"
     )
 
-    # pairwise distances between atoms in (0,0,0) cell
-    # and atoms in all periodic images
-    dist = torch.cdist(a.positions, x_supercell)
+    # pairwise distances between atoms in (0,0,0) cell and atoms in all periodic images
+    dist = torch.cdist(
+        a.positions, x_supercell, compute_mode="donot_use_mm_for_euclid_dist"
+    )
 
     neighbor_mask = (dist > 1e-5) & (dist <= cutoff)
 
@@ -128,9 +129,12 @@ def periodic_radius_graph(
     x_supercell = a.positions + (cell_images @ a.cell).unsqueeze(1)
 
     # pairwise distances between atoms in (0,0,0) cell and atoms in all periodic images
+    # disable matmul implementation, numerical instabilities -> self interactions
     # from cdist docs: (B P M) * (B R M) -> (B P R)
     # (atoms xyz) x (images neighbors xyz) -> (images atoms neighbors)
-    dist = torch.cdist(a.positions, x_supercell)
+    dist = torch.cdist(
+        a.positions, x_supercell, compute_mode="donot_use_mm_for_euclid_dist"
+    )
     neighbor_mask = (dist > 1e-5) & (dist <= r)
 
     # get node indices for edgelist from neighbor mask
@@ -211,7 +215,9 @@ def periodic_adaptive_radius_graph(
     )
 
     # pairwise distances between atoms in (0,0,0) cell and atoms in all periodic images
-    dist = torch.cdist(a.positions, x_supercell)
+    dist = torch.cdist(
+        a.positions, x_supercell, compute_mode="donot_use_mm_for_euclid_dist"
+    )
 
     # collect nearest neighbor distance
     # k = 2 because first neighbor is a self-interaction
@@ -265,7 +271,9 @@ def periodic_kshell_graph(
 
     # pairwise distances between atoms in (0,0,0) cell
     # and atoms in all periodic images
-    dist = torch.cdist(a.positions, x_supercell)
+    dist = torch.cdist(
+        a.positions, x_supercell, compute_mode="donot_use_mm_for_euclid_dist"
+    )
 
     # collect kth-nearest neighbor distance
     # topk: k = 13 because first neighbor is a self-interaction
@@ -322,8 +330,9 @@ def periodic_knn_graph(
 
     # pairwise distances between atoms in (0,0,0) cell
     # and atoms in all periodic images
-    dist = torch.cdist(a.positions, x_supercell)
-    print(f"{dist.shape=}")
+    dist = torch.cdist(
+        a.positions, x_supercell, compute_mode="donot_use_mm_for_euclid_dist"
+    )
 
     # collect kth-nearest neighbor distance
     # topk: k = 13 because first neighbor is a self-interaction
