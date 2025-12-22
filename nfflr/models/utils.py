@@ -92,7 +92,10 @@ def autograd_forces(
     )[0]
 
     # forces: negative energy gradient -dU/dr
-    pairwise_forces = -dy_dr
+    # note: the sign convention on displacement vectors
+    # is opposite the sign convention on pair forces
+    # because messages flow from neighbors to central atom
+    pairwise_forces = dy_dr
 
     if not reduce:
         return pairwise_forces, None
