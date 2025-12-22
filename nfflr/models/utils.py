@@ -105,12 +105,12 @@ def autograd_forces(
         # these are the per-bond virial contributions:
         # TODO: double check sign convention wrt edge direction...
         # forces_ji contribution
-        virials = vmap(torch.outer)(pairwise_forces, displacement_vectors)
+        virials = vmap(torch.outer)(pairwise_forces, -displacement_vectors)
         g.edata["virials"] = virials
         virial = 0.5 * dgl.readout.sum_edges(g, "virials")
 
         # consider reverse force sum -forces_ji
-        virials = vmap(torch.outer)(-pairwise_forces, -displacement_vectors)
+        virials = vmap(torch.outer)(-pairwise_forces, displacement_vectors)
         g.edata["virials"] = virials
         virial += 0.5 * dgl.readout.sum_edges(g, "virials")
 
