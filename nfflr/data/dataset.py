@@ -81,23 +81,27 @@ def _load_dataset(dataset_name, cache_dir=None):
 
 
 def get_cachedir(scratchdir: Path | str | bool = True):
-    """Get local scratch directory."""
-    prefix = "nfflr-"
+    """Get local scratch directory.
 
-    if isinstance(scratchdir, bool) and scratchdir:
-        scratchdir = None
+    If scratchdir is not set, try TMPDIR; fall back to /tmp
+    """
+    prefix = "nfflr-"
 
     if isinstance(scratchdir, str):
         scratchdir = Path(scratchdir)
 
-    if "TMPDIR" in os.environ:
-        scratchdir = Path(os.environ.get("TMPDIR"))
+    # default scratch directory: try $TMPDIR, fall back to /tmp
+    if scratchdir == True:
+        if "TMPDIR" in os.environ:
+            scratchdir = Path(os.environ.get("TMPDIR"))
+        else:
+            scratchdir = Path("/tmp")
 
+    # under slurm, add SLURM_JOB_ID
     if "SLURM_JOB_ID" in os.environ:
         scratchdir = scratchdir / os.environ.get("SLURM_JOB_ID")
 
-    if scratchdir is not None:
-        os.makedirs(scratchdir, exist_ok=True)
+    os.makedirs(scratchdir, exist_ok=True)
 
     return tempfile.TemporaryDirectory(dir=scratchdir, prefix=prefix)
 
